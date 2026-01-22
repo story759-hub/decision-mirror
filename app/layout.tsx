@@ -2,13 +2,17 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
-import Link from "next/link"; // Link 컴포넌트 추가
+import Link from "next/link";
 
 const inter = Inter({ subsets: ["latin"] });
 
+// [수정된 부분] verification 항목을 추가했습니다.
 export const metadata: Metadata = {
   title: "Clarity Room",
   description: "Cognitive Depth Organizer",
+  verification: {
+    google: "X8nk5HbNdU0hqqDg6AGr2q9Mzu2yOfyMkZxKO8ppdfU",
+  },
 };
 
 export default function RootLayout({
@@ -33,7 +37,7 @@ export default function RootLayout({
           {children}
         </div>
 
-        {/* [3단계] 애드센스 승인을 위한 필수 푸터 영역 */}
+        {/* 애드센스 승인을 위한 필수 푸터 영역 */}
         <footer className="w-full max-w-lg mx-auto py-12 px-6 text-center border-t border-slate-800/50">
           <div className="flex justify-center space-x-6 mb-4 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
             <Link href="/privacy" className="hover:text-[#5D5FEF] transition-colors">
