@@ -6,12 +6,16 @@ import Link from "next/link";
 
 const inter = Inter({ subsets: ["latin"] });
 
-// [수정된 부분] verification 항목을 추가했습니다.
 export const metadata: Metadata = {
   title: "Clarity Room",
   description: "Cognitive Depth Organizer",
+  // [업데이트] 서치콘솔과 애드센스 인증 태그를 통합 관리합니다.
   verification: {
-    google: "X8nk5HbNdU0hqqDg6AGr2q9Mzu2yOfyMkZxKO8ppdfU",
+    google: "X8nk5HbNdU0hqqDg6AGr2q9Mzu2yOfyMkZxKO8ppdfU", // 서치콘솔용
+  },
+  // [추가] 구글 애드센스 계정 확인용 메타태그
+  other: {
+    "google-adsense-account": "ca-pub-6062349022770025",
   },
 };
 
@@ -23,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
-        {/* 애드센스 스크립트 */}
+        {/* 애드센스 자동 광고 스크립트 */}
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6062349022770025"
