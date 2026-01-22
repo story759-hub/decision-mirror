@@ -5,63 +5,168 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 export async function POST(req: Request) {
   try {
-    const { decisionText, useSarcasm } = await req.json();
-    
-    const model = genAI.getGenerativeModel({ 
+    const { decisionText } = await req.json();
+
+    if (!decisionText) {
+      return NextResponse.json({ error: "분석할 데이터가 없습니다." }, { status: 400 });
+    }
+
+    const input = decisionText.trim();
+
+    /* ======================================================
+       [방어선 1] 판단 이전 입력 필터 (Trivial Layer)
+    ====================================================== */
+
+    const trivialInputs = [
+      "배고파", "졸려", "심심해", "피곤해",
+      "짜증나", "힘들다", "귀찮아", "안녕", "뭐해"
+    ];
+
+    const isDecisionLike =
+      /(까|할까|해야|고민|선택|결정|그만|계속|이직|퇴사|투자|관계)/.test(input);
+
+    if (
+      input.length < 8 ||
+      trivialInputs.includes(input) ||
+      !isDecisionLike
+    ) {
+      return NextResponse.json({
+        isTrivial: true,
+        mainTitle: "판단 이전의 비구조적 입력이 기록되었습니다.",
+        basic: {
+          emotion: 10,
+          risk: 5,
+          pattern: "이 입력에는 분석 가능한 판단 구조가 포함되지 않았습니다."
+        },
+        deep: null
+      });
+    }
+
+    /* ======================================================
+       [방어선 1.5] RESTRICTED INPUT 차단
+       (기록·분석 자체가 허용되지 않는 영역)
+    ====================================================== */
+
+    const restrictedKeywords = [
+      // 약물 / 불법 행위
+      "마약", "대마", "필로폰", "코카인", "헤로인",
+      "약물", "투약", "흡입",
+
+      // 자해 / 생명 위협
+      "죽고싶", "자살", "극단적", "목숨", "자해",
+
+      // 성적 범죄
+      "강간", "성폭행", "성추행", "성범죄",
+      "불법촬영", "몰카",
+
+      // 아동·미성년자 관련 범죄
+      "아동", "미성년자", "청소년",
+      "아동성", "소아", "미성년",
+      "아동학대", "성착취"
+    ];
+
+    const intentPattern =
+      /(하고 싶다|해보고 싶다|할까|해도 될까|원한다|욕구)/;
+
+    const isRestricted =
+      restrictedKeywords.some(k => input.includes(k)) &&
+      intentPattern.test(input);
+
+    if (isRestricted) {
+      return NextResponse.json(
+        {
+          type: "RESTRICTED_INPUT",
+          mainTitle: "분석 대상에서 제외된 입력이 감지되었습니다.",
+          message: "이 입력은 Clarity Room의 기록 범위에 포함되지 않습니다."
+        },
+        { status: 403 }
+      );
+    }
+
+    /* ======================================================
+       [방어선 2] Gemini 인지 엔진 (Normal Decision Input)
+    ====================================================== */
+
+    const model = genAI.getGenerativeModel({
       model: "gemini-2.0-flash",
       generationConfig: {
-        temperature: 0.1, // 패턴 분석의 일관성을 위해 저온도 유지
-        topP: 0.8,
+        responseMimeType: "application/json",
       }
     });
 
-    // 당신의 '생존 자산' 가이드라인이 100% 반영된 프롬프트
     const systemPrompt = `
-      Role: Decision Mirror v4.4 (Pattern Crusher)
-      당신은 사용자의 인격을 공격하지 않습니다. 오직 '반복되는 패턴'만 조용히 노출하여 스스로 무너지게 만듭니다.
-      불쾌함의 원천은 '모욕'이 아니라 '자기 인식 지연에 대한 노출'이어야 합니다.
+Role: Clarity Room v5.4 (Neutral Mirror)
 
-      [PHASE 1: HARD GATE — 판단 가능성 검증]
-      - 정서 취약+약물/알코올, 회피 목적 위험행동, 오남용 합리화, 비가역적 손실 감지 시 즉시 RED.
-      - RED 출력 규칙: 아래 문장만 단독 출력.
-      🔴 분석 중단. 현재 당신의 상태는 ‘결정’ 자체가 리스크입니다. 지금은 판단하지 않는 것이 가장 안전한 선택입니다.
+당신은 상담자, 코치, 분석가가 아닙니다.
+당신의 유일한 기능은 사용자의 입력을 하나의 '상태 선언 기록'으로 구조화하는 것입니다.
 
-      [PHASE 2: MIRROR — 패턴 폭로 원칙]
-      - 목적은 '도움'이 아닌 '불편함'. 조언, 팁, 해결책은 결제 전까지 절대 금지.
-      1. 신호등 상태: 🟢 NORMAL(건조하게) 또는 🟡 CAUTION(감정 개입 명시).
-      2. 사고적 분석 (T-Side): 관찰 중심의 팩트 나열. "처음이 아니라는 점"을 강조. 말투는 ${useSarcasm ? '자비 없는 팩트 폭격' : '무표정한 사실 나열'}.
-      3. 감정적 리스크 (F-Side): '후회'가 아닌 '패턴화된 피로'와 '통제감 상실'에 집중.
-      4. 미러링 질문: 행동이 아닌 욕구를 재정의하는 날카로운 질문 (예: "이 패턴이 지난번과 다르다고 확신할 근거가 있습니까?")
+[RESTRICTED INPUT SCOPE – ABSOLUTE RULE]
+다음 범주에 해당하는 입력은 기록 대상이 아닙니다.
+- 불법 행위 또는 약물 사용 의도
+- 신체적 자해 또는 생명 위협 행위 의도
+- 성적 범죄 또는 타인의 신체·성적 침해
+- 아동·미성년자 대상의 모든 범죄 또는 착취
+- 중독 행위에 대한 욕구 표현
 
-      [독설 생성 템플릿 - 상황에 맞게 적극 활용]
-      - 시간 왜곡형: "내일의 당신을 전제로 설계된 선택은 아닙니다."
-      - 반복 노출형: "이 질문의 구조는 이전과 거의 같습니다."
-      - 선택 분리형: "감정이 먼저 결정하고 이유가 뒤따르고 있습니다."
-      - 거울형: "제3자가 던진 질문이라면 당신은 같은 답을 했을까요?"
+해당 입력에 대해서는 JSON 출력, 상태 선언, Deep 구조를 생성해서는 안 됩니다.
 
-      [PHASE 3: LOCKED DATA — 결제 유도]
-      구분자 [LOCKED_DATA] 뒤에 다음 내용을 구성하되, 구체 수치는 생략하라.
-      - 유사 패턴 사용자들의 낮은 만족도와 정서적 손실 지표 언급.
-      - 클로징 7문장 전략 적용 (아래 중 하나 선택):
-        * "여기서 더 설명하면, 당신이 스스로 부정하고 싶은 장면들이 포함됩니다."
-        * "이 데이터는 당신이 외면해온 '그 시점'의 반복성을 증명합니다."
-        * "지금 이 흐름을 멈추지 않으면, 다음 분석도 같은 결과일 확률이 높습니다."
+[절대 금지 표현 사전]
+- 조언·권장·행동 유도
+- 판단·정답·결론 암시
+- 감정 직접 단정
+- 미래 예측
+- 치료·상담·진단
+- 위로·공감
+- 질문형·명령형 문장
 
-      [금기 사항]
-      - "추천", "하세요" 등 해결책 제공 절대 금지.
-      - 마크다운 강조(**, ##) 기호 사용 절대 금지.
-      - 인격 공격("멍청하다", "통제 안 된다") 금지. 패턴("회피에 가깝다")을 지적할 것.
-    `;
+[대체 표현 규칙]
+- 관찰·기록·활성화 상태만 기술하십시오.
+- 원인, 이유, 미래 결과는 기술하지 마십시오.
+- 해석이 아닌 스냅샷이며, 결론이 아닌 로그입니다.
 
-    const result = await model.generateContent([systemPrompt, decisionText]);
-    let text = result.response.text();
+[출력 형식]
+{
+  "mainTitle": "관찰된 상태를 압축한 선언적 문구",
+  "basic": {
+    "emotion": 0~100,
+    "risk": 0~100,
+    "pattern": "관찰된 사고 패턴 선언"
+  },
+  "deep": {
+    "frequency": "질문 구조 반복성 기록",
+    "complex": "중첩된 판단 축 기술",
+    "position": "판단 구조 내 상대적 위치"
+  }
+}
 
-    // 시각적 노이즈(마크다운) 제거 엔진
-    text = text.replace(/\*\*/g, '').replace(/##/g, '');
+[표현 원칙]
+- 모든 문장은 선언형으로 끝납니다.
+- 질문형, 명령형은 사용하지 않습니다.
+- 이 출력은 답변이 아니라 기록입니다.
+- 방향을 제시하지 않습니다.
+`;
 
-    return NextResponse.json({ result: text });
-  } catch (error) {
-    console.error("Critical API Error:", error);
-    return NextResponse.json({ error: "분석 중 내부 오류 발생" }, { status: 500 });
+    const result = await model.generateContent([systemPrompt, input]);
+    const responseText = result.response.text();
+
+    let parsedData;
+    try {
+      const cleanJson = responseText.replace(/```json|```/g, "").trim();
+      parsedData = JSON.parse(cleanJson);
+    } catch {
+      return NextResponse.json(
+        { error: "데이터 구조화 실패" },
+        { status: 422 }
+      );
+    }
+
+    return NextResponse.json(parsedData);
+
+  } catch (error: any) {
+    console.error("Clarity Room 시스템 오류:", error);
+    return NextResponse.json(
+      { error: "시스템 연결 실패", details: error.message },
+      { status: 500 }
+    );
   }
 }

@@ -1,168 +1,232 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import html2canvas from 'html2canvas';
 
-export default function DecisionMirror() {
+type Stage = 'input' | 'ad_basic' | 'processing' | 'result' | 'ad_deep' | 'deep_result';
+
+export default function ClarityRoom() {
   const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
-  const [lockedData, setLockedData] = useState<string | null>(null);
-  const [isUnlocked, setIsUnlocked] = useState(false);
-  const [useSarcasm, setUseSarcasm] = useState(false);
-  const [randomQuote, setRandomQuote] = useState('');
+  const [stage, setStage] = useState<Stage>('input');
+  const [data, setData] = useState<any>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
-  const quotes = [
-    "결정하지 않는 것도 하나의 결정입니다.",
-    "데이터는 감정을 읽지 못하지만, 감정은 데이터를 왜곡합니다.",
-    "지금의 확신이 6개월 뒤에도 유효할까요?",
-    "통제할 수 없는 것에 집중하고 있지는 않나요?"
-  ];
-
-  const handleAnalyze = async () => {
-    if (!input) return;
-    setLoading(true);
-    setResult(null);
-    setLockedData(null);
-    setIsUnlocked(false);
-    setRandomQuote(quotes[Math.floor(Math.random() * quotes.length)]);
-
+  // [기능 1: 이미지 저장] - 현재 화면에 보이는 cardRef를 캡처합니다.
+  const handleSaveImage = async () => {
+    if (!cardRef.current) return;
     try {
-      const res = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ decisionText: input, useSarcasm }),
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: stage === 'deep_result' ? '#5D5FEF' : '#ffffff', // 배경색 단계별 대응
+        scale: 3,
+        useCORS: true,
       });
-
-      if (!res.ok) throw new Error('서버 응답 오류');
-
-      const data = await res.json();
-      const fullText = data.result || "데이터를 불러올 수 없습니다.";
-
-      if (fullText.includes('[LOCKED_DATA]')) {
-        const parts = fullText.split('[LOCKED_DATA]');
-        setResult(parts[0].trim());
-        setLockedData(parts[1].trim());
-      } else {
-        setResult(fullText);
-      }
+      const image = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = `Clarity_${stage}_${Date.now()}.png`;
+      link.click();
     } catch (err) {
-      setResult("시스템 연결 오류가 발생했습니다.");
-    } finally {
-      setLoading(false);
+      console.error("이미지 저장 실패", err);
+      alert("이미지 저장 중 오류가 발생했습니다.");
     }
   };
 
+  // [기능 2: 페이지 공유] - Web Share API 사용
+  const handleShare = async () => {
+    const shareData = {
+      title: 'Clarity Room - 나의 인지 구조 분석',
+      text: `"${data?.mainTitle || '나의 분석 결과'}" - 클러리티 룸에서 확인한 나의 상태입니다.`,
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        alert("링크가 클립보드에 복사되었습니다.");
+      }
+    } catch (err) {
+      console.error("공유 실패", err);
+    }
+  };
+
+  // [분석 로직 생략 없이 유지]
+  const handleBasicAnalyze = async () => {
+    if (input.trim().length < 5) {
+      alert("기록할 만한 판단 구조가 감지되지 않았습니다.");
+      return;
+    }
+    setStage('ad_basic');
+    try {
+      const fetchPromise = fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decisionText: input }),
+      }).then(res => res.json());
+
+      setTimeout(async () => {
+        const result = await fetchPromise;
+        setData(result);
+        setStage('processing');
+        setTimeout(() => setStage('result'), 1200);
+      }, 5000);
+    } catch (err) {
+      setStage('input');
+      alert("정리 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleDeepAnalyze = () => {
+    if (data?.isTrivial) return;
+    setStage('ad_deep');
+    setTimeout(() => setStage('deep_result'), 30000);
+  };
+
   return (
-    <div className="min-h-screen bg-[#0F172A] text-slate-100 font-sans pb-20">
-      <header className="max-w-4xl mx-auto pt-20 pb-16 text-center px-4">
-        <div className="inline-flex items-center gap-2 bg-[#5D5FEF]/10 text-[#5D5FEF] text-[10px] px-4 py-1.5 rounded-full mb-6 font-mono tracking-widest uppercase border border-[#5D5FEF]/20 animate-pulse">
-          Decision Mirror v4.4 Operational
-        </div>
-        <h1 className="text-6xl font-black tracking-tighter mb-4 bg-gradient-to-b from-white to-slate-500 bg-clip-text text-transparent">
-          Decision <span className="text-[#5D5FEF]">Mirror</span>
+    <div className="min-h-screen bg-[#0F172A] text-slate-100 font-sans pb-20 selection:bg-[#5D5FEF]/30">
+      <header className="max-w-xl mx-auto pt-20 pb-12 text-center px-6">
+        <h1 className="text-4xl font-black tracking-tighter mb-2 bg-gradient-to-b from-white to-slate-500 bg-clip-text text-transparent cursor-pointer" onClick={() => window.location.reload()}>
+          Clarity <span className="text-[#5D5FEF]">Room</span>
         </h1>
-        <p className="text-lg font-medium text-slate-400">당신의 패턴은 데이터가 기억하고 있습니다.</p>
+        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em]">Cognitive Depth Organizer</p>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4">
-        {!result && !loading ? (
-          <div className="bg-slate-800/50 backdrop-blur-xl rounded-[40px] p-10 border border-slate-700/50">
+      <main className="max-w-lg mx-auto px-6">
+        {/* 1. 입력 단계 */}
+        {stage === 'input' && (
+          <div className="space-y-6 animate-in fade-in">
             <textarea 
-              className="w-full h-48 bg-slate-900/50 rounded-3xl p-8 text-xl border border-slate-700 focus:ring-2 focus:ring-[#5D5FEF] transition-all outline-none resize-none mb-6 text-white placeholder-slate-600"
+              className="w-full h-44 bg-slate-900/50 rounded-3xl p-6 text-lg border border-slate-700 focus:ring-1 focus:ring-[#5D5FEF] transition-all outline-none resize-none text-white font-light"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="무엇을 망설이고 있습니까? 당신의 의도를 입력하십시오."
+              placeholder="현재의 혼란을 입력하십시오."
             />
-            <div className="flex items-center justify-between mb-8">
-              <span className="text-sm text-slate-500">* 감정적 왜곡을 배제하고 패턴만 분석합니다.</span>
-              <div className="flex items-center gap-3">
-                <span className={`text-xs font-bold ${useSarcasm ? 'text-[#5D5FEF]' : 'text-slate-500'}`}>독설 모드</span>
-                <button onClick={() => setUseSarcasm(!useSarcasm)} className={`w-14 h-7 rounded-full relative transition-all ${useSarcasm ? 'bg-[#5D5FEF]' : 'bg-slate-700'}`}>
-                  <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-transform ${useSarcasm ? 'left-8' : 'left-1'}`} />
-                </button>
-              </div>
-            </div>
-            <button onClick={handleAnalyze} className="w-full bg-[#5D5FEF] hover:bg-[#4A4CCF] text-white py-6 rounded-3xl font-black text-2xl shadow-lg transition-all active:scale-95">
-              패턴 분석 시작 🚀
+            <button onClick={handleBasicAnalyze} className="w-full bg-[#5D5FEF] text-white py-5 rounded-2xl font-black text-lg shadow-2xl shadow-[#5D5FEF]/20 active:scale-95 transition-all">
+              상태 정리 시작 🚀
             </button>
           </div>
-        ) : loading ? (
-          <div className="text-center py-32 animate-pulse text-[#5D5FEF] font-black tracking-widest text-xl">
-            결정 가능 상태 검증 및 패턴 대조 중...
+        )}
+
+        {/* 2. 대기/로딩 단계 */}
+        {(stage === 'ad_basic' || stage === 'ad_deep' || stage === 'processing') && (
+          <div className="py-20 text-center animate-in zoom-in-95">
+            <div className="text-[#5D5FEF] font-black text-xl mb-4 uppercase tracking-tighter">
+              {stage === 'ad_basic' ? 'Analyzing density...' : stage === 'ad_deep' ? 'Deep Purification...' : 'Structuring...'}
+            </div>
+            <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden max-w-xs mx-auto">
+              <div className={`h-full bg-[#5D5FEF] ${stage === 'ad_basic' ? 'animate-[load_5s_linear]' : stage === 'ad_deep' ? 'animate-[load_30s_linear]' : 'w-full animate-pulse'}`} />
+            </div>
           </div>
-        ) : (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-10">
-            <div className="bg-slate-800/80 rounded-[48px] p-10 border border-slate-700">
-              {/* 무료 분석 결과 영역 */}
-              <div className="whitespace-pre-wrap leading-relaxed text-slate-200 text-xl font-medium mb-4">
-                {result}
+        )}
+
+        {/* 3. 일반 결과 단계 (result) */}
+        {stage === 'result' && data && (
+          <div className="space-y-8 animate-in slide-in-from-bottom-10 duration-1000">
+            <div 
+              ref={cardRef} 
+              className="bg-white text-slate-900 rounded-[40px] p-12 shadow-2xl space-y-12 relative overflow-hidden flex flex-col items-center text-center"
+            >
+              <div className="space-y-1">
+                <span className="text-[12px] font-black tracking-[0.4em] text-[#5D5FEF] uppercase block">CLARITY CARD</span>
+                <span className="text-[9px] text-slate-400 font-medium uppercase tracking-wider block">A snapshot, not an answer</span>
               </div>
-              
-              {/* 유료 잠금 영역: 심리적 거리감과 불쾌하지만 궁금한 UI 설계 */}
-              {lockedData && (
-                <div className="mt-12 pt-8 border-t border-dashed border-slate-600">
-                  <div className="bg-slate-900/90 rounded-[32px] p-10 border border-[#5D5FEF]/20 relative overflow-hidden transition-all duration-1000">
-                    
-                    <div className="flex justify-between items-center mb-8">
-                      <span className="text-[10px] font-mono tracking-widest text-[#5D5FEF] uppercase">Pattern Analysis Locked</span>
-                      <span className="text-[10px] text-slate-500 font-medium">유사 패턴 12,400+건 대조 완료</span>
-                    </div>
-
-                    <div className="relative mb-10">
-                      <div className={`transition-all duration-1000 ${!isUnlocked ? 'filter blur-[18px] opacity-20 select-none' : 'filter blur-0 opacity-100'}`}>
-                        <div className="space-y-6 text-slate-300 text-base leading-relaxed font-light">
-                          {lockedData}
-                        </div>
-                      </div>
-                      
-                      {!isUnlocked && (
-                        <div className="absolute inset-0 flex flex-col justify-center items-center text-center">
-                          <h3 className="text-white text-lg font-black mb-3 leading-tight">
-                            "당신이 스스로 부정하고 싶은<br/>장면들이 포함되어 있습니다."
-                          </h3>
-                          <p className="text-slate-500 text-sm font-medium">
-                            시스템이 포착한 당신의 '결정적 패턴'을 확인하시겠습니까?
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    {!isUnlocked ? (
-                      <div className="space-y-4">
-                        <button 
-                          onClick={() => setIsUnlocked(true)} 
-                          className="w-full py-6 bg-[#5D5FEF] hover:bg-[#4A4CCF] text-white rounded-3xl font-black text-xl transition-all shadow-[0_20px_40px_rgba(93,95,239,0.2)] hover:scale-[1.01] active:scale-95"
-                        >
-                          나의 패턴 실체 확인하기 🔓
-                        </button>
-                        <p className="text-center text-[11px] text-slate-600 font-semibold tracking-tight">
-                          * 이 데이터는 당신의 선택 전/후 통제감 변화를 추적합니다.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="text-center py-4 text-[#5D5FEF] font-bold animate-pulse">
-                        🔓 데이터 거울이 활성화되었습니다.
-                      </div>
-                    )}
+              <h2 className="text-2xl font-black leading-tight tracking-tighter break-keep">“{data.mainTitle}”</h2>
+              <div className="w-full space-y-8">
+                <section className="space-y-3">
+                  <div className="flex justify-between items-end text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <span>Emotion involvement</span>
+                    <span className="text-slate-900 text-xs font-mono">{data.basic.emotion}%</span>
                   </div>
-                </div>
-              )}
-
-              <div className="mt-10 text-center pt-10 border-t border-slate-700/50">
-                <button 
-                  onClick={() => {setResult(null); setLockedData(null); setIsUnlocked(false); setInput('');}} 
-                  className="px-12 py-4 bg-slate-700/50 text-slate-400 font-bold rounded-2xl hover:bg-slate-700 transition-all"
-                >
-                  새로운 판단 미러링
-                </button>
+                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-[#5D5FEF]" style={{ width: `${data.basic.emotion}%` }} />
+                  </div>
+                </section>
+                <section className="space-y-3">
+                  <div className="flex justify-between items-end text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <span>Reality exposure</span>
+                    <span className="text-slate-900 text-xs font-mono">{data.basic.risk}%</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-slate-900" style={{ width: `${data.basic.risk}%` }} />
+                  </div>
+                </section>
+              </div>
+              <div className="bg-slate-50 w-full rounded-3xl p-8 border border-slate-100">
+                <p className="text-[14px] font-bold text-slate-800 leading-relaxed italic break-keep">“{data.basic.pattern}”</p>
+              </div>
+              <div className="pt-4 space-y-1">
+                <p className="text-[13px] font-black text-slate-900">답은 없었지만, 정리는 됐다.</p>
+                <p className="text-[9px] text-slate-300 font-bold uppercase tracking-widest">Judgment Mirror v5.4</p>
               </div>
             </div>
-            
-            <div className="bg-gradient-to-r from-[#1E293B] to-[#0F172A] rounded-[32px] p-10 text-center border border-slate-800">
-              <h2 className="text-2xl font-black text-white italic">"{randomQuote}"</h2>
+
+            <div className="space-y-4">
+              {/* 기능 버튼 그룹 */}
+              <div className="grid grid-cols-2 gap-3">
+                <button onClick={handleSaveImage} className="py-5 bg-white/5 text-slate-300 rounded-2xl font-bold text-sm border border-white/10 active:bg-white/10">
+                  이미지 저장 💾
+                </button>
+                <button onClick={handleShare} className="py-5 bg-white/5 text-slate-300 rounded-2xl font-bold text-sm border border-white/10 active:bg-white/10">
+                  결과 공유 🔗
+                </button>
+              </div>
+
+              {!data.isTrivial ? (
+                <button onClick={handleDeepAnalyze} className="w-full py-5 bg-[#5D5FEF] text-white rounded-2xl font-black text-sm shadow-xl shadow-[#5D5FEF]/20 active:scale-95 transition-all">
+                  심층 분석 (30초 정제) 🔓
+                </button>
+              ) : (
+                <div className="text-center p-6 bg-slate-900/50 rounded-2xl border border-slate-800">
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] leading-relaxed">Cognitive density too low<br/>Deep analysis is restricted</p>
+                </div>
+              )}
+              
+              <button onClick={() => { setStage('input'); setInput(''); }} className="w-full py-4 text-slate-500 font-bold text-xs uppercase tracking-widest">
+                New Entry
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* 4. 심층 결과 단계 (deep_result) */}
+        {stage === 'deep_result' && data && (
+          <div className="space-y-8 animate-in zoom-in-95 duration-700">
+            <div ref={cardRef} className="bg-[#5D5FEF] text-white rounded-[40px] p-12 shadow-2xl space-y-12 text-center overflow-hidden">
+              <div className="space-y-1">
+                <span className="text-[11px] font-black tracking-[0.3em] opacity-60 uppercase">DEEP POSITIONING</span>
+                <span className="text-[9px] font-bold opacity-40 uppercase">Where you stand</span>
+              </div>
+              <div className="space-y-6">
+                <h3 className="text-xl font-black leading-tight break-keep">“{data.deep.position}”</h3>
+                <p className="text-sm font-medium opacity-90 leading-relaxed break-keep">{data.deep.complex}</p>
+              </div>
+              <div className="pt-8 border-t border-white/20">
+                <p className="text-[12px] font-black italic opacity-80 uppercase tracking-tight">“이 상태는 틀리지 않았다.”</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Deep 단계에서도 저장 및 공유 추가 */}
+              <div className="grid grid-cols-2 gap-3">
+                <button onClick={handleSaveImage} className="py-5 bg-white/10 text-white rounded-2xl font-bold text-sm border border-white/20 active:bg-white/20">
+                  이미지 저장 💾
+                </button>
+                <button onClick={handleShare} className="py-5 bg-white/10 text-white rounded-2xl font-bold text-sm border border-white/20 active:bg-white/20">
+                  결과 공유 🔗
+                </button>
+              </div>
+              <button onClick={() => { setStage('input'); setInput(''); }} className="w-full py-5 bg-slate-800 text-slate-400 rounded-2xl font-black text-sm uppercase">Reset</button>
             </div>
           </div>
         )}
       </main>
+
+      <style jsx>{`
+        @keyframes load {
+          from { width: 0%; }
+          to { width: 100%; }
+        }
+      `}</style>
     </div>
   );
 }
