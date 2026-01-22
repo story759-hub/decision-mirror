@@ -10,39 +10,46 @@ export default function ClarityRoom() {
   const [data, setData] = useState<any>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  /* ------------------------------
-      [수정] 이미지 저장 로직 (HTML2CANVAS)
+/* ------------------------------
+      [최종 해결] 이미지 저장 로직
   ------------------------------ */
   const handleSaveImage = async () => {
-    // 1. 브라우저 환경인지 확인 (SSR 에러 방지)
-    if (typeof window === 'undefined' || !cardRef.current) return;
-
+    if (!cardRef.current) return;
+    
     try {
-      // 2. html2canvas를 동적으로 불러옵니다 (성능 및 안정성)
       const html2canvas = (await import('html2canvas')).default;
       
+      // 1. 캔버스 생성
       const canvas = await html2canvas(cardRef.current, {
-        scale: 3,             // 고화질 (숫자가 높을수록 선명함)
-        useCORS: true,        // 외부 이미지 로드 허용
+        scale: 2,             // 3에서 2로 조절 (사양 충돌 방지)
+        useCORS: true,        
         allowTaint: true,
-        backgroundColor: stage === 'deep_result' ? '#5D5FEF' : '#ffffff', // 배경색 명시
+        backgroundColor: stage === 'deep_result' ? '#5D5FEF' : '#ffffff',
         logging: false,
+        // 아래 설정을 추가하여 렌더링 누락 방지
+        width: cardRef.current.offsetWidth,
+        height: cardRef.current.offsetHeight,
       });
 
-      // 3. 이미지 데이터 변환 및 다운로드
-      const image = canvas.toDataURL('image/png', 1.0);
-      const link = document.createElement('a');
-      link.style.display = 'none';
-      link.href = image;
-      link.download = `Clarity_${stage}_${Date.now()}.png`;
-      
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // 2. Blob 방식으로 변환 (가장 안전한 다운로드 방식)
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Clarity_${Date.now()}.png`;
+        
+        document.body.appendChild(link);
+        link.click();
+        
+        // 정리
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 'image/png');
 
     } catch (err) {
       console.error("이미지 저장 실패:", err);
-      alert("이미지 생성에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      alert("이미지 저장에 실패했습니다. 크롬 브라우저 이용을 권장합니다.");
     }
   };
 
