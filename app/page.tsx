@@ -1,15 +1,15 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import Script from 'next/script';
 
 type Stage =
   | 'input'
-  | 'ad_basic'
+  | 'loading'
   | 'processing'
   | 'result'
-  | 'ad_deep'
+  | 'deep_processing'
   | 'deep_result';
 
 export default function ClarityRoom() {
@@ -17,110 +17,97 @@ export default function ClarityRoom() {
   const [stage, setStage] = useState<Stage>('input');
   const [data, setData] = useState<any>(null);
 
-  // ✅ 캡처 전용 ref (단 하나만 사용)
   const captureRef = useRef<HTMLDivElement>(null);
 
-  /* --------------------------------------------------
-     폰트 로딩 안정화
-  -------------------------------------------------- */
-  useEffect(() => {
-    document.fonts?.ready.then(() => {
-      console.log('Fonts ready');
-    });
-  }, []);
-
-  /* --------------------------------------------------
-     이미지 저장 (안정판)
-  -------------------------------------------------- */
+  /* -----------------------------------
+     이미지 저장 (실동작 안정판)
+  ----------------------------------- */
   const handleSaveImage = async () => {
     const target = captureRef.current;
-    if (!target) {
-      alert('캡처 대상이 준비되지 않았습니다.');
-      return;
-    }
+    if (!target) return alert('저장할 결과가 없습니다.');
 
-    // 렌더링/애니메이션 안정화 대기
-    await new Promise((r) =>
-      requestAnimationFrame(() => setTimeout(r, 120))
-    );
+    // ✅ 캡처용 임시 노드 생성
+    const clone = target.cloneNode(true) as HTMLElement;
+    clone.style.position = 'fixed';
+    clone.style.top = '-9999px';
+    clone.style.left = '0';
+    clone.style.transform = 'none';
+    clone.style.opacity = '1';
+    document.body.appendChild(clone);
+
+    await new Promise((r) => setTimeout(r, 300));
 
     try {
-      const canvas = await html2canvas(target, {
+      const canvas = await html2canvas(clone, {
         scale: 2,
         backgroundColor: null,
         useCORS: true,
-        allowTaint: true,
-        logging: false,
-        windowWidth: target.scrollWidth,
-        windowHeight: target.scrollHeight,
       });
 
-      const image = canvas.toDataURL('image/png');
-      const link = document.createElement('a');
-      link.href = image;
-      link.download = `Clarity_${Date.now()}.png`;
-      link.click();
-    } catch (err) {
-      console.error('이미지 저장 실패:', err);
-      alert('이미지 생성 중 오류가 발생했습니다.');
+      const url = canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `clarity_${Date.now()}.png`;
+      a.click();
+    } catch (e) {
+      alert('이미지 저장에 실패했습니다.');
+    } finally {
+      document.body.removeChild(clone);
     }
   };
 
-  /* --------------------------------------------------
-     공유
-  -------------------------------------------------- */
-  const handleShare = async () => {
-    const title = 'Clarity Room';
-    const text = `"${data?.mainTitle}"`;
+  /* -----------------------------------
+     링크 공유
+  ----------------------------------- */
+  const handleShareLink = async () => {
     const url = window.location.href;
 
     if (navigator.share) {
-      try {
-        await navigator.share({ title, text, url });
-      } catch {}
+      await navigator.share({
+        title: 'Clarity Room',
+        url,
+      });
     } else {
       await navigator.clipboard.writeText(url);
       alert('링크가 복사되었습니다.');
     }
   };
 
-  /* --------------------------------------------------
+  /* -----------------------------------
      기본 분석
-  -------------------------------------------------- */
-  const handleBasicAnalyze = async () => {
+  ----------------------------------- */
+  const handleAnalyze = async () => {
     if (input.trim().length < 5) {
-      alert('기록할 만한 판단 구조가 감지되지 않았습니다.');
+      alert('조금 더 구체적으로 입력해 주세요.');
       return;
     }
 
-    setStage('ad_basic');
+    setStage('loading');
 
     try {
-      const fetchPromise = fetch('/api/analyze', {
+      const res = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ decisionText: input }),
-      }).then((res) => res.json());
+      });
 
-      setTimeout(async () => {
-        const result = await fetchPromise;
-        setData(result);
-        setStage('processing');
-        setTimeout(() => setStage('result'), 1000);
-      }, 5000);
+      const result = await res.json();
+      setData(result);
+
+      setStage('processing');
+      setTimeout(() => setStage('result'), 1200);
     } catch {
       setStage('input');
-      alert('정리 중 오류가 발생했습니다.');
+      alert('분석 중 오류가 발생했습니다.');
     }
   };
 
-  /* --------------------------------------------------
+  /* -----------------------------------
      Deep 분석
-  -------------------------------------------------- */
+  ----------------------------------- */
   const handleDeepAnalyze = () => {
-    if (data?.isTrivial) return;
-    setStage('ad_deep');
-    setTimeout(() => setStage('deep_result'), 30000);
+    setStage('deep_processing');
+    setTimeout(() => setStage('deep_result'), 2500);
   };
 
   return (
@@ -133,15 +120,15 @@ export default function ClarityRoom() {
         strategy="afterInteractive"
       />
 
-      <div className="min-h-screen bg-[#0F172A] text-slate-100 pb-20">
-        <header className="max-w-xl mx-auto pt-20 pb-12 text-center px-6">
+      <div className="min-h-screen bg-[#0F172A] text-white pb-24">
+        <header className="text-center pt-20 pb-12">
           <h1
-            className="text-4xl font-black tracking-tighter mb-2 text-white cursor-pointer"
-            onClick={() => window.location.reload()}
+            className="text-4xl font-black cursor-pointer"
+            onClick={() => location.reload()}
           >
             Clarity <span className="text-[#5D5FEF]">Room</span>
           </h1>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em]">
+          <p className="text-xs tracking-widest text-slate-400 mt-2">
             Cognitive Depth Organizer
           </p>
         </header>
@@ -151,30 +138,30 @@ export default function ClarityRoom() {
           {stage === 'input' && (
             <div className="space-y-6">
               <textarea
-                className="w-full h-44 bg-slate-900/50 rounded-3xl p-6 text-lg border border-slate-700 outline-none resize-none"
+                className="w-full h-44 bg-slate-900/60 rounded-3xl p-6 text-lg resize-none outline-none"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="현재의 혼란을 입력하십시오."
+                placeholder="지금 머릿속 상태를 입력하세요."
               />
               <button
-                onClick={handleBasicAnalyze}
-                className="w-full bg-[#5D5FEF] text-white py-5 rounded-2xl font-black"
+                onClick={handleAnalyze}
+                className="w-full py-5 rounded-2xl bg-[#5D5FEF] font-black"
               >
-                상태 정리 시작 🚀
+                정리 시작
               </button>
             </div>
           )}
 
           {/* LOADING */}
-          {(stage === 'ad_basic' ||
-            stage === 'ad_deep' ||
-            stage === 'processing') && (
-            <div className="py-20 text-center">
-              <p className="text-[#5D5FEF] font-black text-xl mb-4">
-                Structuring...
+          {(stage === 'loading' ||
+            stage === 'processing' ||
+            stage === 'deep_processing') && (
+            <div className="py-24 text-center">
+              <p className="text-[#5D5FEF] text-xl font-black mb-3">
+                데이터를 분석하고 있습니다
               </p>
-              <p className="text-[10px] text-slate-500 font-bold uppercase">
-                광고 시청 후 결과가 공개됩니다
+              <p className="text-xs text-slate-400 tracking-widest">
+                잠시만 기다려 주세요
               </p>
             </div>
           )}
@@ -184,43 +171,40 @@ export default function ClarityRoom() {
             <div className="space-y-6">
               <div
                 ref={captureRef}
-                data-capture="card"
-                className="bg-white text-slate-900 rounded-[40px] p-12 shadow-2xl text-center space-y-10"
+                className="bg-white text-slate-900 rounded-[36px] p-10 text-center space-y-8 shadow-xl"
               >
                 <h2 className="text-2xl font-black">
                   “{data.mainTitle}”
                 </h2>
-
                 <p className="italic font-bold">
-                  “{data.basic.pattern}”
+                  {data.basic?.pattern}
                 </p>
-
-                <p className="text-xs text-slate-400 font-bold">
-                  Judgment Mirror v5.4
+                <p className="text-xs text-slate-400">
+                  Judgment Mirror v5
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={handleSaveImage}
-                  className="py-4 bg-white/5 rounded-xl"
+                  className="py-4 rounded-xl bg-white/10"
                 >
                   이미지 저장 💾
                 </button>
                 <button
-                  onClick={handleShare}
-                  className="py-4 bg-white/5 rounded-xl"
+                  onClick={handleShareLink}
+                  className="py-4 rounded-xl bg-white/10"
                 >
-                  결과 공유 🔗
+                  링크 공유 🔗
                 </button>
               </div>
 
               {!data.isTrivial && (
                 <button
                   onClick={handleDeepAnalyze}
-                  className="w-full py-5 bg-[#5D5FEF] text-white rounded-2xl font-black"
+                  className="w-full py-5 rounded-2xl bg-[#5D5FEF] font-black"
                 >
-                  심층 분석 🔓
+                  심층 분석 열기
                 </button>
               )}
             </div>
@@ -231,32 +215,31 @@ export default function ClarityRoom() {
             <div className="space-y-6">
               <div
                 ref={captureRef}
-                data-capture="card"
-                className="bg-[#5D5FEF] text-white rounded-[40px] p-12 shadow-2xl text-center space-y-8"
+                className="bg-[#5D5FEF] rounded-[36px] p-10 text-center space-y-6 shadow-xl"
               >
                 <h3 className="text-xl font-black">
-                  {data.deep.position}
+                  {data.deep?.position}
                 </h3>
                 <p className="opacity-90">
-                  {data.deep.complex}
+                  {data.deep?.complex}
                 </p>
                 <p className="italic font-bold">
-                  “이 상태는 틀리지 않았다.”
+                  이 상태는 틀리지 않았다
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={handleSaveImage}
-                  className="py-4 bg-white/10 rounded-xl"
+                  className="py-4 rounded-xl bg-white/10"
                 >
                   이미지 저장 💾
                 </button>
                 <button
-                  onClick={handleShare}
-                  className="py-4 bg-white/10 rounded-xl"
+                  onClick={handleShareLink}
+                  className="py-4 rounded-xl bg-white/10"
                 >
-                  결과 공유 🔗
+                  링크 공유 🔗
                 </button>
               </div>
             </div>
