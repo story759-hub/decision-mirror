@@ -1,169 +1,463 @@
 'use client';
 
-import { useState } from 'react';
-import Script from 'next/script';
+import { useState, useRef } from 'react';
+
+import html2canvas from 'html2canvas';
+
+
 
 type Stage = 'input' | 'ad_basic' | 'processing' | 'result' | 'ad_deep' | 'deep_result';
 
+
+
 export default function ClarityRoom() {
+
   const [input, setInput] = useState('');
+
   const [stage, setStage] = useState<Stage>('input');
+
   const [data, setData] = useState<any>(null);
-  const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
 
-  // 텍스트 줄바꿈 함수 (컴포넌트 내부에 배치하여 참조 오류 방지)
-  const drawWrappedText = (ctx: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, lineHeight: number) => {
-    const words = text.split(' ');
-    let line = '';
-    let yy = y;
+  const cardRef = useRef<HTMLDivElement>(null);
 
-    for (let i = 0; i < words.length; i++) {
-      const testLine = line + words[i] + ' ';
-      const metrics = ctx.measureText(testLine);
-      const testWidth = metrics.width;
 
-      if (testWidth > maxWidth && i > 0) {
-        ctx.fillText(line, x, yy);
-        line = words[i] + ' ';
-        yy += lineHeight;
-      } else {
-        line = testLine;
-      }
+
+  // [기능 1: 이미지 저장] - 현재 화면에 보이는 cardRef를 캡처합니다.
+
+  const handleSaveImage = async () => {
+
+    if (!cardRef.current) return;
+
+    try {
+
+      const canvas = await html2canvas(cardRef.current, {
+
+        backgroundColor: stage === 'deep_result' ? '#5D5FEF' : '#ffffff', // 배경색 단계별 대응
+
+        scale: 3,
+
+        useCORS: true,
+
+      });
+
+      const image = canvas.toDataURL('image/png');
+
+      const link = document.createElement('a');
+
+      link.href = image;
+
+      link.download = `Clarity_${stage}_${Date.now()}.png`;
+
+      link.click();
+
+    } catch (err) {
+
+      console.error("이미지 저장 실패", err);
+
+      alert("이미지 저장 중 오류가 발생했습니다.");
+
     }
-    ctx.fillText(line, x, yy);
+
   };
 
-  // 이미지 생성 핵심 로직 (오류 방지 버전)
-  const generateCanvasImage = (analysisData: any, isDeep: boolean) => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
 
-    canvas.width = 900;
-    canvas.height = 1200;
 
-    // 1. 전체 배경색
-    ctx.fillStyle = '#0F172A';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // [기능 2: 페이지 공유] - Web Share API 사용
 
-    // 2. 카드 배경 (둥근 사각형 - 호환성 위해 수동 구현)
-    const cardX = 80;
-    const cardY = 150;
-    const cardW = 740;
-    const cardH = 800;
-    const radius = 60;
+  const handleShare = async () => {
 
-    ctx.fillStyle = isDeep ? '#5D5FEF' : '#ffffff';
-    ctx.beginPath();
-    ctx.moveTo(cardX + radius, cardY);
-    ctx.lineTo(cardX + cardW - radius, cardY);
-    ctx.quadraticCurveTo(cardX + cardW, cardY, cardX + cardW, cardY + radius);
-    ctx.lineTo(cardX + cardW, cardY + cardH - radius);
-    ctx.quadraticCurveTo(cardX + cardW, cardY + cardH, cardX + cardW - radius, cardY + cardH);
-    ctx.lineTo(cardX + radius, cardY + cardH);
-    ctx.quadraticCurveTo(cardX, cardY + cardH, cardX, cardY + cardH - radius);
-    ctx.lineTo(cardX, cardY + radius);
-    ctx.quadraticCurveTo(cardX, cardY, cardX + radius, cardY);
-    ctx.closePath();
-    ctx.fill();
+    const shareData = {
 
-    // 3. 텍스트 그리기
-    const textColor = isDeep ? '#ffffff' : '#111827';
-    ctx.textAlign = 'center';
-    
-    // 헤더
-    ctx.fillStyle = isDeep ? 'rgba(255,255,255,0.5)' : '#5D5FEF';
-    ctx.font = 'bold 24px sans-serif';
-    ctx.fillText(isDeep ? 'DEEP POSITIONING' : 'CLARITY CARD', 450, 240);
+      title: 'Clarity Room - 나의 인지 구조 분석',
 
-    // 메인 타이틀
-    ctx.fillStyle = textColor;
-    ctx.font = 'bold 48px sans-serif';
-    const title = isDeep ? analysisData.deep.position : analysisData.mainTitle;
-    drawWrappedText(ctx, `“${title}”`, 450, 360, 600, 65);
+      text: `"${data?.mainTitle || '나의 분석 결과'}" - 클러리티 룸에서 확인한 나의 상태입니다.`,
 
-    // 상세 내용
-    ctx.font = '32px sans-serif';
-    ctx.fillStyle = isDeep ? 'rgba(255,255,255,0.9)' : '#334155';
-    const content = isDeep ? analysisData.deep.complex : analysisData.basic.pattern;
-    drawWrappedText(ctx, content, 450, 580, 600, 48);
+      url: window.location.href,
 
-    // 푸터
-    ctx.font = '24px sans-serif';
-    ctx.fillStyle = isDeep ? 'rgba(255,255,255,0.4)' : '#94A3B8';
-    ctx.fillText('Judgment Mirror v5.4', 450, 880);
+    };
 
-    return canvas.toDataURL('image/png');
+
+
+    try {
+
+      if (navigator.share) {
+
+        await navigator.share(shareData);
+
+      } else {
+
+        await navigator.clipboard.writeText(window.location.href);
+
+        alert("링크가 클립보드에 복사되었습니다.");
+
+      }
+
+    } catch (err) {
+
+      console.error("공유 실패", err);
+
+    }
+
   };
+
+
+
+  // [분석 로직 생략 없이 유지]
 
   const handleBasicAnalyze = async () => {
-    if (input.trim().length < 5) return alert("입력이 너무 짧습니다.");
-    setStage('ad_basic');
-    
-    try {
-      const res = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ decisionText: input }),
-      });
-      const result = await res.json();
-      
-      setTimeout(() => {
-        setData(result);
-        const img = generateCanvasImage(result, false);
-        setGeneratedImageUrl(img);
-        setStage('processing');
-        setTimeout(() => setStage('result'), 1200);
-      }, 5000);
-    } catch (err) {
-      alert("분석 중 오류 발생");
-      setStage('input');
+
+    if (input.trim().length < 5) {
+
+      alert("기록할 만한 판단 구조가 감지되지 않았습니다.");
+
+      return;
+
     }
+
+    setStage('ad_basic');
+
+    try {
+
+      const fetchPromise = fetch('/api/analyze', {
+
+        method: 'POST',
+
+        headers: { 'Content-Type': 'application/json' },
+
+        body: JSON.stringify({ decisionText: input }),
+
+      }).then(res => res.json());
+
+
+
+      setTimeout(async () => {
+
+        const result = await fetchPromise;
+
+        setData(result);
+
+        setStage('processing');
+
+        setTimeout(() => setStage('result'), 1200);
+
+      }, 5000);
+
+    } catch (err) {
+
+      setStage('input');
+
+      alert("정리 중 오류가 발생했습니다.");
+
+    }
+
   };
 
-  const downloadImage = () => {
-    if (!generatedImageUrl) return alert("이미지가 아직 준비되지 않았습니다.");
-    const link = document.createElement('a');
-    link.href = generatedImageUrl;
-    link.download = `Clarity_${Date.now()}.png`;
-    link.click();
+
+
+  const handleDeepAnalyze = () => {
+
+    if (data?.isTrivial) return;
+
+    setStage('ad_deep');
+
+    setTimeout(() => setStage('deep_result'), 30000);
+
   };
+
+
 
   return (
-    <>
-      <Script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6062349022770025" crossOrigin="anonymous" />
-      <div className="min-h-screen bg-[#0F172A] text-white flex flex-col items-center px-6 pt-20">
-        <h1 className="text-4xl font-black mb-10">Clarity Room</h1>
-        
+
+    <div className="min-h-screen bg-[#0F172A] text-slate-100 font-sans pb-20 selection:bg-[#5D5FEF]/30">
+
+      <header className="max-w-xl mx-auto pt-20 pb-12 text-center px-6">
+
+        <h1 className="text-4xl font-black tracking-tighter mb-2 bg-gradient-to-b from-white to-slate-500 bg-clip-text text-transparent cursor-pointer" onClick={() => window.location.reload()}>
+
+          Clarity <span className="text-[#5D5FEF]">Room</span>
+
+        </h1>
+
+        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em]">Cognitive Depth Organizer</p>
+
+      </header>
+
+
+
+      <main className="max-w-lg mx-auto px-6">
+
+        {/* 1. 입력 단계 */}
+
         {stage === 'input' && (
-          <div className="w-full max-w-md space-y-4">
-            <textarea 
-              className="w-full h-44 bg-slate-900/50 rounded-3xl p-6 border border-slate-700 outline-none"
+
+          <div className="space-y-6 animate-in fade-in">
+
+            <textarea
+
+              className="w-full h-44 bg-slate-900/50 rounded-3xl p-6 text-lg border border-slate-700 focus:ring-1 focus:ring-[#5D5FEF] transition-all outline-none resize-none text-white font-light"
+
               value={input}
+
               onChange={(e) => setInput(e.target.value)}
-              placeholder="머릿속 고민을 입력하세요."
+
+              placeholder="현재의 혼란을 입력하십시오."
+
             />
-            <button onClick={handleBasicAnalyze} className="w-full bg-[#5D5FEF] py-5 rounded-2xl font-bold">정리 시작</button>
+
+            <button onClick={handleBasicAnalyze} className="w-full bg-[#5D5FEF] text-white py-5 rounded-2xl font-black text-lg shadow-2xl shadow-[#5D5FEF]/20 active:scale-95 transition-all">
+
+              상태 정리 시작 🚀
+
+            </button>
+
           </div>
+
         )}
 
-        {(stage === 'ad_basic' || stage === 'processing') && (
-          <div className="text-center py-20">
-            <div className="animate-pulse text-[#5D5FEF] font-bold">분석 중...</div>
+
+
+        {/* 2. 대기/로딩 단계 */}
+
+        {(stage === 'ad_basic' || stage === 'ad_deep' || stage === 'processing') && (
+
+          <div className="py-20 text-center animate-in zoom-in-95">
+
+            <div className="text-[#5D5FEF] font-black text-xl mb-4 uppercase tracking-tighter">
+
+              {stage === 'ad_basic' ? 'Analyzing density...' : stage === 'ad_deep' ? 'Deep Purification...' : 'Structuring...'}
+
+            </div>
+
+            <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden max-w-xs mx-auto">
+
+              <div className={`h-full bg-[#5D5FEF] ${stage === 'ad_basic' ? 'animate-[load_5s_linear]' : stage === 'ad_deep' ? 'animate-[load_30s_linear]' : 'w-full animate-pulse'}`} />
+
+            </div>
+
           </div>
+
         )}
+
+
+
+        {/* 3. 일반 결과 단계 (result) */}
 
         {stage === 'result' && data && (
-          <div className="w-full max-w-md space-y-6">
-            <div className="bg-white text-slate-900 rounded-[40px] p-10 text-center shadow-2xl">
-              <h2 className="text-2xl font-bold mb-4">“{data.mainTitle}”</h2>
-              <p className="text-slate-600">{data.basic.pattern}</p>
+
+          <div className="space-y-8 animate-in slide-in-from-bottom-10 duration-1000">
+
+            <div
+
+              ref={cardRef}
+
+              className="bg-white text-slate-900 rounded-[40px] p-12 shadow-2xl space-y-12 relative overflow-hidden flex flex-col items-center text-center"
+
+            >
+
+              <div className="space-y-1">
+
+                <span className="text-[12px] font-black tracking-[0.4em] text-[#5D5FEF] uppercase block">CLARITY CARD</span>
+
+                <span className="text-[9px] text-slate-400 font-medium uppercase tracking-wider block">A snapshot, not an answer</span>
+
+              </div>
+
+              <h2 className="text-2xl font-black leading-tight tracking-tighter break-keep">“{data.mainTitle}”</h2>
+
+              <div className="w-full space-y-8">
+
+                <section className="space-y-3">
+
+                  <div className="flex justify-between items-end text-[10px] font-black uppercase tracking-widest text-slate-400">
+
+                    <span>Emotion involvement</span>
+
+                    <span className="text-slate-900 text-xs font-mono">{data.basic.emotion}%</span>
+
+                  </div>
+
+                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+
+                    <div className="h-full bg-[#5D5FEF]" style={{ width: `${data.basic.emotion}%` }} />
+
+                  </div>
+
+                </section>
+
+                <section className="space-y-3">
+
+                  <div className="flex justify-between items-end text-[10px] font-black uppercase tracking-widest text-slate-400">
+
+                    <span>Reality exposure</span>
+
+                    <span className="text-slate-900 text-xs font-mono">{data.basic.risk}%</span>
+
+                  </div>
+
+                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+
+                    <div className="h-full bg-slate-900" style={{ width: `${data.basic.risk}%` }} />
+
+                  </div>
+
+                </section>
+
+              </div>
+
+              <div className="bg-slate-50 w-full rounded-3xl p-8 border border-slate-100">
+
+                <p className="text-[14px] font-bold text-slate-800 leading-relaxed italic break-keep">“{data.basic.pattern}”</p>
+
+              </div>
+
+              <div className="pt-4 space-y-1">
+
+                <p className="text-[13px] font-black text-slate-900">답은 없었지만, 정리는 됐다.</p>
+
+                <p className="text-[9px] text-slate-300 font-bold uppercase tracking-widest">Judgment Mirror v5.4</p>
+
+              </div>
+
             </div>
-            <button onClick={downloadImage} className="w-full bg-white/10 py-5 rounded-2xl font-bold border border-white/20">이미지 저장 💾</button>
-            <button onClick={() => window.location.reload()} className="w-full text-slate-500 text-xs uppercase tracking-widest">New Entry</button>
+
+
+
+            <div className="space-y-4">
+
+              {/* 기능 버튼 그룹 */}
+
+              <div className="grid grid-cols-2 gap-3">
+
+                <button onClick={handleSaveImage} className="py-5 bg-white/5 text-slate-300 rounded-2xl font-bold text-sm border border-white/10 active:bg-white/10">
+
+                  이미지 저장 💾
+
+                </button>
+
+                <button onClick={handleShare} className="py-5 bg-white/5 text-slate-300 rounded-2xl font-bold text-sm border border-white/10 active:bg-white/10">
+
+                  결과 공유 🔗
+
+                </button>
+
+              </div>
+
+
+
+              {!data.isTrivial ? (
+
+                <button onClick={handleDeepAnalyze} className="w-full py-5 bg-[#5D5FEF] text-white rounded-2xl font-black text-sm shadow-xl shadow-[#5D5FEF]/20 active:scale-95 transition-all">
+
+                  심층 분석 (30초 정제) 🔓
+
+                </button>
+
+              ) : (
+
+                <div className="text-center p-6 bg-slate-900/50 rounded-2xl border border-slate-800">
+
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] leading-relaxed">Cognitive density too low<br/>Deep analysis is restricted</p>
+
+                </div>
+
+              )}
+
+             
+
+              <button onClick={() => { setStage('input'); setInput(''); }} className="w-full py-4 text-slate-500 font-bold text-xs uppercase tracking-widest">
+
+                New Entry
+
+              </button>
+
+            </div>
+
           </div>
+
         )}
-      </div>
-    </>
+
+
+
+        {/* 4. 심층 결과 단계 (deep_result) */}
+
+        {stage === 'deep_result' && data && (
+
+          <div className="space-y-8 animate-in zoom-in-95 duration-700">
+
+            <div ref={cardRef} className="bg-[#5D5FEF] text-white rounded-[40px] p-12 shadow-2xl space-y-12 text-center overflow-hidden">
+
+              <div className="space-y-1">
+
+                <span className="text-[11px] font-black tracking-[0.3em] opacity-60 uppercase">DEEP POSITIONING</span>
+
+                <span className="text-[9px] font-bold opacity-40 uppercase">Where you stand</span>
+
+              </div>
+
+              <div className="space-y-6">
+
+                <h3 className="text-xl font-black leading-tight break-keep">“{data.deep.position}”</h3>
+
+                <p className="text-sm font-medium opacity-90 leading-relaxed break-keep">{data.deep.complex}</p>
+
+              </div>
+
+              <div className="pt-8 border-t border-white/20">
+
+                <p className="text-[12px] font-black italic opacity-80 uppercase tracking-tight">“이 상태는 틀리지 않았다.”</p>
+
+              </div>
+
+            </div>
+
+
+
+            <div className="space-y-4">
+
+              {/* Deep 단계에서도 저장 및 공유 추가 */}
+
+              <div className="grid grid-cols-2 gap-3">
+
+                <button onClick={handleSaveImage} className="py-5 bg-white/10 text-white rounded-2xl font-bold text-sm border border-white/20 active:bg-white/20">
+
+                  이미지 저장 💾
+
+                </button>
+
+                <button onClick={handleShare} className="py-5 bg-white/10 text-white rounded-2xl font-bold text-sm border border-white/20 active:bg-white/20">
+
+                  결과 공유 🔗
+
+                </button>
+
+              </div>
+
+              <button onClick={() => { setStage('input'); setInput(''); }} className="w-full py-5 bg-slate-800 text-slate-400 rounded-2xl font-black text-sm uppercase">Reset</button>
+
+            </div>
+
+          </div>
+
+        )}
+
+      </main>
+
+
+
+      <style jsx>{`
+
+        @keyframes load {
+
+          from { width: 0%; }
+
+          to { width: 100%; }
+
+        }
+
+      `}</style>
+
+    </div>
+
   );
+
 }
