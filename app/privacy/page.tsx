@@ -64,7 +64,7 @@ export default function PrivacyPolicy() {
           <h3 className="text-xl font-bold text-slate-900">5. 문의처</h3>
           <p className="leading-relaxed text-slate-600">
             서비스 이용 중 개인정보 관련 문의사항이 있으시면 아래 메일로 연락 부탁드립니다.<br/>
-            <span className="text-[#E91E63] font-bold">support@feelingsnap.com</span>
+            <span className="text-[#E91E63] font-bold">bullet9372@gmail.com</span>
           </p>
         </section>
 
