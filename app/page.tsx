@@ -3,165 +3,137 @@
 import { useState, useRef } from 'react';
 import { toPng } from 'html-to-image';
 
-type Stage = 'input' | 'ad_basic' | 'processing' | 'result' | 'ad_deep' | 'deep_result';
+type Stage = 'input' | 'analyzing' | 'result';
 
-export default function ClarityRoom() {
+export default function FeelingSnap() {
   const [input, setInput] = useState('');
   const [stage, setStage] = useState<Stage>('input');
-  const [data, setData] = useState<any>(null);
+  const [resultData, setResultData] = useState<any>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // 다시 시작하기 (초기화) 로직
-  const handleRestart = () => {
-    setInput('');
-    setData(null);
-    setStage('input');
+  // 1. 감정 분석 및 이미지 매칭 시뮬레이션
+  const handleAnalyze = async () => {
+    if (input.trim().length < 5) return alert("오늘의 마음을 조금 더 들려주세요.");
+    
+    setStage('analyzing');
+
+    // 실제 API 호출 대신 시뮬레이션 (이미지 풀 방식)
+    setTimeout(() => {
+      setResultData({
+        emotion: "기쁨",
+        imagePath: "/images/joy_01.png", // 미리 준비된 이미지 풀
+        matchRate: 84,
+        description: "당신의 마음속에 몽글몽글한 구름이 피어오르고 있네요. 이 기분은 주변 사람들에게도 따뜻한 에너지가 될 거예요.",
+        totalcount: 1240
+      });
+      setStage('result');
+    }, 3000);
   };
 
+  // 2. 이미지 저장 (필링스냅 포토카드)
   const handleSaveImage = async () => {
     if (!cardRef.current) return;
     try {
       const dataUrl = await toPng(cardRef.current, {
-        cacheBust: true,
-        pixelRatio: 2,
-        backgroundColor: stage === 'deep_result' ? '#5D5FEF' : '#ffffff',
+        pixelRatio: 3,
+        backgroundColor: '#ffffff',
       });
       const link = document.createElement('a');
-      link.download = `Clarity_${Date.now()}.png`;
+      link.download = `FeelingSnap_${Date.now()}.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
-      alert('이미지 저장에 실패했습니다.');
+      alert('이미지를 저장할 수 없습니다.');
     }
-  };
-
-  const handleShare = async () => {
-    try {
-      const shareData = {
-        title: 'Clarity Room',
-        text: `"${data?.mainTitle || '분석 결과'}" 확인하기`,
-        url: window.location.href,
-      };
-      if (navigator.share) await navigator.share(shareData);
-      else {
-        await navigator.clipboard.writeText(window.location.href);
-        alert("링크가 복사되었습니다.");
-      }
-    } catch (err) { console.error(err); }
-  };
-
-  const handleBasicAnalyze = async () => {
-    if (input.trim().length < 5) return alert("내용을 조금 더 입력해주세요.");
-    setStage('ad_basic');
-    try {
-      const res = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ decisionText: input }),
-      });
-      const result = await res.json();
-      setTimeout(() => {
-        setData(result);
-        setStage('processing');
-        setTimeout(() => setStage('result'), 1200);
-      }, 5000);
-    } catch (err) {
-      setStage('input');
-      alert("오류가 발생했습니다.");
-    }
-  };
-
-  const handleDeepAnalyze = () => {
-    setStage('ad_deep');
-    setTimeout(() => setStage('deep_result'), 30000);
   };
 
   return (
-    <div className="min-h-screen bg-[#0F172A] text-slate-100 font-sans pb-20">
-      <header className="max-w-xl mx-auto pt-20 pb-12 text-center px-6">
-        <h1 className="text-4xl font-black tracking-tighter mb-2 cursor-pointer" onClick={handleRestart}>
-          Clarity <span className="text-[#5D5FEF]">Room</span>
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans pb-20 selection:bg-pink-100">
+      {/* 헤더 */}
+      <header className="max-w-xl mx-auto pt-16 pb-10 text-center px-6">
+        <h1 className="text-3xl font-black tracking-tight text-slate-800 mb-2">
+          Feeling <span className="text-pink-500">Snap</span>
         </h1>
-        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em]">Cognitive Depth Organizer</p>
+        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Capture your heart, Share your mood</p>
       </header>
 
-      <main className="max-w-lg mx-auto px-6">
+      <main className="max-w-md mx-auto px-6">
+        {/* 단계 1: 입력 */}
         {stage === 'input' && (
-          <div className="space-y-6 animate-in fade-in">
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
+            <div className="text-center space-y-2">
+              <h2 className="text-xl font-bold text-slate-700">지금 어떤 기분이신가요?</h2>
+              <p className="text-sm text-slate-400">누구에게도 말하지 못한 감정을 솔직하게 적어보세요.</p>
+            </div>
             <textarea
-              className="w-full h-44 bg-slate-900/50 rounded-3xl p-6 text-lg border border-slate-700 focus:ring-1 focus:ring-[#5D5FEF] outline-none text-white font-light"
+              className="w-full h-56 bg-white shadow-inner rounded-[32px] p-8 text-lg border-none focus:ring-2 focus:ring-pink-200 outline-none transition-all placeholder:text-slate-300 italic"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="현재의 혼란을 입력하십시오."
+              placeholder="여기에 당신의 마음을 스냅하세요..."
             />
-            <button onClick={handleBasicAnalyze} className="w-full bg-[#5D5FEF] text-white py-5 rounded-2xl font-black text-lg shadow-2xl shadow-[#5D5FEF]/20 active:scale-95 transition-all">
-              상태 정리 시작 🚀
+            <button onClick={handleAnalyze} className="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold text-lg shadow-xl active:scale-95 transition-all">
+              나만의 감정카드 만들기 ✨
             </button>
           </div>
         )}
 
-        {(stage === 'ad_basic' || stage === 'ad_deep' || stage === 'processing') && (
-          <div className="py-20 text-center animate-pulse">
-            <div className="text-[#5D5FEF] font-black text-xl mb-4 uppercase tracking-tighter">
-              {stage === 'ad_basic' ? 'Analyzing density...' : stage === 'ad_deep' ? 'Deep Purification...' : 'Structuring...'}
+        {/* 단계 2: 분석 중 */}
+        {stage === 'analyzing' && (
+          <div className="py-24 text-center space-y-6 animate-in zoom-in-95">
+            <div className="relative w-20 h-20 mx-auto">
+              <div className="absolute inset-0 border-4 border-pink-100 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-pink-500 rounded-full border-t-transparent animate-spin"></div>
             </div>
-            <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden max-w-xs mx-auto">
-              <div className="h-full bg-[#5D5FEF] animate-[load_5s_linear]" />
-            </div>
-          </div>
-        )}
-
-        {stage === 'result' && data && (
-          <div className="space-y-8 animate-in slide-in-from-bottom-10 duration-700">
-            <div ref={cardRef} className="bg-white text-slate-900 rounded-[40px] p-12 shadow-2xl space-y-8 flex flex-col items-center text-center">
-              <span className="text-[12px] font-black tracking-[0.4em] text-[#5D5FEF] uppercase">CLARITY CARD</span>
-              <h2 className="text-2xl font-black leading-tight tracking-tighter">“{data.mainTitle}”</h2>
-              <div className="bg-slate-50 w-full rounded-3xl p-8 border border-slate-100">
-                <p className="text-[14px] font-bold text-slate-800 italic break-keep">“{data.basic.pattern}”</p>
-              </div>
-              <p className="text-[13px] font-black text-slate-900">답은 없었지만, 정리는 됐다.</p>
-            </div>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <button onClick={handleSaveImage} className="py-5 bg-white/5 text-slate-300 rounded-2xl font-bold border border-white/10 active:bg-white/10 transition-colors">이미지 저장 💾</button>
-                {/* 명칭 변경: 결과 공유 -> 공유하기 */}
-                <button onClick={handleShare} className="py-5 bg-white/5 text-slate-300 rounded-2xl font-bold border border-white/10 active:bg-white/10 transition-colors">공유하기 🔗</button>
-              </div>
-              {!data.isTrivial && (
-                <button onClick={handleDeepAnalyze} className="w-full py-5 bg-[#5D5FEF] text-white rounded-2xl font-black shadow-xl active:scale-95 transition-all">심층 분석 시작 🔓</button>
-              )}
-              {/* 추가된 Restart 버튼 */}
-              <button onClick={handleRestart} className="w-full py-4 text-slate-500 font-bold text-xs uppercase tracking-[0.3em] hover:text-white transition-colors">
-                ↻ Restart Analysis
-              </button>
+            <div className="space-y-2">
+              <p className="font-bold text-slate-600">감정의 주파수를 맞추는 중...</p>
+              <p className="text-xs text-slate-400">비슷한 마음을 가진 {resultData?.totalcount || '1,200'}명의 데이터를 찾고 있어요.</p>
             </div>
           </div>
         )}
 
-        {stage === 'deep_result' && data && (
-          <div className="space-y-8 animate-in zoom-in-95 duration-700">
-            <div ref={cardRef} className="bg-[#5D5FEF] text-white rounded-[40px] p-12 shadow-2xl space-y-8 text-center">
-              <span className="text-[11px] font-black tracking-[0.3em] opacity-60 uppercase">DEEP POSITIONING</span>
-              <h3 className="text-xl font-black leading-tight">“{data.deep.position}”</h3>
-              <p className="text-sm font-medium opacity-90 leading-relaxed">{data.deep.complex}</p>
-            </div>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <button onClick={handleSaveImage} className="py-5 bg-white/10 text-white rounded-2xl font-bold border border-white/20 active:bg-white/20 transition-colors">이미지 저장 💾</button>
-                <button onClick={handleShare} className="py-5 bg-white/10 text-white rounded-2xl font-bold border border-white/20 active:bg-white/20 transition-colors">공유하기 🔗</button>
+        {/* 단계 3: 결과 (포토카드) */}
+        {stage === 'result' && resultData && (
+          <div className="space-y-8 animate-in fade-in scale-95 duration-500">
+            {/* 저장될 카드 영역 */}
+            <div ref={cardRef} className="bg-white rounded-[40px] p-10 shadow-2xl border border-slate-50 flex flex-col items-center text-center space-y-6">
+              <div className="w-full aspect-square bg-slate-50 rounded-[30px] overflow-hidden flex items-center justify-center border border-slate-100">
+                {/* 실제 이미지가 없을 경우를 대비한 placeholder */}
+                <img src={resultData.imagePath} alt={resultData.emotion} className="w-full h-full object-cover" 
+                     onError={(e) => (e.currentTarget.src = "https://via.placeholder.com/400?text=Feeling+Snap")} />
               </div>
-              {/* 추가된 Restart 버튼 */}
-              <button onClick={handleRestart} className="w-full py-5 bg-slate-800 text-slate-400 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-slate-700 transition-colors">
-                New Entry
-              </button>
+              
+              <div className="space-y-2">
+                <span className="text-[10px] font-black tracking-[0.3em] text-pink-500 uppercase">Today's Snapshot</span>
+                <h3 className="text-2xl font-black text-slate-800 italic">“{resultData.emotion}”</h3>
+              </div>
+
+              <div className="w-full p-6 bg-slate-50 rounded-3xl">
+                <p className="text-sm leading-relaxed text-slate-600 font-medium break-keep">
+                  {resultData.description}
+                </p>
+              </div>
+
+              <div className="w-full pt-4 border-t border-slate-100 flex justify-between items-center">
+                <div className="text-left">
+                  <p className="text-[10px] text-slate-400 font-bold uppercase">Same Feelings</p>
+                  <p className="text-lg font-black text-slate-800">{resultData.matchRate}%</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] text-pink-400 font-bold uppercase">Feeling Snap</p>
+                  <p className="text-[10px] text-slate-300 font-medium">feelingsnap.com</p>
+                </div>
+              </div>
             </div>
+
+            {/* 버튼들 */}
+            <div className="grid grid-cols-2 gap-3">
+              <button onClick={handleSaveImage} className="py-5 bg-white text-slate-700 rounded-2xl font-bold border border-slate-200 shadow-sm active:bg-slate-50">이미지 저장 💾</button>
+              <button onClick={() => alert('공유 기능')} className="py-5 bg-white text-slate-700 rounded-2xl font-bold border border-slate-200 shadow-sm active:bg-slate-50">공유하기 🔗</button>
+            </div>
+            <button onClick={() => setStage('input')} className="w-full py-4 text-slate-400 font-bold text-xs uppercase tracking-widest">↻ 다시 찍기</button>
           </div>
         )}
       </main>
-
-      <style jsx>{`
-        @keyframes load { from { width: 0%; } to { width: 100%; } }
-      `}</style>
     </div>
   );
 }
