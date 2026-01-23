@@ -1,73 +1,62 @@
-import React from 'react';
-import Link from 'next/link';
-
 export default function PrivacyPolicy() {
-  return (
-    <div className="min-h-screen bg-[#0F172A] text-slate-300 font-sans leading-relaxed">
-      <article className="max-w-3xl mx-auto px-6 py-20">
-        <Link href="/" className="text-[#5D5FEF] font-bold mb-8 inline-block hover:underline">
-          ← 메인으로 돌아가기
-        </Link>
+  const lastUpdated = "2026. 01. 23"; // 오늘 날짜로 수정 가능
 
-        <header className="mb-12 border-b border-slate-800 pb-8">
-          <h1 className="text-3xl font-black text-white tracking-tighter mb-4">
-            개인정보 처리방침 (Privacy Policy)
-          </h1>
-          <p className="text-slate-500 text-sm">최종 수정일: 2026. 01. 22</p>
+  return (
+    <div className="min-h-screen bg-white text-slate-800 font-sans py-20 px-6">
+      <div className="max-w-2xl mx-auto space-y-10">
+        <header className="space-y-2 border-b border-slate-100 pb-8">
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">개인정보 처리방침</h1>
+          <p className="text-sm text-slate-400 font-medium">시행일자: {lastUpdated}</p>
         </header>
 
-        <section className="space-y-10 text-sm md:text-base">
-          {/* 1. 수집 항목 */}
-          <div>
-            <h2 className="text-xl font-bold text-white mb-4">1. 수집하는 개인정보 항목</h2>
-            <p>
-              Clarity Room은 사용자가 서비스를 이용할 때 별도의 회원가입 없이도 이용 가능하도록 설계되었습니다. 다만, 서비스 이용 과정에서 아래와 같은 정보들이 자동으로 생성되어 수집될 수 있습니다.
-            </p>
-            <ul className="list-disc pl-5 mt-2 space-y-1 text-slate-400">
-              <li>IP 주소, 쿠키, 방문 일시, 서비스 이용 기록, 기기 정보</li>
-            </ul>
-          </div>
-
-          {/* 2. 애드센스 필수 문구 (가장 중요) */}
-          <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-800">
-            <h2 className="text-xl font-bold text-[#5D5FEF] mb-4">2. 구글 광고 및 쿠키 사용 고지</h2>
-            <p className="mb-4">
-              본 웹사이트는 구글(Google)에서 제공하는 웹 광고 서비스인 **'구글 애드센스(Google AdSense)'**를 사용합니다.
-            </p>
-            <ul className="list-disc pl-5 space-y-2 text-slate-300">
-              <li>구글을 포함한 제3자 제공업체는 사용자의 이전 웹사이트 방문 기록을 바탕으로 광고를 게재하기 위해 쿠키를 사용합니다.</li>
-              <li>구글의 광고 쿠키를 사용하여 구글과 파트너는 사용자의 본 사이트 및 다른 사이트 방문 기록을 토대로 적절한 광고를 사용자에게 게재할 수 있습니다.</li>
-              <li>사용자는 <a href="https://www.google.com/settings/ads" target="_blank" className="text-[#5D5FEF] underline">구글 광고 설정</a>을 방문하여 맞춤설정 광고를 해제할 수 있습니다.</li>
-            </ul>
-          </div>
-
-          {/* 3. 정보 이용 목적 */}
-          <div>
-            <h2 className="text-xl font-bold text-white mb-4">3. 개인정보의 이용 목적</h2>
-            <p>수집된 정보는 다음의 목적을 위해서만 사용됩니다.</p>
-            <ul className="list-disc pl-5 mt-2 space-y-1 text-slate-400">
-              <li>서비스 분석 및 통계 (사용자 경험 개선)</li>
-              <li>부정 이용 방지 및 보안 유지</li>
-              <li>구글 애드센스를 통한 맞춤형 광고 제공</li>
-            </ul>
-          </div>
-
-          {/* 4. 정보의 파기 */}
-          <div>
-            <h2 className="text-xl font-bold text-white mb-4">4. 개인정보의 파기절차 및 방법</h2>
-            <p>
-              Clarity Room은 원칙적으로 개인정보 수집 및 이용목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다. 전자적 파일 형태의 정보는 기록을 재생할 수 없는 기술적 방법을 사용하여 삭제합니다.
-            </p>
-          </div>
-
-          {/* 5. 문의처 */}
-          <div className="pt-10 border-t border-slate-800">
-            <h2 className="text-lg font-bold text-white mb-2">문의사항</h2>
-            <p>본 방침과 관련하여 궁금한 점이 있으시면 아래로 연락주시기 바랍니다.</p>
-            <p className="mt-2 text-[#5D5FEF]">Email: bullet9372@gmail.com</p>
-          </div>
+        <section className="space-y-4">
+          <h2 className="text-xl font-bold text-slate-800 tracking-tight">1. 수집하는 개인정보 항목</h2>
+          <p className="text-sm leading-relaxed text-slate-600">
+            &apos;필링스냅&apos;은 사용자의 별도 회원가입 없이 이용 가능한 서비스로, 원칙적으로 직접적인 개인 식별 정보(이름, 연락처 등)를 수집하지 않습니다. 다만, 서비스 이용 과정에서 다음과 같은 정보가 자동 생성되어 수집될 수 있습니다.
+          </p>
+          <ul className="list-disc list-inside text-sm text-slate-600 ml-2 space-y-1">
+            <li>IP 주소, 쿠키, 방문 일시, 서비스 이용 기록</li>
+            <li>사용자가 입력한 감정 텍스트 (통계 및 분석용)</li>
+          </ul>
         </section>
-      </article>
+
+        <section className="space-y-4">
+          <h2 className="text-xl font-bold text-slate-800 tracking-tight">2. 개인정보의 수집 및 이용 목적</h2>
+          <p className="text-sm leading-relaxed text-slate-600">
+            수집된 정보는 다음의 목적을 위해서만 활용됩니다.
+          </p>
+          <ul className="list-disc list-inside text-sm text-slate-600 ml-2 space-y-1">
+            <li>감정 분석 결과(포토카드) 생성 및 제공</li>
+            <li>전체 사용자 감정 통계 데이터 산출</li>
+            <li>구글 애드센스 광고 게재 및 서비스 품질 개선</li>
+          </ul>
+        </section>
+
+        <section className="space-y-4">
+          <h2 className="text-xl font-bold text-slate-800 tracking-tight">3. 제3자 제공 및 위탁</h2>
+          <p className="text-sm leading-relaxed text-slate-600">
+            &apos;필링스냅&apos;은 사용자의 개인정보를 외부에 제공하지 않습니다. 다만, 구글(Google)에서 제공하는 광고 서비스(AdSense) 및 분석 도구 등을 이용하는 과정에서 비식별화된 정보가 해당 업체에 제공될 수 있습니다.
+          </p>
+        </section>
+
+        <section className="space-y-4">
+          <h2 className="text-xl font-bold text-slate-800 tracking-tight text-pink-500 font-black">4. 구글 애드센스 광고 관련 안내</h2>
+          <p className="text-sm leading-relaxed text-slate-600 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+            본 웹사이트는 구글(Google)이 제공하는 웹 분석 및 광고 서비스인 구글 애드센스를 사용합니다. 구글은 사용자의 방문 기록을 바탕으로 맞춤형 광고를 제공하기 위해 쿠키(Cookie)를 사용하며, 사용자는 브라우저 설정을 통해 쿠키 수집을 거부할 수 있습니다.
+          </p>
+        </section>
+
+        <section className="space-y-4">
+          <h2 className="text-xl font-bold text-slate-800 tracking-tight">5. 개인정보의 보유 및 파기</h2>
+          <p className="text-sm leading-relaxed text-slate-600">
+            수집된 비식별 정보는 서비스 운영 목적이 달성된 후 지체 없이 파기하는 것을 원칙으로 합니다.
+          </p>
+        </section>
+
+        <footer className="pt-10 border-t border-slate-100 text-[11px] text-slate-400">
+          <p>© 2026 Feeling Snap. All rights reserved.</p>
+        </footer>
+      </div>
     </div>
   );
 }
