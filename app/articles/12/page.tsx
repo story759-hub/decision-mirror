@@ -1,68 +1,102 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 
 export default function ArticleTwelve() {
   return (
-    <div className="min-h-screen bg-[#0F172A] text-slate-300 font-sans leading-relaxed">
-      <article className="max-w-2xl mx-auto px-6 py-20">
-        <Link href="/articles" className="text-[#5D5FEF] font-bold mb-8 inline-block hover:underline">
+    <div className="min-h-screen bg-white text-slate-900 font-sans pb-20 overflow-x-hidden">
+      {/* 메인 로고 디자인 유지 */}
+      <header className="max-w-xl mx-auto pt-14 pb-8 text-center border-b border-slate-50">
+        <Link href="/">
+          <h1 
+            className="text-4xl font-black tracking-tighter flex justify-center items-center cursor-pointer" 
+            style={{ WebkitTextStroke: '1.2px currentColor' }}
+          >
+            <span className="text-[#0F172A]" style={{ WebkitTextStrokeColor: '#0F172A' }}>Feeling</span>
+            <span className="text-[#E91E63] ml-1" style={{ WebkitTextStrokeColor: '#E91E63' }}>Snap</span>
+          </h1>
+        </Link>
+      </header>
+
+      <main className="max-w-xl mx-auto px-6 py-12">
+        {/* 수정된 목록 경로와 문구 */}
+        <Link href="/articles" className="text-[#E91E63] font-bold mb-8 inline-block hover:underline">
           ← Insights 목록으로 돌아가기
         </Link>
-        
-        <header className="mb-12">
-          <h1 className="text-3xl md:text-4xl font-black text-white tracking-tighter mb-4 leading-tight">
-            의사결정에도 골든타임이 있다: <br/>생체 리듬에 따른 최적의 판단 시간
-          </h1>
-          <p className="text-slate-500 font-medium">작성일: 2026. 01. 22 • 카테고리: 시간 생물학 및 성과 심리학</p>
-        </header>
 
-        <section className="space-y-6 text-lg">
-          <p>
-            중요한 계약이나 인생의 갈림길에서 내리는 결정, 혹시 '언제' 내리는지가 결과에 영향을 미친다는 사실을 알고 계셨나요? 심리학자와 생물학자들의 연구에 따르면, 우리의 인지 능력은 하루 24시간 동안 일정한 패턴을 그리며 오르내립니다. 이를 무시하고 결정을 내리는 것은 마치 안개가 자욱한 날 고속도로를 달리는 것과 같습니다.
-          </p>
+        <article className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <header className="mb-10">
+            {/* 카테고리 태그 */}
+            <div className="mb-4">
+              <span className="bg-pink-50 text-[#E91E63] text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border border-pink-100">
+                Relationship & Defense
+              </span>
+            </div>
+            
+            <h2 className="text-3xl md:text-4xl font-black text-[#0F172A] leading-tight tracking-tighter">
+              내 감정이 의심될 때: <br/>정서적 조종 '가스라이팅' 식별법
+            </h2>
+            <p className="text-slate-400 mt-4 font-medium text-sm">작성일: 2026. 01. 24 • 5 min read</p>
+          </header>
 
-          <h2 className="text-2xl font-bold text-white mt-12 mb-4">1. 크로노타입(Chronotype): 사자형 vs 올빼미형</h2>
-          <p>
-            사람마다 에너지가 정점에 도달하는 시간은 다릅니다. 이를 '크로노타입'이라고 합니다. 
-          </p>
-          <ul className="list-disc pl-6 space-y-3">
-            <li><strong>아침형(사자형):</strong> 기상 직후부터 정오까지 논리적 사고와 분석 능력이 최고조에 달합니다. 중대한 비즈니스 결정은 오전에 하는 것이 유리합니다.</li>
-            <li><strong>저녁형(올빼미형):</strong> 오전에는 인지 효율이 낮으나, 오후 늦게나 밤이 될수록 창의성과 문제 해결 능력이 활성화됩니다.</li>
-          </ul>
-
-          <h2 className="text-2xl font-bold text-white mt-12 mb-4">2. 오전의 '분석' vs 오후의 '창의'</h2>
-          <p>
-            일반적으로 인간의 뇌는 잠에서 깨어난 지 몇 시간 후 가장 높은 '기민함'을 유지합니다. 이때는 논리적인 허점을 찾아내거나 숫자를 다루는 업무에 적합합니다. 반대로 오후 2~4시 사이에는 인지적 에너지가 일시적으로 하락하는 '오후 슬럼프'가 찾아옵니다. 흥미롭게도 이 시기에는 뇌의 억제력이 약해져 오히려 고정관념에서 벗어난 창의적인 아이디어가 더 잘 나오기도 합니다.
-          </p>
-
-          <h2 className="text-2xl font-bold text-white mt-12 mb-4">3. 밤늦은 시간의 결정이 위험한 이유</h2>
-          <p>
-            밤이 깊어질수록 전두엽의 기능은 퇴화하고 감정을 담당하는 편도체의 목소리가 커집니다. 밤에 쓴 편지가 다음 날 아침 오글거리는 이유가 바로 이것입니다. '결정 피로'가 극에 달한 밤에는 복잡한 인생의 결정을 내리기보다, 잠을 통해 뇌를 청소(Glymphatic system)하고 다음 날 아침의 명료함을 기다리는 것이 현명합니다.
-          </p>
-
-          <div className="bg-slate-900 border-l-4 border-[#5D5FEF] p-6 my-10">
-            <p className="italic">
-              "최악의 결정은 가장 지쳤을 때 내려지고, 최선의 결정은 가장 맑을 때 내려집니다."
+          <section className="space-y-8 text-lg text-slate-600 leading-relaxed font-medium">
+            <p className="break-keep">
+              "네가 너무 예민한 거 아니야?", "다 너 잘되라고 하는 소리야." 이런 말들을 들으며 어느 순간 나의 판단력이 흐려지고 상대방의 말이 진리처럼 느껴진다면, 당신은 <strong>가스라이팅(Gaslighting)</strong>의 피해를 입고 있을 가능성이 큽니다.
             </p>
-          </div>
 
-          <h2 className="text-2xl font-bold text-white mt-12 mb-4">결론: 시간의 흐름을 타는 지혜</h2>
-          <p>
-            자신의 생체 시계가 언제 가장 날카로운지 파악하십시오. 에너지가 부족한 시간에 억지로 답을 찾으려 고군분투하는 것은 효율을 떨어뜨릴 뿐입니다. 때로는 시간을 기다리는 것 자체가 훌륭한 전략이 됩니다.
-          </p>
-          <p className="font-bold text-white">
-            Clarity Room은 당신의 인지적 밀도를 분석하여 지금이 판단을 내리기에 적절한 상태인지 시각적으로 보여줍니다. 뇌가 보내는 신호를 무시하지 마세요. 가장 명료한 순간에 가장 최선의 결정을 내릴 수 있도록 Clarity Room이 돕겠습니다.
-          </p>
-        </section>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">1. 가스라이팅이란 무엇인가?</h3>
+            <p className="break-keep">
+              상황을 조작해 타인이 자기 자신을 의심하게 만들고, 판단력을 상실하게 하여 정서적으로 지배하는 행위를 말합니다. 친밀한 연인, 부모, 혹은 직장 동료 사이에서 교묘하게 일어나기 때문에 알아차리기가 매우 어렵습니다.
+            </p>
 
-        <footer className="mt-20 pt-10 border-t border-slate-800 text-center">
-          <Link href="/">
-            <button className="bg-[#5D5FEF] text-white px-8 py-4 rounded-2xl font-black hover:scale-105 transition-transform">
-              지금 내 판단력 점수 확인하기 🚀
-            </button>
-          </Link>
-        </footer>
-      </article>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">2. 내가 겪고 있다는 신호</h3>
+            <ul className="space-y-4">
+              <li className="flex items-start border-b border-slate-50 pb-2">
+                <span className="text-[#E91E63] mr-2 font-bold">•</span>
+                <span>상대방에게 끊임없이 "미안해"라고 사과하게 된다.</span>
+              </li>
+              <li className="flex items-start border-b border-slate-50 pb-2">
+                <span className="text-[#E91E63] mr-2 font-bold">•</span>
+                <span>내가 너무 예민하고 이상한 사람인 것 같아 자책한다.</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-[#E91E63] mr-2 font-bold">•</span>
+                <span>간단한 결정조차 스스로 내리기 두려워진다.</span>
+              </li>
+            </ul>
+
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">3. 정서적 지배에서 벗어나는 법</h3>
+            <p className="break-keep">
+              가장 중요한 것은 <strong>감정 기록하기</strong>입니다. 당시의 상황과 내 감정을 사실 그대로 적어두면 나중에 상대방이 상황을 왜곡할 때 객관적인 증거가 됩니다. 또한 물리적·심리적 거리를 두어 상대방의 판단이 나의 자아를 잠식하지 않도록 경계를 세워야 합니다.
+            </p>
+
+            {/* 인용구 박스 */}
+            <div className="bg-slate-50 border-l-4 border-[#E91E63] p-8 my-10 rounded-r-[32px] shadow-sm">
+              <p className="italic text-[#0F172A] text-xl font-bold leading-relaxed">
+                "당신의 감정은 당신만의 것입니다. <br/>누구도 그것을 틀렸다고 말할 권리는 없습니다."
+              </p>
+            </div>
+
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">결론: Feeling Snap의 제언</h3>
+            <p className="break-keep">
+              가스라이팅에서 벗어나는 가장 강력한 도구는 '나의 주관을 되찾는 기록'입니다. 혼란스러운 마음을 그대로 방치하지 마세요.
+            </p>
+            <p className="font-bold text-[#0F172A] p-6 bg-pink-50/50 rounded-2xl border border-pink-100">
+              Feeling Snap에서 지금 느낀 감정을 투명하게 기록해 보세요. AI가 당신의 감정 패턴을 분석하여, 타인의 목소리가 아닌 당신 내면의 진실한 목소리를 들을 수 있도록 돕겠습니다.
+            </p>
+          </section>
+
+          {/* 하단 CTA 버튼 */}
+          <footer className="mt-20 pt-10 border-t border-slate-100 text-center">
+            <Link href="/">
+              <button className="w-full max-w-xs bg-[#1A1F2C] text-white py-6 rounded-[24px] font-bold text-xl shadow-xl hover:scale-105 active:scale-95 transition-all">
+                내 감정 주권 되찾기 🛡️
+              </button>
+            </Link>
+          </footer>
+        </article>
+      </main>
     </div>
   );
 }

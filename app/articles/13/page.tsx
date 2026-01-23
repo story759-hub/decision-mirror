@@ -1,68 +1,92 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 
 export default function ArticleThirteen() {
   return (
-    <div className="min-h-screen bg-[#0F172A] text-slate-300 font-sans leading-relaxed">
-      <article className="max-w-2xl mx-auto px-6 py-20">
-        <Link href="/articles" className="text-[#5D5FEF] font-bold mb-8 inline-block hover:underline">
+    <div className="min-h-screen bg-white text-slate-900 font-sans pb-20 overflow-x-hidden">
+      {/* 메인 로고 디자인 유지 */}
+      <header className="max-w-xl mx-auto pt-14 pb-8 text-center border-b border-slate-50">
+        <Link href="/">
+          <h1 
+            className="text-4xl font-black tracking-tighter flex justify-center items-center cursor-pointer" 
+            style={{ WebkitTextStroke: '1.2px currentColor' }}
+          >
+            <span className="text-[#0F172A]" style={{ WebkitTextStrokeColor: '#0F172A' }}>Feeling</span>
+            <span className="text-[#E91E63] ml-1" style={{ WebkitTextStrokeColor: '#E91E63' }}>Snap</span>
+          </h1>
+        </Link>
+      </header>
+
+      <main className="max-w-xl mx-auto px-6 py-12">
+        {/* 수정된 목록 경로와 문구 */}
+        <Link href="/articles" className="text-[#E91E63] font-bold mb-8 inline-block hover:underline">
           ← Insights 목록으로 돌아가기
         </Link>
-        
-        <header className="mb-12">
-          <h1 className="text-3xl md:text-4xl font-black text-white tracking-tighter mb-4 leading-tight">
-            성장형 마인드셋: <br/>실패를 결정의 끝이 아닌 과정으로 보는 법
-          </h1>
-          <p className="text-slate-500 font-medium">작성일: 2026. 01. 22 • 카테고리: 교육 심리학 및 자기계발</p>
-        </header>
 
-        <section className="space-y-6 text-lg">
-          <p>
-            똑같은 실수나 실패를 마주했을 때, 어떤 사람은 좌절하며 포기하고 어떤 사람은 이를 발판 삼아 다시 일어섭니다. 이 차이를 만드는 결정적인 요소는 지능이나 환경이 아닌 **'마인드셋(Mindset)'**에 있습니다. 스탠퍼드 대학교의 심리학자 캐럴 드웩 교수는 인간의 사고방식을 '고정형'과 '성장형' 두 가지로 정의했습니다.
-          </p>
+        <article className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <header className="mb-10">
+            {/* 카테고리 태그 */}
+            <div className="mb-4">
+              <span className="bg-pink-50 text-[#E91E63] text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border border-pink-100">
+                Self-Love & Psychology
+              </span>
+            </div>
+            
+            <h2 className="text-3xl md:text-4xl font-black text-[#0F172A] leading-tight tracking-tighter">
+              자존감보다 중요한 '자기 자비': <br/>자신에게 친절해지는 연습
+            </h2>
+            <p className="text-slate-400 mt-4 font-medium text-sm">작성일: 2026. 01. 24 • 4 min read</p>
+          </header>
 
-          <h2 className="text-2xl font-bold text-white mt-12 mb-4">1. 고정형 마인드셋 vs 성장형 마인드셋</h2>
-          <p>
-            자신의 능력이 태어날 때부터 정해져 있다고 믿는 것이 **고정형 마인드셋(Fixed Mindset)**입니다. 반면, 노력과 전략을 통해 지능과 능력을 계속해서 키울 수 있다고 믿는 것이 **성장형 마인드셋(Growth Mindset)**입니다. 
-          </p>
-          <ul className="list-disc pl-6 space-y-3">
-            <li><strong>고정형:</strong> 실패를 자신의 무능함을 증명하는 사건으로 받아들여 도전을 피합니다.</li>
-            <li><strong>성장형:</strong> 실패를 학습의 데이터로 여기며, 더 나은 방법을 찾기 위한 신호로 해석합니다.</li>
-          </ul>
-
-          <h2 className="text-2xl font-bold text-white mt-12 mb-4">2. 의사결정에서의 마인드셋 차이</h2>
-          <p>
-            성장형 마인드셋을 가진 사람은 의사결정을 내릴 때 결과에 대한 과도한 압박감을 덜어낼 수 있습니다. "이 결정이 틀리면 내 인생은 끝이야"가 아니라 "이 결정이 기대와 다른 결과를 가져오더라도 나는 무언가를 배울 것이고, 다음에는 더 나은 결정을 내릴 수 있어"라고 생각하기 때문입니다. 이러한 태도는 결정 마비를 방지하고 과감한 실행력을 부여합니다.
-          </p>
-
-          <h2 className="text-2xl font-bold text-white mt-12 mb-4">3. '아직(Not Yet)'의 힘</h2>
-          <p>
-            드웩 교수는 '아직 아님'이라는 단어의 힘을 강조합니다. 지금 당장 결과가 나오지 않거나 판단이 서지 않는 상태를 '실패'로 규정짓는 대신, '아직 도달하지 못한 과정'으로 인식하는 것입니다. 이 작은 관점의 변화가 뇌의 인지 구조를 방어적인 상태에서 탐색적인 상태로 전환시킵니다.
-          </p>
-
-          <div className="bg-slate-900 border-l-4 border-[#5D5FEF] p-6 my-10">
-            <p className="italic">
-              "실패는 당신의 정체성이 아니라, 당신이 풀고 있는 퍼즐의 일부일 뿐입니다."
+          <section className="space-y-8 text-lg text-slate-600 leading-relaxed font-medium">
+            <p className="break-keep">
+              우리는 흔히 '자존감을 높여야 한다'는 압박 속에 삽니다. 하지만 자존감은 타인과의 비교나 성취에 따라 끊임없이 흔들리기 마련입니다. 심리학자 크리스틴 네프는 그 대안으로 <strong>'자기 자비(Self-Compassion)'</strong>를 제안합니다. 이는 잘났을 때만 사랑하는 것이 아니라, 힘들고 실수했을 때의 나를 따뜻하게 안아주는 능력입니다.
             </p>
-          </div>
 
-          <h2 className="text-2xl font-bold text-white mt-12 mb-4">결론: 배움을 위한 선택을 하십시오</h2>
-          <p>
-            완벽한 결정을 내리려고 애쓰기보다, 당신을 성장시킬 수 있는 선택을 하십시오. 결과가 좋다면 그것대로 기쁜 일이고, 결과가 나쁘다면 당신은 더 강력한 '경험치'를 얻게 될 것입니다. 성장형 마인드셋으로 무장할 때 의사결정은 두려움이 아닌 성장을 위한 도구가 됩니다.
-          </p>
-          <p className="font-bold text-white">
-            Clarity Room은 당신의 현재 마인드셋이 어디를 향하고 있는지 분석합니다. 당신의 고민 속에 숨겨진 고정형 사고의 패턴을 찾아내고, 이를 성장형 질문으로 전환할 수 있도록 구조화해 드립니다. 지금 당신의 한계를 배움의 기회로 바꿔보세요.
-          </p>
-        </section>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">1. 자기 자비의 3요소</h3>
+            <ul className="space-y-4">
+              <li className="flex items-start border-b border-slate-50 pb-2">
+                <span className="text-[#E91E63] mr-2 font-bold">•</span>
+                <span><strong>자기 친절(Self-Kindness):</strong> 실수를 저질렀을 때 비난 대신 따뜻한 위로를 건네는 것.</span>
+              </li>
+              <li className="flex items-start border-b border-slate-50 pb-2">
+                <span className="text-[#E91E63] mr-2 font-bold">•</span>
+                <span><strong>보편적 인류애(Common Humanity):</strong> 고통은 나만 겪는 것이 아니라 인간이라면 누구나 겪는 과정임을 이해하는 것.</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-[#E91E63] mr-2 font-bold">•</span>
+                <span><strong>마음챙김(Mindfulness):</strong> 감정을 과장하거나 억압하지 않고 있는 그대로 관찰하는 것.</span>
+              </li>
+            </ul>
 
-        <footer className="mt-20 pt-10 border-t border-slate-800 text-center">
-          <Link href="/">
-            <button className="bg-[#5D5FEF] text-white px-8 py-4 rounded-2xl font-black hover:scale-105 transition-transform">
-              성장형 사고로 전환하기 🚀
-            </button>
-          </Link>
-        </footer>
-      </article>
+            {/* 인용구 박스 */}
+            <div className="bg-slate-50 border-l-4 border-[#E91E63] p-8 my-10 rounded-r-[32px] shadow-sm">
+              <p className="italic text-[#0F172A] text-xl font-bold leading-relaxed">
+                "당신이 가장 친한 친구에게 결코 하지 않을 비난을, <br/>왜 당신 자신에게는 하고 있나요?"
+              </p>
+            </div>
+
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">결론: Feeling Snap의 제언</h3>
+            <p className="break-keep">
+              오늘 당신의 실수를 비난의 화살로 바꾸지 마세요. 마음의 상처를 돌보는 일은 나약함이 아니라 가장 큰 용기입니다.
+            </p>
+            <p className="font-bold text-[#0F172A] p-6 bg-pink-50/50 rounded-2xl border border-pink-100">
+              Feeling Snap에서 오늘 당신의 실수를 기록해 보세요. AI가 비난 대신 따뜻한 공감의 시선으로 당신의 하루를 재해석해 드릴 것입니다.
+            </p>
+          </section>
+
+          {/* 하단 CTA 버튼 */}
+          <footer className="mt-20 pt-10 border-t border-slate-100 text-center">
+            <Link href="/">
+              <button className="w-full max-w-xs bg-[#1A1F2C] text-white py-6 rounded-[24px] font-bold text-xl shadow-xl hover:scale-105 active:scale-95 transition-all">
+                나에게 친절해지기 🤍
+              </button>
+            </Link>
+          </footer>
+        </article>
+      </main>
     </div>
   );
 }

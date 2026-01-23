@@ -25,28 +25,39 @@ export async function POST(req: Request) {
       }
     });
 
-    // 2. ONLY JSON 강제 프롬프트 (해결책 1 적용)
-    const prompt = `
-      SYSTEM: You are a JSON generator. Respond ONLY with valid JSON. 
-      No markdown, no backticks, no explanations.
+// 2. AI에게 전달할 강화된 프롬프트 (중복 방지 + 선곡 규칙 추가)
+const prompt = `
+      SYSTEM: You are a professional psychological counselor and music therapist. 
+      Respond ONLY with valid JSON. No markdown, no backticks, no explanations.
+
+      AVAILABLE EMOTION KEYS (MUST USE ONLY THESE):
+      [joy, sadness, anger, anxiety, neutral, regret]
+
+      RULES:
+      1. STRICT KEY LIMIT: Use ONLY keys from the AVAILABLE EMOTION KEYS list. NEVER create new keys like 'loneliness' or 'fear'.
+      2. UNIQUE KEYS: Each key in the "mix" array must be unique. Do not repeat the same key.
+      3. DYNAMIC RATES: Determine realistic emotional proportions based on the input text.
+      4. PERCENTAGE: Total sum of "rate" values must be exactly 100.
+      5. CONTENT: 
+         - "description": Warm empathy in Korean, strictly under 75 characters (excluding spaces).
+         - "song": Choose a song that matches the user's emotional depth. "Artist - Title" format.
 
       INPUT:
       Main Emotion: ${mainEmotion}
       Reason: ${reason}
       Text: "${text}"
 
-      OUTPUT FORMAT (Strictly JSON, Language: Korean):
+      OUTPUT FORMAT (Strictly JSON Example):
       {
         "mix": [
           { "key": "${mainEmotion}", "rate": 70 },
           { "key": "neutral", "rate": 20 },
-          { "key": "joy", "rate": 10 }
+          { "key": "regret", "rate": 10 }
         ],
-        "description": "공감과 위로의 메시지 2문장",
+        "description": "메시지 내용",
         "song": "가수 - 제목"
       }
     `;
-
     const result = await model.generateContent(prompt);
     const rawText = result.response.text();
     

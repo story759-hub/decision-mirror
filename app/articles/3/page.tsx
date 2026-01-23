@@ -1,69 +1,115 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 
 export default function ArticleThree() {
   return (
-    <div className="min-h-screen bg-[#0F172A] text-slate-300 font-sans leading-relaxed">
-      <article className="max-w-2xl mx-auto px-6 py-20">
-        <Link href="/articles" className="text-[#5D5FEF] font-bold mb-8 inline-block hover:underline">
+    <div className="min-h-screen bg-white text-slate-900 font-sans pb-20 overflow-x-hidden">
+      {/* 메인 로고 디자인 유지 */}
+      <header className="max-w-xl mx-auto pt-14 pb-8 text-center border-b border-slate-50">
+        <Link href="/">
+          <h1 
+            className="text-4xl font-black tracking-tighter flex justify-center items-center cursor-pointer" 
+            style={{ WebkitTextStroke: '1.2px currentColor' }}
+          >
+            <span className="text-[#0F172A]" style={{ WebkitTextStrokeColor: '#0F172A' }}>Feeling</span>
+            <span className="text-[#E91E63] ml-1" style={{ WebkitTextStrokeColor: '#E91E63' }}>Snap</span>
+          </h1>
+        </Link>
+      </header>
+
+      <main className="max-w-xl mx-auto px-6 py-12">
+        {/* 수정된 목록 경로와 문구 */}
+        <Link href="/articles" className="text-[#E91E63] font-bold mb-8 inline-block hover:underline">
           ← Insights 목록으로 돌아가기
         </Link>
-        
-        <header className="mb-12">
-          <h1 className="text-3xl md:text-4xl font-black text-white tracking-tighter mb-4 leading-tight">
-            매몰 비용 오류: <br/>과거에 쏟은 시간이 당신의 발목을 잡고 있다면
-          </h1>
-          <p className="text-slate-500 font-medium">작성일: 2026. 01. 22 • 카테고리: 행동 경제학</p>
-        </header>
 
-        <section className="space-y-6 text-lg">
-          <p>
-            "지금까지 부은 돈이 얼마인데...", "여기에 들인 시간이 아까워서 못 그만두겠어." 우리가 무언가를 포기해야 할 시점에 흔히 내뱉는 말들입니다. 하지만 심리학과 경제학에서는 이를 **'매몰 비용 오류(Sunk Cost Fallacy)'**라고 부르며, 합리적인 의사결정을 방해하는 가장 위험한 심리적 함정으로 규정합니다.
-          </p>
+        <article className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <header className="mb-10">
+            {/* 카테고리 태그 */}
+            <div className="mb-4">
+              <span className="bg-pink-50 text-[#E91E63] text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border border-pink-100">
+                Brain Science
+              </span>
+            </div>
+            
+            <h2 className="text-3xl md:text-4xl font-black text-[#0F172A] leading-tight tracking-tighter">
+              6초의 기적: 욱하는 화를 다스리는 <br/>뇌 과학적 메커니즘
+            </h2>
+            <p className="text-slate-400 mt-4 font-medium text-sm">작성일: 2026. 01. 24 • 6 min read</p>
+          </header>
 
-          <h2 className="text-2xl font-bold text-white mt-12 mb-4">1. 매몰 비용(Sunk Cost)이란 무엇인가?</h2>
-          <p>
-            매몰 비용이란 이미 지출되어 어떤 방법을 써도 다시 회수할 수 없는 비용을 의미합니다. 돈, 시간, 감정적 에너지 등이 모두 포함됩니다. 합리적인 결정이라면 '미래에 얻을 이익'과 '추가로 들 비용'만을 계산해야 하지만, 인간은 본능적으로 **손실 회피(Loss Aversion)** 성향을 가지고 있어 이미 잃어버린 것에 집착하게 됩니다.
-          </p>
-
-          <h2 className="text-2xl font-bold text-white mt-12 mb-4">2. 콩코드 오류(Concorde Fallacy)</h2>
-          <p>
-            이 현상의 대표적인 사례는 초음속 여객기 '콩코드' 사업입니다. 영국과 프랑스 정부는 사업성이 없다는 사실을 중도에 깨달았음에도 불구하고, 이미 투입된 엄청난 예산이 아까워 사업을 강행했습니다. 결국 천문학적인 적자를 내고 나서야 멈췄습니다. 
-          </p>
-          <ul className="list-disc pl-6 space-y-3">
-            <li><strong>주식 투자:</strong> 하락장에서도 "본전은 찾아야지"라며 매도하지 못하는 심리.</li>
-            <li><strong>인간관계:</strong> 맞지 않는 상대임을 알면서도 "함께한 세월" 때문에 이별을 미루는 심리.</li>
-            <li><strong>진로 결정:</strong> 전공이 적성에 맞지 않지만 "공부한 게 아까워서" 진로를 바꾸지 못하는 심리.</li>
-          </ul>
-
-          <h2 className="text-2xl font-bold text-white mt-12 mb-4">3. 과거의 나로부터 독립하기</h2>
-          <p>
-            매몰 비용 오류에서 벗어나는 유일한 방법은 **'제로 베이스(Zero-base)'** 사고입니다. "만약 내가 오늘 이 일을 처음 시작한다면, 그래도 선택할 것인가?"라고 자문해 보십시오. 과거의 투자와 상관없이 현재 시점에서 미래 가치가 없다면, 과감히 '손절'하는 것이 가장 이익이 큰 결정입니다.
-          </p>
-
-          <div className="bg-slate-900 border-l-4 border-[#5D5FEF] p-6 my-10">
-            <p className="italic">
-              "합리적인 인간은 지나간 어제를 계산하지 않습니다. 오직 오늘 이후의 가치만을 계산합니다."
+          <section className="space-y-8 text-lg text-slate-600 leading-relaxed font-medium">
+            <p className="break-keep">
+              누구나 한 번쯤은 울컥하는 감정을 참지 못해 후회할 말을 내뱉거나 행동한 적이 있을 것입니다. 분노는 불꽃처럼 순식간에 타오르지만, 그 짧은 찰나를 다스리는 것만으로도 우리는 수많은 갈등과 자책에서 벗어날 수 있습니다. 뇌 과학이 증명하는 분노 조절의 핵심은 바로 <strong>'6초'</strong>에 있습니다.
             </p>
-          </div>
 
-          <h2 className="text-2xl font-bold text-white mt-12 mb-4">결론: 비워내야 채울 수 있습니다</h2>
-          <p>
-            머릿속이 복잡한 이유는 어쩌면 버려야 할 것을 버리지 못하고 있기 때문일지도 모릅니다. 아까운 마음이 드는 것은 인간의 당연한 본능이지만, 그 본능이 당신의 미래까지 망치게 두어서는 안 됩니다.
-          </p>
-          <p className="font-bold text-white">
-            Clarity Room은 당신이 쥐고 있는 복잡한 감정 중 무엇이 '이미 지나간 비용'인지 냉정하게 비추어 줍니다. 지금 당신의 고민을 입력하고, 현재 유지하고 있는 상태의 밀도를 객관적으로 확인해 보세요.
-          </p>
-        </section>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">1. 감정의 뇌 vs 이성의 뇌</h3>
+            <p className="break-keep">
+              우리가 분노를 느낄 때, 뇌의 편도체(Amygdala)는 비상경보를 울립니다. 이는 생존을 위한 본능적인 반응이지만, 동시에 이성적인 판단을 담당하는 전두엽(Prefrontal Cortex)의 기능을 일시적으로 마비시킵니다. 이를 심리학에서는 <strong>'편도체 납치(Amygdala Hijack)'</strong>라고 부릅니다.
+            </p>
 
-        <footer className="mt-20 pt-10 border-t border-slate-800 text-center">
-          <Link href="/">
-            <button className="bg-[#5D5FEF] text-white px-8 py-4 rounded-2xl font-black hover:scale-105 transition-transform">
-              미련 없이 정리 시작하기 🚀
-            </button>
-          </Link>
-        </footer>
-      </article>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">2. 왜 하필 '6초'인가?</h3>
+            <p className="break-keep">
+              편도체가 발화하여 온몸에 분노 호르몬을 뿌리고, 다시 전두엽이 상황을 파악하여 제어력을 회복하는 데 걸리는 최소한의 시간이 바로 6초입니다. 
+            </p>
+            <ul className="space-y-4">
+              <li className="flex items-start">
+                <span className="text-[#E91E63] mr-2 font-bold">•</span>
+                <span><strong>초기 2초:</strong> 강렬한 감정 에너지가 분출되는 시점입니다.</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-[#E91E63] mr-2 font-bold">•</span>
+                <span><strong>중간 2초:</strong> 심장 박동이 빨라지고 신체적 반응이 정점에 달합니다.</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-[#E91E63] mr-2 font-bold">•</span>
+                <span><strong>마지막 2초:</strong> 전두엽이 활성화되며 "이게 정말 화낼 일인가?"라고 묻기 시작합니다.</span>
+              </li>
+            </ul>
+
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">3. 6초를 벌어주는 실전 기술</h3>
+            <p className="break-keep">
+              화가 치밀어 오를 때 단순히 참으려고 하면 오히려 역효과가 날 수 있습니다. 대신 뇌의 주의를 다른 곳으로 돌리는 전략이 필요합니다.
+            </p>
+            <ul className="space-y-4">
+              <li className="flex items-start">
+                <span className="text-[#E91E63] mr-2 font-bold">•</span>
+                <span><strong>숫자 세기:</strong> 1부터 6까지 천천히 숫자를 세며 호흡합니다.</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-[#E91E63] mr-2 font-bold">•</span>
+                <span><strong>객관적 묘사:</strong> "나는 지금 화가 났다"라고 자신의 상태를 제3자처럼 관찰합니다.</span>
+              </li>
+            </ul>
+
+            {/* 인용구 박스 */}
+            <div className="bg-slate-50 border-l-4 border-[#E91E63] p-8 my-10 rounded-r-[32px] shadow-sm">
+              <p className="italic text-[#0F172A] text-xl font-bold leading-relaxed">
+                "분노는 다른 사람에게 던지려고 뜨거운 석탄을 손에 쥐는 것과 같습니다. <br/>결국 화상을 입는 것은 자기 자신입니다."
+              </p>
+            </div>
+
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">결론: Feeling Snap의 제언</h3>
+            <p className="break-keep">
+              분노는 무조건 나쁜 것이 아닙니다. 하지만 조절되지 않은 분노는 당신의 에너지를 갉아먹습니다. 욱하는 순간이 찾아온다면, 바로 대응하기보다 그 마음을 짧게라도 기록해 보세요. 
+            </p>
+            <p className="font-bold text-[#0F172A] p-6 bg-pink-50/50 rounded-2xl border border-pink-100">
+              지금 Feeling Snap에 당신의 답답한 마음을 쏟아내 보세요. AI 분석이 당신의 감정 온도를 낮춰주고, 전두엽이 다시 명확한 판단을 내릴 수 있도록 도와줄 것입니다.
+            </p>
+          </section>
+
+          {/* 하단 CTA 버튼 */}
+          <footer className="mt-20 pt-10 border-t border-slate-100 text-center">
+            <Link href="/">
+              <button className="w-full max-w-xs bg-[#1A1F2C] text-white py-6 rounded-[24px] font-bold text-xl shadow-xl hover:scale-105 active:scale-95 transition-all">
+                내 감정 온도 낮추러 가기 🌡️
+              </button>
+            </Link>
+          </footer>
+        </article>
+      </main>
     </div>
   );
 }

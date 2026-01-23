@@ -1,69 +1,101 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 
 export default function ArticleFive() {
   return (
-    <div className="min-h-screen bg-[#0F172A] text-slate-300 font-sans leading-relaxed">
-      <article className="max-w-2xl mx-auto px-6 py-20">
-        <Link href="/articles" className="text-[#5D5FEF] font-bold mb-8 inline-block hover:underline">
+    <div className="min-h-screen bg-white text-slate-900 font-sans pb-20 overflow-x-hidden">
+      {/* 메인 로고 디자인 유지 */}
+      <header className="max-w-xl mx-auto pt-14 pb-8 text-center border-b border-slate-50">
+        <Link href="/">
+          <h1 
+            className="text-4xl font-black tracking-tighter flex justify-center items-center cursor-pointer" 
+            style={{ WebkitTextStroke: '1.2px currentColor' }}
+          >
+            <span className="text-[#0F172A]" style={{ WebkitTextStrokeColor: '#0F172A' }}>Feeling</span>
+            <span className="text-[#E91E63] ml-1" style={{ WebkitTextStrokeColor: '#E91E63' }}>Snap</span>
+          </h1>
+        </Link>
+      </header>
+
+      <main className="max-w-xl mx-auto px-6 py-12">
+        {/* 수정된 목록 경로와 문구 */}
+        <Link href="/articles" className="text-[#E91E63] font-bold mb-8 inline-block hover:underline">
           ← Insights 목록으로 돌아가기
         </Link>
-        
-        <header className="mb-12">
-          <h1 className="text-3xl md:text-4xl font-black text-white tracking-tighter mb-4 leading-tight">
-            번아웃과 결정력: <br/>지친 뇌가 잘못된 선택을 내리는 과학적 이유
-          </h1>
-          <p className="text-slate-500 font-medium">작성일: 2026. 01. 22 • 카테고리: 인지 심리학 및 멘탈케어</p>
-        </header>
 
-        <section className="space-y-6 text-lg">
-          <p>
-            업무에 치이고 인간관계에 에너지를 쏟다 보면 어느 순간 손가락 하나 까딱하기 싫은 상태가 찾아옵니다. 바로 **'번아웃(Burnout)'**입니다. 하지만 번아웃의 가장 무서운 점은 단순히 의욕이 사라지는 것이 아니라, 우리의 **'의사결정 능력'**을 심각하게 훼손한다는 데 있습니다.
-          </p>
+        <article className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <header className="mb-10">
+            {/* 카테고리 태그 */}
+            <div className="mb-4">
+              <span className="bg-pink-50 text-[#E91E63] text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border border-pink-100">
+                Happiness & Brain
+              </span>
+            </div>
+            
+            <h2 className="text-3xl md:text-4xl font-black text-[#0F172A] leading-tight tracking-tighter">
+              도파민과 세로토닌의 차이: <br/>지속 가능한 행복을 찾는 법
+            </h2>
+            <p className="text-slate-400 mt-4 font-medium text-sm">작성일: 2026. 01. 24 • 5 min read</p>
+          </header>
 
-          <h2 className="text-2xl font-bold text-white mt-12 mb-4">1. 결정 피로(Decision Fatigue)의 누적</h2>
-          <p>
-            인간의 의지력은 무한한 자원이 아닙니다. 마치 스마트폰 배터리처럼 하루 동안 쓸 수 있는 양이 정해져 있습니다. 아침부터 밤까지 수많은 선택을 거치며 배터리가 소진되면, 뇌는 에너지를 아끼기 위해 '가장 게으른 선택'을 하기 시작합니다. 이를 **결정 피로**라고 합니다. 번아웃 상태는 이 배터리 자체가 방전되어 충전되지 않는 상태와 같습니다.
-          </p>
-
-          <h2 className="text-2xl font-bold text-white mt-12 mb-4">2. 전두엽의 기능 저하와 충동적 선택</h2>
-          <p>
-            이성적 판단을 담당하는 뇌의 부위인 **전두엽**은 스트레스에 매우 취약합니다. 번아웃이 오면 전두엽의 활성도가 낮아지고, 대신 감정과 본능을 담당하는 편도체가 주도권을 잡게 됩니다. 
-          </p>
-          <ul className="list-disc pl-6 space-y-3">
-            <li><strong>회피 전략:</strong> 중요한 결정을 뒤로 미루거나 외면합니다.</li>
-            <li><strong>충동적 결정:</strong> 장기적인 이득보다 당장의 편안함을 주는 선택을 합니다.</li>
-            <li><strong>인지적 유연성 상실:</strong> 새로운 대안을 생각하지 못하고 기존의 관성에만 매달립니다.</li>
-          </ul>
-
-          <h2 className="text-2xl font-bold text-white mt-12 mb-4">3. 뇌를 쉬게 하는 '구조화'의 힘</h2>
-          <p>
-            번아웃 상태에서 중요한 결정을 내려야 한다면, 뇌에게 생으로 고민할 짐을 지워서는 안 됩니다. 뇌가 처리해야 할 정보를 **외부로 시각화**하고 구조화해야 합니다. 머릿속에 맴도는 막연한 불안을 텍스트로 옮기는 것만으로도 전두엽의 부담은 현저히 줄어듭니다.
-          </p>
-
-          <div className="bg-slate-900 border-l-4 border-[#5D5FEF] p-6 my-10">
-            <p className="italic">
-              "당신이 내린 최악의 선택은 능력이 부족해서가 아니라, 단지 뇌가 너무 지쳤기 때문일 수 있습니다."
+          <section className="space-y-8 text-lg text-slate-600 leading-relaxed font-medium">
+            <p className="break-keep">
+              우리는 기분이 좋을 때 흔히 "도파민 터진다"라는 표현을 씁니다. 하지만 우리가 느끼는 '기쁨'에는 두 가지 전혀 다른 얼굴이 있다는 사실을 아시나요? 강렬하지만 금방 사라지는 자극과 은은하지만 오래 지속되는 평온함, 이 두 사이의 균형을 이해하는 것이 행복의 핵심입니다.
             </p>
-          </div>
 
-          <h2 className="text-2xl font-bold text-white mt-12 mb-4">결론: 판단하기 전에 비우십시오</h2>
-          <p>
-            오늘따라 모든 선택이 버겁게 느껴진다면, 그것은 당신의 의지가 약해서가 아니라 뇌가 보내는 휴식 신호입니다. 이럴 때는 억지로 답을 찾으려 하기보다, 현재의 혼란스러운 상태를 그대로 기록하고 객관화하는 과정이 먼저 필요합니다.
-          </p>
-          <p className="font-bold text-white">
-            Clarity Room은 지친 당신의 뇌를 대신해 복잡한 생각의 밀도를 측정하고 구조를 잡아줍니다. 에너지를 소모하는 고민 대신, AI가 제안하는 선언적 스냅샷을 통해 현재 위치를 확인해 보세요.
-          </p>
-        </section>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">1. 도파민(Dopamine): 짜릿한 성취의 쾌락</h3>
+            <p className="break-keep">
+              도파민은 '보상'의 호르몬입니다. 무언가를 쟁취하거나, 새로운 자극을 받았을 때 분출됩니다. 에너지가 넘치고 흥분되는 기쁨을 주지만, 내성이 생겨 더 큰 자극을 원하게 만든다는 특징이 있습니다.
+            </p>
 
-        <footer className="mt-20 pt-10 border-t border-slate-800 text-center">
-          <Link href="/">
-            <button className="bg-[#5D5FEF] text-white px-8 py-4 rounded-2xl font-black hover:scale-105 transition-transform">
-              방전된 내 마음 진단하기 🚀
-            </button>
-          </Link>
-        </footer>
-      </article>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">2. 세로토닌(Serotonin): 은은한 존재의 행복</h3>
+            <p className="break-keep">
+              세로토닌은 '안정'의 호르몬입니다. 따뜻한 햇볕 아래 산책을 하거나, 감사함을 느낄 때 활성화됩니다. 평온하고 만족스러운 기쁨을 주며 중독성이 없고 몸과 마음의 면역력을 높여줍니다.
+            </p>
+
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">3. 행복의 골든 스코어 만드는 법</h3>
+            <p className="break-keep">
+              현대인들은 도파민 과잉의 시대에 살고 있습니다. 자극적인 쾌락 끝에 오는 무기력증을 막으려면 의도적으로 세로토닌의 비중을 높여야 합니다.
+            </p>
+            <ul className="space-y-4">
+              <li className="flex items-start">
+                <span className="text-[#E91E63] mr-2 font-bold">•</span>
+                <span><strong>느린 보상 즐기기:</strong> 즉각적인 자극 대신 독서나 요리 같은 긴 호흡의 활동하기.</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-[#E91E63] mr-2 font-bold">•</span>
+                <span><strong>작은 감사의 기록:</strong> 오늘 하루 당연했던 것들 중 좋았던 점 3가지만 적어보기.</span>
+              </li>
+            </ul>
+
+            {/* 인용구 박스 */}
+            <div className="bg-slate-50 border-l-4 border-[#E91E63] p-8 my-10 rounded-r-[32px] shadow-sm">
+              <p className="italic text-[#0F172A] text-xl font-bold leading-relaxed">
+                "행복은 자극의 강도가 아니라, <br/>평온함의 빈도에 달려 있습니다."
+              </p>
+            </div>
+
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">결론: Feeling Snap의 제언</h3>
+            <p className="break-keep">
+              지금 당신이 느끼는 기쁨이 쾌락에 가까운지, 평온에 가까운지 관찰해 보세요. 어떤 종류의 기쁨이든 그 순간을 온전히 만끽하는 것이 중요합니다.
+            </p>
+            <p className="font-bold text-[#0F172A] p-6 bg-pink-50/50 rounded-2xl border border-pink-100">
+              Feeling Snap에서 오늘의 긍정적인 감정을 기록해 보세요. 기록하는 행위 자체가 뇌의 세로토닌 수치를 높여주며, 당신의 소중한 기쁨을 더 오래 머물게 도와줄 것입니다.
+            </p>
+          </section>
+
+          {/* 하단 CTA 버튼 */}
+          <footer className="mt-20 pt-10 border-t border-slate-100 text-center">
+            <Link href="/">
+              <button className="w-full max-w-xs bg-[#1A1F2C] text-white py-6 rounded-[24px] font-bold text-xl shadow-xl hover:scale-105 active:scale-95 transition-all">
+                오늘의 기쁨 스냅 찍기 ✨
+              </button>
+            </Link>
+          </footer>
+        </article>
+      </main>
     </div>
   );
 }

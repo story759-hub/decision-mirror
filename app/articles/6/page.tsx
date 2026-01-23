@@ -1,69 +1,105 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 
 export default function ArticleSix() {
   return (
-    <div className="min-h-screen bg-[#0F172A] text-slate-300 font-sans leading-relaxed">
-      <article className="max-w-2xl mx-auto px-6 py-20">
-        <Link href="/articles" className="text-[#5D5FEF] font-bold mb-8 inline-block hover:underline">
+    <div className="min-h-screen bg-white text-slate-900 font-sans pb-20 overflow-x-hidden">
+      {/* 메인 로고 디자인 유지 */}
+      <header className="max-w-xl mx-auto pt-14 pb-8 text-center border-b border-slate-50">
+        <Link href="/">
+          <h1 
+            className="text-4xl font-black tracking-tighter flex justify-center items-center cursor-pointer" 
+            style={{ WebkitTextStroke: '1.2px currentColor' }}
+          >
+            <span className="text-[#0F172A]" style={{ WebkitTextStrokeColor: '#0F172A' }}>Feeling</span>
+            <span className="text-[#E91E63] ml-1" style={{ WebkitTextStrokeColor: '#E91E63' }}>Snap</span>
+          </h1>
+        </Link>
+      </header>
+
+      <main className="max-w-xl mx-auto px-6 py-12">
+        {/* 수정된 목록 경로와 문구 */}
+        <Link href="/articles" className="text-[#E91E63] font-bold mb-8 inline-block hover:underline">
           ← Insights 목록으로 돌아가기
         </Link>
-        
-        <header className="mb-12">
-          <h1 className="text-3xl md:text-4xl font-black text-white tracking-tighter mb-4 leading-tight">
-            메타인지 능력을 높이는 습관: <br/>내가 무엇을 모르는지 아는 것의 힘
-          </h1>
-          <p className="text-slate-500 font-medium">작성일: 2026. 01. 22 • 카테고리: 인지 심리학 및 학습 전략</p>
-        </header>
 
-        <section className="space-y-6 text-lg">
-          <p>
-            상위 0.1%의 학생들과 평범한 학생들의 가장 큰 차이점은 무엇일까요? IQ나 기억력이 아닙니다. 정답은 바로 **'메타인지(Metacognition)'**입니다. 메타인지란 '자신의 생각에 대해 생각하는 능력', 즉 내가 무엇을 알고 무엇을 모르는지를 객관적으로 파악하는 인지 능력을 말합니다.
-          </p>
+        <article className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <header className="mb-10">
+            {/* 카테고리 태그 */}
+            <div className="mb-4">
+              <span className="bg-pink-50 text-[#E91E63] text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border border-pink-100">
+                Mental Health
+              </span>
+            </div>
+            
+            <h2 className="text-3xl md:text-4xl font-black text-[#0F172A] leading-tight tracking-tighter">
+              아무것도 하기 싫을 때: <br/>번아웃이 보내는 뇌의 SOS 신호
+            </h2>
+            <p className="text-slate-400 mt-4 font-medium text-sm">작성일: 2026. 01. 24 • 5 min read</p>
+          </header>
 
-          <h2 className="text-2xl font-bold text-white mt-12 mb-4">1. 왜 메타인지가 의사결정의 핵심인가?</h2>
-          <p>
-            우리는 종종 '자신감'과 '실력'을 착각합니다. 자신이 잘 모르는 분야임에도 불구하고 잘 안다고 착각할 때(더닝 크루거 효과), 치명적인 판단 실수가 발생합니다. 메타인지가 높은 사람은 자신의 인지적 한계를 인정하기 때문에, 부족한 정보를 보충하거나 타인의 조언을 수용하는 데 유연합니다.
-          </p>
-
-          <h2 className="text-2xl font-bold text-white mt-12 mb-4">2. 메타인지를 높이는 3가지 훈련법</h2>
-          <p>
-            메타인지는 타고나는 것이 아니라 후천적인 훈련으로 충분히 강화할 수 있습니다.
-          </p>
-          <ul className="list-disc pl-6 space-y-3">
-            <li><strong>셀프 테스트와 설명하기:</strong> 누군가에게 설명할 수 없다면 그것은 모르는 것입니다. 배운 내용을 소리 내어 설명해 보십시오.</li>
-            <li><strong>인지적 거리두기:</strong> 현재의 고민을 마치 남의 일인 것처럼 3인칭 시점에서 바라보는 연습을 하십시오.</li>
-            <li><strong>기록하고 모니터링하기:</strong> 자신의 판단 과정과 결과를 글로 남겨 나중에 복기하십시오. 기록은 기억의 왜곡을 막아주는 가장 강력한 도구입니다.</li>
-          </ul>
-
-          <h2 className="text-2xl font-bold text-white mt-12 mb-4">3. '안다'는 착각에서 벗어나는 법</h2>
-          <p>
-            머릿속에만 머무르는 지식은 파편화되어 있어 정확한 형체를 알기 어렵습니다. 하지만 생각을 밖으로 꺼내어 구조화(Structuring)하면, 논리의 빈틈이 선명하게 드러납니다. 이것이 바로 전문가들이 복잡한 문제일수록 화이트보드나 종이에 적으며 사고하는 이유입니다.
-          </p>
-
-          <div className="bg-slate-900 border-l-4 border-[#5D5FEF] p-6 my-10">
-            <p className="italic">
-              "메타인지의 시작은 '나는 생각보다 나를 잘 모른다'는 정직한 고백에서 시작됩니다."
+          <section className="space-y-8 text-lg text-slate-600 leading-relaxed font-medium">
+            <p className="break-keep">
+              분명 열심히 살고 싶고 해야 할 일도 산더미인데, 정작 몸과 마음이 천근만근 무거워 손하나 까딱하기 싫은 날이 있습니다. 이는 의지력의 문제가 아니라, 당신의 뇌가 과부하를 막기 위해 스스로 전원을 내리는 <strong>'번아웃(Burnout)'</strong> 증상일 확률이 높습니다.
             </p>
-          </div>
 
-          <h2 className="text-2xl font-bold text-white mt-12 mb-4">결론: 당신의 생각을 객관화하십시오</h2>
-          <p>
-            메타인지 능력을 키우는 가장 빠른 방법은 내 생각의 '스냅샷'을 찍어보는 것입니다. 모호한 감정의 구름을 걷어내고, 현재 내 판단의 논리적 구조가 어떠한지 관찰할 때 우리는 비로소 지혜로운 결정을 내릴 수 있습니다.
-          </p>
-          <p className="font-bold text-white">
-            Clarity Room은 당신의 메타인지 엔진을 활성화하도록 돕습니다. 당신의 고민을 입력하는 행위 자체가 이미 인지적 거리두기의 시작입니다. 지금 AI가 분석한 당신의 사고 패턴을 통해, 내가 놓치고 있던 인지적 사각지대를 확인해 보세요.
-          </p>
-        </section>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">1. 뇌의 에너지가 고갈되었다는 증거</h3>
+            <p className="break-keep">
+              우리 뇌의 전두엽은 의사결정과 실행력을 담당합니다. 하지만 만성적인 스트레스와 휴식 없는 몰입은 전두엽을 지치게 만듭니다. 이때 우리 뇌는 생존을 위해 '최소 전력 모드'로 전환하며, 이것이 우리가 느끼는 <strong>'무기력증'</strong>으로 나타납니다.
+            </p>
 
-        <footer className="mt-20 pt-10 border-t border-slate-800 text-center">
-          <Link href="/">
-            <button className="bg-[#5D5FEF] text-white px-8 py-4 rounded-2xl font-black hover:scale-105 transition-transform">
-              내 생각의 메타데이터 확인하기 🚀
-            </button>
-          </Link>
-        </footer>
-      </article>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">2. 번아웃의 주요 신호 3가지</h3>
+            <p className="break-keep">
+              단순한 피로와 번아웃은 다릅니다. 다음 신호가 느껴진다면 즉시 멈춰야 합니다.
+            </p>
+            <ul className="space-y-4">
+              <li className="flex items-start">
+                <span className="text-[#E91E63] mr-2 font-bold">•</span>
+                <span><strong>정서적 고갈:</strong> 예전에는 즐겁던 일이 아무런 감흥을 주지 못합니다.</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-[#E91E63] mr-2 font-bold">•</span>
+                <span><strong>냉소적인 태도:</strong> 주변 사람이나 업무에 대해 무관심해집니다.</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-[#E91E63] mr-2 font-bold">•</span>
+                <span><strong>효능감 저하:</strong> "내가 잘할 수 있을까?"라는 자기 의심이 깊어집니다.</span>
+              </li>
+            </ul>
+
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">3. '진짜 휴식'을 위한 뇌 리셋 법</h3>
+            <p className="break-keep">
+              스마트폰을 보며 누워 있는 것은 뇌에게 휴식이 아닙니다. 하루 딱 1시간만이라도 모든 기기를 끄고 시각 정보를 차단하는 <strong>디지털 디톡스</strong>가 필요합니다. 멍하게 있는 시간을 의도적으로 만들어 뇌의 디폴트 모드 네트워크(DMN)를 정돈해야 합니다.
+            </p>
+
+            {/* 인용구 박스 */}
+            <div className="bg-slate-50 border-l-4 border-[#E91E63] p-8 my-10 rounded-r-[32px] shadow-sm">
+              <p className="italic text-[#0F172A] text-xl font-bold leading-relaxed">
+                "당신은 기계가 아닙니다. 가끔 멈추는 것은 <br/>퇴보가 아니라 다음 항해를 위한 정비 시간입니다."
+              </p>
+            </div>
+
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">결론: Feeling Snap의 제언</h3>
+            <p className="break-keep">
+              지금 아무것도 하기 싫다면, 그것은 당신이 그동안 누구보다 최선을 다해 달려왔다는 증거입니다. 자신을 채찍질하는 대신, 지금의 에너지가 몇 퍼센트 남았는지 솔직하게 대면해 보세요.
+            </p>
+            <p className="font-bold text-[#0F172A] p-6 bg-pink-50/50 rounded-2xl border border-pink-100">
+              Feeling Snap에서 지금 당신의 무기력함의 깊이를 기록해 보세요. AI가 당신의 에너지를 회복할 수 있는 작은 첫걸음을 제안해 드립니다.
+            </p>
+          </section>
+
+          {/* 하단 CTA 버튼 */}
+          <footer className="mt-20 pt-10 border-t border-slate-100 text-center">
+            <Link href="/">
+              <button className="w-full max-w-xs bg-[#1A1F2C] text-white py-6 rounded-[24px] font-bold text-xl shadow-xl hover:scale-105 active:scale-95 transition-all">
+                지친 내 마음 진단하기 🔋
+              </button>
+            </Link>
+          </footer>
+        </article>
+      </main>
     </div>
   );
 }

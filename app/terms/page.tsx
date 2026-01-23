@@ -1,5 +1,10 @@
+'use client';
+
+import { useRouter } from 'next/navigation'; // router를 사용하기 위해 추가
+
 export default function TermsOfService() {
   const lastUpdated = "2026. 01. 23";
+  const router = useRouter(); // router 인스턴스 생성
 
   return (
     <div className="min-h-screen bg-white text-slate-800 font-sans py-20 px-6">
@@ -37,6 +42,16 @@ export default function TermsOfService() {
           </p>
         </section>
 
+        {/* 요청하신 메인으로 돌아가기 버튼 영역 */}
+        <div className="pt-10 border-t border-slate-100 text-center">
+          <button 
+            onClick={() => router.push('/')}
+            className="px-8 py-4 bg-[#1A1F2C] text-white rounded-2xl font-bold shadow-lg active:scale-95 transition-transform"
+          >
+            메인으로 돌아가기
+          </button>
+        </div>
+        
         <footer className="pt-10 border-t border-slate-100 text-[11px] text-slate-400">
           <p>© 2026 Feeling Snap. All rights reserved.</p>
         </footer>

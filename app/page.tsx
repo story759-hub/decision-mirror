@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { toPng } from 'html-to-image';
+import Link from 'next/link';
 
 type Stage = 'pick' | 'resonate' | 'deep' | 'analyzing' | 'result';
 
@@ -106,7 +107,7 @@ export default function FeelingSnapV2() {
       });
       
       const aiData = await response.json();
-      const wait = Math.max(0, 5000 - (Date.now() - start));
+      const wait = Math.max(0, 7000 - (Date.now() - start));
 
       setTimeout(() => {
         if (aiData) {
@@ -145,10 +146,29 @@ export default function FeelingSnapV2() {
     }
   };
 
+  // 공유하기 기능 추가
+  const handleShare = async () => {
+    const shareData = {
+      title: 'Feeling Snap',
+      text: `오늘 나의 감정 스냅: ${resultData?.subName}\n${resultData?.description}`,
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        alert("링크가 클립보드에 복사되었습니다!");
+      }
+    } catch (err) {
+      console.log("공유 실패:", err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white text-slate-900 pb-20 overflow-x-hidden font-sans">
       <header className="max-w-xl mx-auto pt-14 pb-8 text-center">
-        {/* 로고: 기존 스타일 유지 + 텍스트 스트로크를 통해 굵기 1.5배 강화 */}
         <h1 
           className="text-5xl font-black tracking-tighter cursor-pointer flex justify-center items-center" 
           onClick={() => window.location.reload()}
@@ -176,6 +196,41 @@ export default function FeelingSnapV2() {
                 </button>
               ))}
             </div>
+
+            <section className="mt-20 border-t border-slate-100 pt-12 text-left">
+              <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center">
+                <span className="mr-2">📚</span> 감정 인사이트
+              </h2>
+              <div className="space-y-4">
+                <Link href="/articles/1" className="block group">
+                  <div className="bg-slate-50 p-6 rounded-[24px] hover:bg-slate-100 transition-all border border-transparent hover:border-slate-200">
+                    <span className="text-[10px] font-black text-[#E91E63] uppercase tracking-widest">Decision Strategy</span>
+                    <h3 className="text-lg font-bold text-slate-800 mt-1 group-hover:text-[#E91E63] transition-colors">
+                      결정 장애를 극복하는 '70% 법칙'
+                    </h3>
+                    <p className="text-sm text-slate-500 mt-2 line-clamp-2 font-medium">
+                      완벽한 타이밍보다 중요한 것, 아마존 제프 베이조스가 강조한 빠른 의사결정의 비밀을 알아보세요.
+                    </p>
+                  </div>
+                </Link>
+
+                <Link href="/articles/2" className="block group">
+                  <div className="bg-slate-50 p-6 rounded-[24px] hover:bg-slate-100 transition-all border border-transparent hover:border-slate-200">
+                    <span className="text-[10px] font-black text-[#6366F1] uppercase tracking-widest">Psychology</span>
+                    <h3 className="text-lg font-bold text-slate-800 mt-1 group-hover:text-[#6366F1] transition-colors">
+                      불안은 왜 나쁜 것만이 아닐까?
+                    </h3>
+                    <p className="text-sm text-slate-500 mt-2 line-clamp-2 font-medium">
+                      방어적 비관주의를 통해 불안 에너지를 치밀한 준비성으로 바꾸는 심리학적 전략.
+                    </p>
+                  </div>
+                </Link>
+                
+                <Link href="/articles" className="block text-center py-4 text-slate-400 font-bold text-sm hover:text-slate-600 transition-colors">
+                  모든 인사이트 보기 →
+                </Link>
+              </div>
+            </section>
           </div>
         )}
 
@@ -217,21 +272,29 @@ export default function FeelingSnapV2() {
               
               <div className="absolute inset-0 p-10 flex flex-col justify-between">
                 <div className="text-white space-y-4">
-                  <span className="text-[10px] font-black tracking-[0.4em] uppercase opacity-80">Emotional Snap</span>
+                  <div className="flex items-center space-x-1.5 opacity-90 mb-4">
+                    <div 
+                      className="text-xl font-black tracking-tighter flex items-center" 
+                      style={{ WebkitTextStroke: '0.6px currentColor' }}
+                    >
+                      <span className="text-white" style={{ WebkitTextStrokeColor: 'white' }}>Feeling</span>
+                      <span className="text-[#E91E63] ml-0.5" style={{ WebkitTextStrokeColor: '#E91E63' }}>Snap</span>
+                    </div>
+                  </div>
                   
                   <h3 className="text-4xl font-black leading-tight tracking-tighter drop-shadow-md">
                     {resultData.subName}
                   </h3>
 
-                  <p className="text-[15px] opacity-100 leading-relaxed font-bold pt-1 break-keep line-clamp-3">
+                  <p className="text-[15px] opacity-100 leading-relaxed font-bold pt-1 break-keep line-clamp-4">
                     {resultData.description}
                   </p>
                 </div>
 
                 <div className="bg-white/95 backdrop-blur-lg rounded-[40px] p-8 space-y-6 shadow-lg">
                   <div className="space-y-4">
-                    {resultData.mix?.map((item: any) => (
-                      <div key={item.key} className="space-y-2">
+                    {resultData.mix?.map((item: any, index: number) => (
+                     <div key={`${item.key}-${index}`} className="space-y-2">
                         <div className="flex justify-between text-xs font-black text-slate-700 uppercase tracking-tight">
                           <span>{EMOTION_DATA[item.key]?.label || item.key}</span>
                           <span className="text-[#E91E63]">{item.rate}%</span>
@@ -258,9 +321,20 @@ export default function FeelingSnapV2() {
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
-              <button onClick={handleSaveImage} className="py-6 bg-white rounded-3xl font-bold text-lg shadow-sm border border-slate-100 active:bg-slate-50 transition-all">스냅 저장 💾</button>
-              <button onClick={() => window.location.reload()} className="py-6 bg-[#1A1F2C] text-white rounded-3xl font-bold text-lg active:scale-95 transition-all">새로 찍기 ↻</button>
+            {/* 버튼 영역: 3컬럼으로 변경하여 공유하기 추가 */}
+            <div className="grid grid-cols-3 gap-3">
+              <button onClick={handleSaveImage} className="py-6 bg-white rounded-3xl font-bold text-sm shadow-sm border border-slate-100 active:bg-slate-50 transition-all flex flex-col items-center justify-center gap-1">
+                <span>💾</span>
+                <span>스냅 저장</span>
+              </button>
+              <button onClick={handleShare} className="py-6 bg-white rounded-3xl font-bold text-sm shadow-sm border border-slate-100 active:bg-slate-50 transition-all flex flex-col items-center justify-center gap-1">
+                <span>🔗</span>
+                <span>공유하기</span>
+              </button>
+              <button onClick={() => window.location.reload()} className="py-6 bg-[#1A1F2C] text-white rounded-3xl font-bold text-sm active:scale-95 transition-all flex flex-col items-center justify-center gap-1">
+                <span>↻</span>
+                <span>새로 찍기</span>
+              </button>
             </div>
           </div>
         )}
