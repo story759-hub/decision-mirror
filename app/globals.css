@@ -1,5 +1,8 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* 그 아래 기존 커스텀 스타일은 그대로 두셔도 됩니다 */
 :root {
   --background: #ffffff;
   --foreground: #171717;
