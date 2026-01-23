@@ -85,6 +85,7 @@ const EMOTION_DATA: { [key: string]: any } = {
     ] 
   }
 };
+
 export default function FeelingSnapV2() {
   const [stage, setStage] = useState<Stage>('pick');
   const [selectedKey, setSelectedKey] = useState<string>('');
@@ -108,7 +109,6 @@ export default function FeelingSnapV2() {
       const wait = Math.max(0, 5000 - (Date.now() - start));
 
       setTimeout(() => {
-        // [수정] 데이터가 불완전해도 런타임 에러가 나지 않도록 방어 코드 적용
         if (aiData) {
           setResultData({
             mix: aiData.mix || [{ key: selectedKey, rate: 100 }],
@@ -146,8 +146,7 @@ export default function FeelingSnapV2() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 pb-20 overflow-x-hidden">
-      {/* 고정 헤더 */}
+    <div className="min-h-screen bg-white text-slate-900 pb-20 overflow-x-hidden font-sans">
       <header className="max-w-xl mx-auto pt-12 pb-6 text-center">
         <h1 className="text-3xl font-black text-[#E91E63] tracking-tighter cursor-pointer" onClick={() => window.location.reload()}>
           Feeling <span className="text-[#E91E63]">Snap</span>
@@ -155,7 +154,6 @@ export default function FeelingSnapV2() {
       </header>
 
       <main className="max-w-md mx-auto px-6">
-        {/* 1단계: 감정 선택 (사용자 요청 문구 반영) */}
         {stage === 'pick' && (
           <div className="text-center space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="space-y-3">
@@ -175,7 +173,6 @@ export default function FeelingSnapV2() {
           </div>
         )}
 
-        {/* 2단계: 이유 선택 */}
         {stage === 'resonate' && (
           <div className="space-y-8 animate-in slide-in-from-right-4 duration-500">
             <div className="bg-[#F8FAFC] p-8 rounded-[32px] shadow-sm italic text-center text-xl font-medium text-slate-600">
@@ -190,7 +187,6 @@ export default function FeelingSnapV2() {
           </div>
         )}
 
-        {/* 3단계: 일기 작성 */}
         {stage === 'deep' && (
           <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
             <textarea className="w-full h-56 bg-[#F8FAFC] rounded-[32px] p-8 text-xl outline-none shadow-inner focus:ring-2 focus:ring-pink-100"
@@ -201,7 +197,6 @@ export default function FeelingSnapV2() {
           </div>
         )}
 
-        {/* 로딩 화면 */}
         {stage === 'analyzing' && (
           <div className="py-32 text-center space-y-8">
             <div className="w-16 h-16 border-4 border-[#E91E63] border-t-transparent rounded-full animate-spin mx-auto"></div>
@@ -209,31 +204,30 @@ export default function FeelingSnapV2() {
           </div>
         )}
 
-        {/* 결과 화면 */}
         {stage === 'result' && resultData && (
           <div className="space-y-8 animate-in zoom-in-95 duration-700">
-            <div ref={cardRef} className="relative aspect-[3/4.5] w-full rounded-[50px] overflow-hidden shadow-2xl bg-black">
+            {/* 카드 내부 폰트를 둥글고 귀여운 느낌의 폰트 스택으로 변경 */}
+            <div ref={cardRef} className="relative aspect-[3/4.5] w-full rounded-[50px] overflow-hidden shadow-2xl bg-black font-rounded" style={{ fontFamily: 'ui-rounded, "Hiragino Maru Gothic ProN", "Quicksand", "Nanum Gothic", system-ui, sans-serif' }}>
               <img src={resultData.mainEmotion.img} alt="bg" className="absolute inset-0 w-full h-full object-cover opacity-60" />
               
               <div className="absolute inset-0 p-10 flex flex-col justify-between">
                 <div className="text-white space-y-4">
                   <span className="text-[10px] font-black tracking-[0.4em] uppercase opacity-70">Emotional Snap</span>
-                  {/* 요청하신 굵고 기울어진 제목 스타일 */}
-                  <h3 className="text-5xl font-black italic leading-tight tracking-tighter">"{resultData.subName}"</h3>
-                  <p className="text-sm opacity-90 leading-relaxed font-medium pt-2">{resultData.description}</p>
+                  <h3 className="text-5xl font-black italic leading-tight tracking-tighter drop-shadow-md">"{resultData.subName}"</h3>
+                  <p className="text-base opacity-95 leading-relaxed font-semibold pt-2 break-keep">{resultData.description}</p>
                 </div>
 
-                <div className="bg-white/95 backdrop-blur-lg rounded-[40px] p-8 space-y-6">
+                <div className="bg-white/95 backdrop-blur-lg rounded-[40px] p-8 space-y-6 shadow-lg">
                   <div className="space-y-4">
-                    {/* mix.map 시 Optional Chaining(?.)을 써서 에러 방지 */}
                     {resultData.mix?.map((item: any) => (
                       <div key={item.key} className="space-y-2">
-                        <div className="flex justify-between text-xs font-black text-slate-700">
+                        <div className="flex justify-between text-xs font-black text-slate-700 uppercase tracking-tight">
                           <span>{EMOTION_DATA[item.key]?.label || item.key}</span>
-                          <span>{item.rate}%</span>
+                          <span className="text-[#E91E63]">{item.rate}%</span>
                         </div>
-                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                          <div className={`h-full bg-gradient-to-r ${EMOTION_DATA[item.key]?.color || 'from-slate-400 to-slate-500'}`} 
+                        <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-50">
+                          {/* 퍼센티지(item.rate)가 width에 실시간 반영되도록 설정 */}
+                          <div className={`h-full bg-gradient-to-r ${EMOTION_DATA[item.key]?.color || 'from-slate-400 to-slate-500'} transition-all duration-1000 ease-out`} 
                                style={{ width: `${item.rate}%` }} />
                         </div>
                       </div>
@@ -241,13 +235,13 @@ export default function FeelingSnapV2() {
                   </div>
 
                   <div className="pt-4 border-t border-slate-100 flex justify-between items-end">
-                    <div className="space-y-2">
-                      <p className="text-xs font-bold text-slate-600">오늘 당신과 같은 마음 <span className="text-[#E91E63]">{resultData.globalShare.sameEmotion}%</span></p>
-                      <span className="text-[10px] font-black text-slate-400 italic">#{resultData.globalShare.totalSnaps} snaps today</span>
+                    <div className="space-y-1.5">
+                      <p className="text-[11px] font-bold text-slate-600 leading-none">오늘 당신과 같은 마음 <span className="text-[#E91E63]">{resultData.globalShare.sameEmotion}%</span></p>
+                      <span className="text-[10px] font-black text-slate-400 italic tracking-tight opacity-80">#{resultData.globalShare.totalSnaps} snaps today</span>
                     </div>
-                    <div className="text-right">
-                      <p className="text-[11px] font-bold text-slate-800">🎧 {resultData.song}</p>
-                      <span className="text-[9px] font-black text-[#E91E63]">TRACK FOR YOU</span>
+                    <div className="text-right space-y-1">
+                      <p className="text-[12px] font-extrabold text-slate-800 leading-tight">🎧 {resultData.song}</p>
+                      <span className="text-[9px] font-black text-[#E91E63] tracking-widest opacity-80 uppercase">TRACK FOR YOU</span>
                     </div>
                   </div>
                 </div>
