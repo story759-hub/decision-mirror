@@ -6,14 +6,85 @@ import { toPng } from 'html-to-image';
 type Stage = 'pick' | 'resonate' | 'deep' | 'analyzing' | 'result';
 
 const EMOTION_DATA: { [key: string]: any } = {
-  joy: { label: "기쁨", icon: "✨", color: "from-yellow-400 to-orange-400", bgColor: "bg-yellow-50", img: "https://images.unsplash.com/photo-1490730141103-6cac27aaab94", resonate: "최고의 순간이군요!", reasons: ['원하던 목표 달성', '뜻밖의 행운', '사랑하는 사람과 함께', '나 자신이 대견해서'] },
-  sadness: { label: "슬픔", icon: "💧", color: "from-blue-400 to-indigo-500", bgColor: "bg-blue-50", img: "https://images.unsplash.com/photo-1516585427167-9f4af9627e6c", resonate: "마음이 많이 무겁군요.", reasons: ['사람에게 서운함', '이별이나 상실', '이유 없는 공허함', '자책과 후회'] },
-  anger: { label: "분노", icon: "🔥", color: "from-red-500 to-rose-600", bgColor: "bg-red-50", img: "https://images.unsplash.com/photo-1579546678181-9927bf144062", resonate: "정말 답답하시겠어요.", reasons: ['부당한 대우', '반복되는 실수', '상대방의 무례함', '계속 참아온 일들'] },
-  anxiety: { label: "불안", icon: "🌀", color: "from-purple-500 to-indigo-600", bgColor: "bg-purple-50", img: "https://images.unsplash.com/photo-1506126613408-eca07ce68773", resonate: "생각이 꼬리에 꼬리를 무는군요.", reasons: ['막연한 미래 걱정', '중요한 일 앞두고', '남들의 시선 의식', '결정하기 힘든 상황'] },
-  regret: { label: "미안", icon: "✉️", color: "from-slate-500 to-slate-700", bgColor: "bg-slate-50", img: "https://images.unsplash.com/photo-1528459801416-a7e99a0d13a3", resonate: "자꾸 되짚게 되는 마음이군요.", reasons: ['하지 못한 말들', '나의 실수나 잘못', '상대방에 대한 미안함', '놓쳐버린 기회'] },
-  neutral: { label: "평온", icon: "🌿", color: "from-emerald-400 to-teal-500", bgColor: "bg-emerald-50", img: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e", resonate: "잔잔한 호수 같은 마음이네요.", reasons: ['오늘 하루 무사히', '여유로운 휴식', '그저 그런 일상', '나쁘지 않은 기분'] }
+  joy: { 
+    label: "기쁨", 
+    icon: "✨", 
+    color: "from-yellow-400 to-orange-400", 
+    bgColor: "bg-yellow-50", 
+    img: "/images/joy.png", 
+    resonate: "최고의 순간이군요!", 
+    reasons: [
+      '원하던 목표 달성', '뜻밖의 행운', '사랑하는 사람과 함께', 
+      '칭찬이나 인정받음', '맛있는 음식의 행복', '작은 성취의 기쁨', 
+      '오랜만의 휴식', '설레는 계획의 시작'
+    ] 
+  },
+  sadness: { 
+    label: "슬픔", 
+    icon: "💧", 
+    color: "from-blue-400 to-indigo-500", 
+    bgColor: "bg-blue-50", 
+    img: "/images/sadness.png", 
+    resonate: "마음이 무겁군요.", 
+    reasons: [
+      '사람에게 서운함', '이별이나 상실', '자책과 후회', 
+      '이유 없는 우울함', '기대했던 일의 실패', '외로움과 고립감', 
+      '몸이 아프고 지침', '공허한 마음'
+    ] 
+  },
+  anger: { 
+    label: "분노", 
+    icon: "🔥", 
+    color: "from-red-500 to-rose-600", 
+    bgColor: "bg-red-50", 
+    img: "/images/anger.png", 
+    resonate: "정말 답답하시겠어요.", 
+    reasons: [
+      '부당한 대우', '반복되는 실수', '무례함에 노출', 
+      '일이 뜻대로 안 됨', '억울한 상황', '계획의 방해', 
+      '나 자신에 대한 화', '무책임한 태도'
+    ] 
+  },
+  anxiety: { 
+    label: "불안", 
+    icon: "🌀", 
+    color: "from-purple-500 to-indigo-600", 
+    bgColor: "bg-purple-50", 
+    img: "/images/anxiety.png", 
+    resonate: "불안은 잘해내고 싶다는 증거예요.", 
+    reasons: [
+      '막연한 미래 걱정', '중요한 일 앞두고', '남들의 시선', 
+      '새로운 환경의 적응', '결정을 내릴 때', '실수할까 봐 걱정', 
+      '금전적인 부담', '인간관계의 긴장'
+    ] 
+  },
+  regret: { 
+    label: "미안", 
+    icon: "✉️", 
+    color: "from-slate-500 to-slate-700", 
+    bgColor: "bg-slate-50", 
+    img: "/images/regret.png", 
+    resonate: "과거의 당신도 최선을 다했을 거예요.", 
+    reasons: [
+      '하지 못한 말들', '나의 실수', '상대방에 대한 미안함', 
+      '시간을 낭비한 기분', '상처 준 기억', '약속을 못 지킴', 
+      '챙겨주지 못한 마음', '과거의 선택'
+    ] 
+  },
+  neutral: { 
+    label: "평온", 
+    icon: "🌿", 
+    color: "from-emerald-400 to-teal-500", 
+    bgColor: "bg-emerald-50", 
+    img: "/images/neutral.png", 
+    resonate: "잔잔한 호수 같은 마음이네요.", 
+    reasons: [
+      '오늘 하루 무사히', '여유로운 휴식', '그저 그런 일상', 
+      '정돈된 주변 환경', '몰입하는 시간', '조용한 혼자만의 시간', 
+      '충분한 수면 후', '평화로운 오후'
+    ] 
+  }
 };
-
 export default function FeelingSnapV2() {
   const [stage, setStage] = useState<Stage>('pick');
   const [selectedKey, setSelectedKey] = useState<string>('');
