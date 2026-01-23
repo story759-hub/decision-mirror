@@ -64,7 +64,7 @@ const EMOTION_DATA: { [key: string]: any } = {
     color: "from-slate-500 to-slate-700", 
     bgColor: "bg-slate-50", 
     img: "/images/regret.png", 
-    resonate: "과거의 당신도 최선을 다했을 거예요.", 
+    resonate: "과거의 당신도 최선을 다했습니다.", 
     reasons: [
       '하지 못한 말들', '나의 실수', '상대방에 대한 미안함', 
       '시간을 낭비한 기분', '상처 준 기억', '약속을 못 지킴', 
