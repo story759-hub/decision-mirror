@@ -147,9 +147,15 @@ export default function FeelingSnapV2() {
 
   return (
     <div className="min-h-screen bg-white text-slate-900 pb-20 overflow-x-hidden font-sans">
-      <header className="max-w-xl mx-auto pt-12 pb-6 text-center">
-        <h1 className="text-3xl font-black text-[#E91E63] tracking-tighter cursor-pointer" onClick={() => window.location.reload()}>
-          Feeling <span className="text-[#E91E63]">Snap</span>
+      <header className="max-w-xl mx-auto pt-14 pb-8 text-center">
+        {/* 로고: 기존 스타일 유지 + 텍스트 스트로크를 통해 굵기 1.5배 강화 */}
+        <h1 
+          className="text-5xl font-black tracking-tighter cursor-pointer flex justify-center items-center" 
+          onClick={() => window.location.reload()}
+          style={{ WebkitTextStroke: '1.2px currentColor' }}
+        >
+          <span className="text-[#0F172A]" style={{ WebkitTextStrokeColor: '#0F172A' }}>Feeling</span>
+          <span className="text-[#E91E63] ml-1" style={{ WebkitTextStrokeColor: '#E91E63' }}>Snap</span>
         </h1>
       </header>
 
@@ -206,15 +212,20 @@ export default function FeelingSnapV2() {
 
         {stage === 'result' && resultData && (
           <div className="space-y-8 animate-in zoom-in-95 duration-700">
-            {/* 카드 내부 폰트를 둥글고 귀여운 느낌의 폰트 스택으로 변경 */}
             <div ref={cardRef} className="relative aspect-[3/4.5] w-full rounded-[50px] overflow-hidden shadow-2xl bg-black font-rounded" style={{ fontFamily: 'ui-rounded, "Hiragino Maru Gothic ProN", "Quicksand", "Nanum Gothic", system-ui, sans-serif' }}>
               <img src={resultData.mainEmotion.img} alt="bg" className="absolute inset-0 w-full h-full object-cover opacity-60" />
               
               <div className="absolute inset-0 p-10 flex flex-col justify-between">
                 <div className="text-white space-y-4">
-                  <span className="text-[10px] font-black tracking-[0.4em] uppercase opacity-70">Emotional Snap</span>
-                  <h3 className="text-5xl font-black italic leading-tight tracking-tighter drop-shadow-md">"{resultData.subName}"</h3>
-                  <p className="text-base opacity-95 leading-relaxed font-semibold pt-2 break-keep">{resultData.description}</p>
+                  <span className="text-[10px] font-black tracking-[0.4em] uppercase opacity-80">Emotional Snap</span>
+                  
+                  <h3 className="text-4xl font-black leading-tight tracking-tighter drop-shadow-md">
+                    {resultData.subName}
+                  </h3>
+
+                  <p className="text-[15px] opacity-100 leading-relaxed font-bold pt-1 break-keep line-clamp-3">
+                    {resultData.description}
+                  </p>
                 </div>
 
                 <div className="bg-white/95 backdrop-blur-lg rounded-[40px] p-8 space-y-6 shadow-lg">
@@ -226,7 +237,6 @@ export default function FeelingSnapV2() {
                           <span className="text-[#E91E63]">{item.rate}%</span>
                         </div>
                         <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-50">
-                          {/* 퍼센티지(item.rate)가 width에 실시간 반영되도록 설정 */}
                           <div className={`h-full bg-gradient-to-r ${EMOTION_DATA[item.key]?.color || 'from-slate-400 to-slate-500'} transition-all duration-1000 ease-out`} 
                                style={{ width: `${item.rate}%` }} />
                         </div>
