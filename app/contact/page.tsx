@@ -12,10 +12,10 @@ export default function Contact() {
 
         <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
           <p className="text-xs text-slate-400 font-bold uppercase mb-1">Email Address</p>
-          <a href="mailto:bullet9372@gmail.com.com" className="text-lg font-black text-slate-800 hover:text-pink-500 transition-colors">
-            bullet9372@gmail.com.com
+          <a href="mailto:support@feelingsnap.com" className="text-lg font-black text-slate-800 hover:text-pink-500 transition-colors">
+            support@feelingsnap.com
           </a>
-        </div> 
+        </div>
 
         <div className="pt-4">
           <button 
