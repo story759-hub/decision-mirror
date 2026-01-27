@@ -20,6 +20,7 @@ const articles = [
   { id: 13, category: "Self-Compassion", title: "자존감보다 중요한 '자기 자비'의 힘" },
   { id: 14, category: "Pygmalion", title: "피그말리온 효과: 말이 씨가 되는 이유" },
   { id: 15, category: "Imposter", title: "가면 증후군: 성공해도 불안한 당신에게" },
+  { id: 16, category: "Emotional Recovery", title: "상실의 70%는 애도입니다: 슬픔이 치유로 변하는 시간" },
 ];
 
 export default function ArticlesPage() {
