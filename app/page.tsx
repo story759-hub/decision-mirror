@@ -88,7 +88,7 @@ export default function FeelingSnapV2() {
       });
       
       const aiData = await response.json();
-      const wait = Math.max(0, 4000 - (Date.now() - start)); // Snap은 너무 오래 기다리게 하지 않습니다.
+      const wait = Math.max(0, 4000 - (Date.now() - start));
 
       setTimeout(() => {
         if (aiData) {
@@ -146,10 +146,10 @@ export default function FeelingSnapV2() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 pb-20 overflow-x-hidden font-sans">
-      <header className="max-w-xl mx-auto pt-14 pb-8 text-center">
+    <div className="min-h-screen bg-white text-slate-900 pb-10 overflow-x-hidden font-sans">
+      <header className="max-w-xl mx-auto pt-10 pb-6 text-center">
         <h1 
-          className="text-5xl font-black tracking-tighter cursor-pointer flex justify-center items-center" 
+          className="text-4xl sm:text-5xl font-black tracking-tighter cursor-pointer flex justify-center items-center" 
           onClick={() => window.location.reload()}
           style={{ WebkitTextStroke: '1.2px currentColor' }}
         >
@@ -160,38 +160,32 @@ export default function FeelingSnapV2() {
 
       <main className="max-w-md mx-auto px-6">
         {stage === 'pick' && (
-          <div className="text-center space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="space-y-3">
-              <h2 className="text-2xl font-bold text-[#2D3E50]">나야, Snap.</h2>
-              <p className="text-slate-400 text-lg font-medium">오늘은 어떤 쪽으로 마음이 기울었어?</p>
+          <div className="text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-2">
+              <h2 className="text-xl sm:text-2xl font-bold text-[#2D3E50]">나야, Snap.</h2>
+              <p className="text-slate-400 text-base sm:text-lg font-medium">오늘은 어떤 쪽으로 마음이 기울었어?</p>
             </div>
             
-            <div className="grid grid-cols-2 gap-5 mt-10">
+            <div className="grid grid-cols-2 gap-4">
               {Object.keys(EMOTION_DATA).map((key) => (
                 <button key={key} onClick={() => { setSelectedKey(key); setStage('resonate'); }}
-                  className={`${EMOTION_DATA[key].bgColor} p-10 rounded-[32px] hover:scale-105 active:scale-95 transition-all shadow-sm flex flex-col items-center justify-center`}>
-                  <div className="text-5xl mb-4">{EMOTION_DATA[key].icon}</div>
-                  <div className="font-bold text-xl text-slate-700">{EMOTION_DATA[key].label}</div>
+                  className={`${EMOTION_DATA[key].bgColor} p-8 sm:p-10 rounded-[32px] hover:scale-105 active:scale-95 transition-all shadow-sm flex flex-col items-center justify-center`}>
+                  <div className="text-4xl sm:text-5xl mb-3">{EMOTION_DATA[key].icon}</div>
+                  <div className="font-bold text-lg sm:text-xl text-slate-700">{EMOTION_DATA[key].label}</div>
                 </button>
               ))}
             </div>
 
-<section className="mt-20 border-t border-slate-100 pt-12 text-left opacity-60">
-  <div className="flex justify-between items-end mb-6">
-    <h2 className="text-xl font-bold text-slate-800 flex items-center italic">
-      <span className="mr-2">Snap's Log</span>
-    </h2>
-    <Link href="/articles" className="text-[11px] font-bold text-slate-400 hover:text-[#E91E63] transition-colors pb-1">
-      더보기 →
-    </Link>
-  </div>
-              <div className="space-y-4">
+            <section className="mt-12 border-t border-slate-100 pt-8 text-left opacity-60">
+              <div className="flex justify-between items-end mb-4">
+                <h2 className="text-lg font-bold text-slate-800 flex items-center italic">Snap's Log</h2>
+                <Link href="/articles" className="text-[10px] font-bold text-slate-400 hover:text-[#E91E63] pb-1">더보기 →</Link>
+              </div>
+              <div className="space-y-3">
                 <Link href="/articles/1" className="block group">
-                   <div className="p-1">
-                    <h3 className="text-lg font-bold text-slate-800 group-hover:text-[#E91E63] transition-colors">
-                      불안은 왜 나쁜 것만이 아닐까?
-                    </h3>
-                    <p className="text-sm text-slate-500 mt-1 font-medium">불안 에너지를 준비성으로 바꾸는 법.</p>
+                  <div className="p-1">
+                    <h3 className="text-base font-bold text-slate-800 group-hover:text-[#E91E63]">불안은 왜 나쁜 것만이 아닐까?</h3>
+                    <p className="text-xs text-slate-500 mt-0.5">불안 에너지를 준비성으로 바꾸는 법.</p>
                   </div>
                 </Link>
               </div>
@@ -200,141 +194,134 @@ export default function FeelingSnapV2() {
         )}
 
         {stage === 'resonate' && (
-          <div className="space-y-12 animate-in slide-in-from-right-4 duration-500 text-center">
-             <div className="space-y-4 pt-10">
-              <span className="text-xs font-black bg-slate-100 px-3 py-1 rounded-full text-slate-400 uppercase tracking-widest">Snap</span>
-              <p className="text-2xl font-bold text-slate-700 leading-relaxed break-keep">
+          <div className="space-y-10 animate-in slide-in-from-right-4 duration-500 text-center">
+            <div className="space-y-3 pt-6">
+              <span className="text-[10px] font-black bg-slate-100 px-3 py-1 rounded-full text-slate-400 uppercase tracking-widest">Snap</span>
+              <p className="text-xl sm:text-2xl font-bold text-slate-700 leading-relaxed break-keep">
                 "{EMOTION_DATA[selectedKey].resonate}"
               </p>
             </div>
             <div className="grid grid-cols-1 gap-3">
               {EMOTION_DATA[selectedKey].reasons.map((r: string) => (
                 <button key={r} onClick={() => { setSelectedReason(r); setStage('deep'); }}
-                  className="w-full py-5 bg-white rounded-[24px] font-bold text-lg text-slate-500 border border-slate-100 shadow-sm active:bg-slate-50 transition-all">{r}</button>
+                  className="w-full py-4 sm:py-5 bg-white rounded-[24px] font-bold text-base sm:text-lg text-slate-500 border border-slate-100 shadow-sm active:bg-slate-50 transition-all">{r}</button>
               ))}
             </div>
           </div>
         )}
 
         {stage === 'deep' && (
-          <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-            <div className="px-4 text-center text-slate-400 font-medium italic">
-              Snap: 괜히 잘 쓰려고 안 해도 돼.
-            </div>
-            <textarea className="w-full h-56 bg-[#F8FAFC] rounded-[32px] p-8 text-xl outline-none shadow-inner focus:ring-2 focus:ring-pink-100"
+          <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="px-4 text-center text-slate-400 text-sm font-medium italic">Snap: 괜히 잘 쓰려고 안 해도 돼.</div>
+            <textarea className="w-full h-48 sm:h-56 bg-[#F8FAFC] rounded-[32px] p-6 sm:p-8 text-lg sm:text-xl outline-none shadow-inner focus:ring-2 focus:ring-pink-100"
               value={textInput} onChange={(e) => setTextInput(e.target.value)} placeholder="여기에 네 마음을 좀 더 쏟아내도 돼" />
-            <button onClick={handleFinalAnalyze} className="w-full bg-[#1A1F2C] text-white py-6 rounded-[24px] font-bold text-xl shadow-xl active:scale-95 transition-all">
+            <button onClick={handleFinalAnalyze} className="w-full bg-[#1A1F2C] text-white py-5 sm:py-6 rounded-[24px] font-bold text-lg sm:text-xl shadow-xl active:scale-95 transition-all">
               Snap에게 마음 건네기 ✨
             </button>
           </div>
         )}
+
         {stage === 'analyzing' && (
-          <div className="py-32 text-center space-y-8">
-            <div className="w-16 h-16 border-4 border-[#E91E63] border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="text-xl font-bold text-slate-500 animate-pulse">잠깐만. 네 얘기 천천히 읽고 있어.</p>
+          <div className="py-24 text-center space-y-6">
+            <div className="w-12 h-12 border-4 border-[#E91E63] border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="text-lg font-bold text-slate-500 animate-pulse">잠깐만. 네 얘기 천천히 읽고 있어.</p>
           </div>
         )}
 
         {stage === 'result' && resultData && (
-          <div className="space-y-8 animate-in zoom-in-95 duration-700">
-            <div ref={cardRef} className="relative aspect-[3/4.5] w-full rounded-[50px] overflow-hidden shadow-2xl bg-black font-rounded" style={{ fontFamily: 'ui-rounded, "Hiragino Maru Gothic ProN", "Quicksand", "Nanum Gothic", system-ui, sans-serif' }}>
+          <div className="space-y-6 animate-in zoom-in-95 duration-700">
+            {/* 결과 카드 컨테이너: 모바일 짤림 방지를 위해 maxHeight와 flex 조절 */}
+            <div ref={cardRef} 
+              className="relative w-full rounded-[40px] overflow-hidden shadow-2xl bg-black font-rounded" 
+              style={{ 
+                aspectRatio: '3 / 4.6',
+                maxHeight: '82vh',
+                fontFamily: 'ui-rounded, "Hiragino Maru Gothic ProN", "Quicksand", "Nanum Gothic", system-ui, sans-serif' 
+              }}>
               <img src={resultData.mainEmotion.img} alt="bg" className="absolute inset-0 w-full h-full object-cover opacity-60" />
               
-              <div className="absolute inset-0 p-10 flex flex-col justify-between">
-                <div className="text-white space-y-4">
-                  <div className="flex items-center space-x-1.5 opacity-90 mb-4">
-                    <div className="text-xl font-black tracking-tighter flex items-center" style={{ WebkitTextStroke: '0.6px currentColor' }}>
+              <div className="absolute inset-0 p-6 sm:p-10 flex flex-col justify-between">
+                <div className="text-white space-y-3">
+                  <div className="flex items-center space-x-1.5 opacity-90 mb-2">
+                    <div className="text-lg sm:text-xl font-black tracking-tighter flex items-center" style={{ WebkitTextStroke: '0.6px currentColor' }}>
                       <span className="text-white">Feeling</span>
                       <span className="text-[#E91E63] ml-0.5">Snap</span>
                     </div>
                   </div>
                   
-                  <h3 className="text-4xl font-black leading-tight tracking-tighter drop-shadow-md">
+                  <h3 className="text-3xl sm:text-4xl font-black leading-tight tracking-tighter drop-shadow-md">
                     {resultData.subName}
                   </h3>
 
-                  <div className="pt-2">
-                    <span className="text-[10px] font-black bg-white/20 px-2 py-0.5 rounded-full uppercase tracking-widest mb-2 inline-block">Snap</span>
-                    <p className="text-[17px] leading-relaxed font-bold break-keep">
+                  <div className="pt-1">
+                    <span className="text-[9px] sm:text-[10px] font-black bg-white/20 px-2 py-0.5 rounded-full uppercase tracking-widest mb-1.5 inline-block">Snap</span>
+                    <p className="text-[15px] sm:text-[17px] leading-relaxed font-bold break-keep whitespace-pre-wrap line-clamp-5">
                       {resultData.description}
                     </p>
                   </div>
                 </div>
 
-<div className="bg-white/95 backdrop-blur-lg rounded-[40px] p-6 space-y-1 shadow-lg">
-  {/* 감정 분석 그래프 섹션 */}
-  <div className="space-y-4">
-    {resultData.mix?.map((item: any, index: number) => (
-      <div key={`${item.key}-${index}`} className="space-y-2">
-        <div className="flex justify-between text-xs font-black text-slate-700 uppercase tracking-tight">
-          <span>{item.label || EMOTION_DATA[item.key]?.label}</span>
-          <span className="text-[#E91E63]">{item.rate}%</span>
-        </div>
-        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-          <div 
-            className={`h-full bg-gradient-to-r ${EMOTION_DATA[item.key]?.color || 'from-slate-400 to-slate-500'} transition-all duration-1000 ease-out`} 
-            style={{ width: `${item.rate}%` }} 
-          />
-        </div>
-      </div>
-    ))}
-  </div>
+                {/* 하얀 박스 섹션 */}
+                <div className="bg-white/95 backdrop-blur-lg rounded-[30px] sm:rounded-[40px] p-5 sm:p-7 space-y-4 shadow-lg">
+                  <div className="space-y-3">
+                    {resultData.mix?.map((item: any, index: number) => (
+                      <div key={`${item.key}-${index}`} className="space-y-1.5">
+                        <div className="flex justify-between text-[10px] sm:text-xs font-black text-slate-700 uppercase tracking-tight">
+                          <span>{item.label || EMOTION_DATA[item.key]?.label}</span>
+                          <span className="text-[#E91E63]">{item.rate}%</span>
+                        </div>
+                        <div className="w-full h-1.5 sm:h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full bg-gradient-to-r ${EMOTION_DATA[item.key]?.color || 'from-slate-400 to-slate-500'} transition-all duration-1000 ease-out`} 
+                            style={{ width: `${item.rate}%` }} 
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
 
-  {/* 사운드트랙 섹션 (문구 없이 바로 노출) */}
-  <div className="pt-2">
-    <div className="pt-5 border-t border-slate-100 flex justify-between items-center">
-      <div className="flex flex-col min-w-0">
-        <span className="text-[9px] font-black text-[#E91E63] tracking-widest opacity-80 uppercase mb-0.5">Soundtrack</span>
-        {resultData.song.includes(' - ') ? (
-          <>
-            <p className="text-[10px] font-bold text-slate-400 leading-tight truncate">
-              {resultData.song.split(' - ')[0]}
-            </p>
-            <p className="text-[14px] font-black text-slate-800 leading-tight truncate">
-              {resultData.song.split(' - ')[1]}
-            </p>
-          </>
-        ) : (
-          <p className="text-[14px] font-black text-slate-800 leading-tight truncate">
-            {resultData.song}
-          </p>
-        )}
-      </div>
-      <button 
-        onClick={() => openYouTubeSearch(resultData.song)}
-        className="flex-shrink-0 w-9 h-9 bg-[#E91E63] rounded-full flex items-center justify-center hover:scale-110 transition-all shadow-md ml-4"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
-          <path d="M8 5v14l11-7z" />
-        </svg>
-      </button>
-    </div>
-  </div>
+                  <div className="pt-1 border-t border-slate-100 flex justify-between items-center">
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[8px] sm:text-[9px] font-black text-[#E91E63] tracking-widest opacity-80 uppercase mb-0.5">Soundtrack</span>
+                      <p className="text-[13px] sm:text-[15px] font-black text-slate-800 leading-tight truncate">
+                        {resultData.song.includes(' - ') ? resultData.song.split(' - ')[1] : resultData.song}
+                      </p>
+                      <p className="text-[10px] font-bold text-slate-400 leading-tight truncate">
+                        {resultData.song.includes(' - ') ? resultData.song.split(' - ')[0] : 'Music'}
+                      </p>
+                    </div>
+                    <button 
+                      onClick={() => openYouTubeSearch(resultData.song)}
+                      className="flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 bg-[#E91E63] rounded-full flex items-center justify-center hover:scale-110 transition-all shadow-md ml-3"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </button>
+                  </div>
 
-{/* 하단 통계 섹션 (공감도) */}
-<div className="pt-4 border-t border-slate-50 flex justify-between items-end">
-  {/* 왼쪽: 설명 문구 */}
-  <div className="text-[11px] font-bold text-slate-500 leading-tight flex-1 mr-4">
-    오늘 이 감정을 고른 사람 중,<br />
-    <span className="text-[#E91E63]">{resultData.globalShare.sameEmotion}%</span>가 너랑 같은 이유를 골랐어
-  </div>
-
-  {/* 오른쪽: Snap 수 (오른쪽 정렬) */}
-<div className="text-[15px] font-bold text-pink-300 text-right whitespace-nowrap">
-  snaps #{resultData.globalShare.totalSnaps}
-  </div>
-  </div>
-</div>              </div>
+                  <div className="pt-3 border-t border-slate-50 flex justify-between items-end">
+                    <div className="text-[10px] sm:text-[11px] font-bold text-slate-500 leading-tight flex-1 mr-2">
+                      오늘 이 감정을 고른 사람 중,<br />
+                      <span className="text-[#E91E63]">{resultData.globalShare.sameEmotion}%</span>가 너랑 같은 이유였어
+                    </div>
+                    <div className="text-[13px] sm:text-[15px] font-bold text-pink-400 text-right whitespace-nowrap">
+                      snaps #{resultData.globalShare.totalSnaps}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
             
-            <div className="grid grid-cols-3 gap-3">
-              <button onClick={handleSaveImage} className="py-6 bg-white rounded-3xl font-bold text-sm shadow-sm border border-slate-100 active:bg-slate-50 flex flex-col items-center gap-1">
-                <span>💾</span><span>Snap 저장</span>
+            {/* 액션 버튼 */}
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <button onClick={handleSaveImage} className="py-4 sm:py-6 bg-white rounded-3xl font-bold text-xs sm:text-sm shadow-sm border border-slate-100 active:bg-slate-50 flex flex-col items-center gap-1">
+                <span>💾</span><span>저장</span>
               </button>
-              <button onClick={handleShare} className="py-6 bg-white rounded-3xl font-bold text-sm shadow-sm border border-slate-100 active:bg-slate-50 flex flex-col items-center gap-1">
-                <span>🔗</span><span>공유하기</span>
+              <button onClick={handleShare} className="py-4 sm:py-6 bg-white rounded-3xl font-bold text-xs sm:text-sm shadow-sm border border-slate-100 active:bg-slate-50 flex flex-col items-center gap-1">
+                <span>🔗</span><span>공유</span>
               </button>
-              <button onClick={() => window.location.reload()} className="py-6 bg-[#1A1F2C] text-white rounded-3xl font-bold text-sm flex flex-col items-center gap-1">
+              <button onClick={() => window.location.reload()} className="py-4 sm:py-6 bg-[#1A1F2C] text-white rounded-3xl font-bold text-xs sm:text-sm flex flex-col items-center gap-1">
                 <span>↻</span><span>새 스냅</span>
               </button>
             </div>
