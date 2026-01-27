@@ -113,18 +113,27 @@ export default function FeelingSnapV2() {
     }
   };
 
-  const handleSaveImage = async () => {
-    if (!cardRef.current) return;
-    try {
-      const dataUrl = await toPng(cardRef.current, { pixelRatio: 3, cacheBust: true });
-      const link = document.createElement('a');
-      link.download = `Snap_${Date.now()}.png`;
-      link.href = dataUrl;
-      link.click();
-    } catch (err) {
-      alert("이미지 저장에 실패했습니다.");
-    }
-  };
+const handleSaveImage = async () => {
+  if (!cardRef.current) return;
+  try {
+    // 둥근 모서리 바깥을 투명하게 처리하기 위한 옵션 적용
+    const dataUrl = await toPng(cardRef.current, { 
+      pixelRatio: 3, 
+      cacheBust: true,
+      backgroundColor: null, // 배경색을 없애서 투명하게 설정 (둥근 모서리 반영)
+      style: {
+        borderRadius: '50px', // 저장 시에도 모서리 곡률 강제 적용
+      }
+    });
+    
+    const link = document.createElement('a');
+    link.download = `Snap_${Date.now()}.png`;
+    link.href = dataUrl;
+    link.click();
+  } catch (err) {
+    alert("이미지 저장에 실패했습니다.");
+  }
+};
 
   const handleShare = async () => {
     const shareData = {
