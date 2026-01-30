@@ -1,3 +1,15 @@
+/* app/globals.css */
+
+@font-face {
+    font-family: 'Bongsoong-Tint';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2403@1.0/Bongsoong-Tint.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* ...기존 코드들... */
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

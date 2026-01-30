@@ -4,6 +4,75 @@ import { NextResponse } from "next/server";
 const apiKey = process.env.GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(apiKey || "");
 
+/* ================================
+   🧠 Snap 문장 딱딱함 완화 로직
+================================ */
+const SOFT_ENDINGS: [string, string][] = [
+  ["이다.", "같다."],
+  ["있다.", "남아 있다."],
+  ["없다.", "없는 편이다."],
+  ["끝났다.", "여기까지다."],
+  ["정해졌다.", "정해진 것 같다."],
+  ["멈췄다.", "멈춰 있다."],
+];
+
+const HARD_ADVERBS: [string, string][] = [
+  ["이미", "어느새"],
+  ["완전히", "거의"],
+  ["분명히", "조금은"],
+  ["딱", "그쯤"],
+];
+
+const NOUN_SOFTEN: [string, string][] = [
+  ["상태", "느낌"],
+  ["지점", "쯤"],
+  ["결과", "모양"],
+  ["방향", "쪽"],
+];
+
+function softenSnapText(sentence: string): string {
+  let result = sentence;
+
+  const applySoft = (pairs: [string, string][], probability: number) => {
+    pairs.forEach(([hard, soft]) => {
+      if (result.includes(hard) && Math.random() < probability) {
+        result = result.replace(hard, soft);
+      }
+    });
+  };
+
+  applySoft(SOFT_ENDINGS, 0.5);
+  applySoft(HARD_ADVERBS, 0.3);
+  applySoft(NOUN_SOFTEN, 0.3);
+
+  return result;
+}
+
+/* ================================
+   🧹 금지어 제거 (Reject ❌)
+================================ */
+const FORBIDDEN_REPLACEMENTS: [RegExp, string][] = [
+  [/나\s?/g, ""],
+  [/너\s?/g, ""],
+  [/당신/g, ""],
+  [/우리/g, ""],
+  [/괜찮/g, "조용한"],
+  [/힘내/g, ""],
+  [/해요/g, "하다"],
+  [/하세요/g, "한다"],
+];
+
+function sanitizeDescription(text: string): string {
+  let result = text;
+  FORBIDDEN_REPLACEMENTS.forEach(([pattern, replacement]) => {
+    result = result.replace(pattern, replacement);
+  });
+  return result.trim();
+}
+
+/* ================================
+   🧩 API Handler
+================================ */
 export async function POST(req: Request) {
   let requestData: any = {};
 
@@ -15,98 +84,107 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid Setup" }, { status: 400 });
     }
 
-    // 1. 모델 설정 (2.0-flash 유지)
-    const model = genAI.getGenerativeModel({ 
+    const model = genAI.getGenerativeModel({
       model: "gemini-2.0-flash",
-      generationConfig: { 
-        // 힌트일 뿐이지만 설정은 유지합니다.
+      generationConfig: {
         responseMimeType: "application/json",
-        temperature: 0.7 
-      }
+        temperature: 1.0,
+      },
     });
 
-// 2. AI에게 전달할 강화된 프롬프트 (3가지 감정 믹스 + 2문장 답변)
-const prompt = `
-      SYSTEM: You are "Snap", a quiet, warm, and deeply empathetic friend sitting right next to the user.
-      Respond ONLY with valid JSON. No markdown, no explanations.
+    /* ================================
+       🧠 톤 결정 + 문장 생성을
+       AI 단일 요청으로 통합
+    ================================ */
+    const prompt = `
+SYSTEM:
+You are "Snap", an emotional observer.
+First determine the tone internally, then write the sentence.
 
-      SNAP'S ABSOLUTE RULES:
-      1. Use warm, informal Korean (반말).
-      2. No advice, no questions, no solutions, no judgments. 
-      3. Respond with EXACTLY TWO SHORT SENTENCES. (Total under 60 characters).
-      4. Just acknowledge and echo the feeling with deep empathy.
-      5.IMPORTANT:
-      Do NOT comfort.
-      Do NOT encourage.
-      Do NOT motivate.
-      Just describe the user's emotional state as if you are speaking for them.
+[TONE MODES]:
+- dry: 담담, 거리감
+- cynical: 기대가 어긋난 느낌
+- neutral: 정보에 가까운 정지 상태
 
-      EMOTION TONE GUIDE:
-      - joy: Light, slightly playful. ("오늘 네 기분처럼 날씨도 참 좋다. 이런 날은 오래 기억해도 돼.")
-      - sadness: Low, slow, fading out. ("말 안 해도, 무거운 날이란 건 느껴져. 잠시 여기 기대서 숨을 골라도 좋아.")
-      - anger: Raw, honest, blunt but supportive. ("그럴만했어. 억지로 참을 필요까지는 없었을지도 몰라.")
-      - anxiety: Quiet, breathing pace. ("지금은 생각이 조금 앞서 있네. 천천히 걸어도 길은 잃지 않으니까 괜찮아.")
-      - neutral: Observer, calm, simple. ("고요한 공기가 나쁘지 않은 것 같아. 아무 일 없던 하루도, 충분히 귀한 법이지.")
-      - regret: Accepting, organizing. ("이미 느꼈다는 것만으로도 충분해. 너무 오래 머물지는 않았으면 좋겠다.")
+You MUST choose ONE tone internally and return it as "appliedTone".
 
-      RULES:
-      1. EMOTION MIX (MUST PROVIDE 3 ELEMENTS): 
-         - Must return exactly 3 unique emotion objects in the "mix" array.
-         - "key": Must be one of [joy, sadness, anger, anxiety, neutral, regret].
-         - "label": A specific Korean emotion word (e.g., '벅참', '먹먹함', '울컥함', '홀가분').
-      2. DYNAMIC RATES: Total sum of "rate" must be exactly 100.
-      3. MUSIC: "Artist - Title" format.
+[ABSOLUTE RULES]:
+- description MUST be exactly 2 lines separated by \\n
+- NO SUBJECTS (나, 너, 우리, 당신 금지)
+- NO punctuation at the end (. ! ? 금지)
+- Informal Korean (반말)
+- Do not explain emotions directly
+- Leave emotional space (미완 느낌)
 
-      INPUT:
-      Main Emotion: ${mainEmotion}
-      Reason: ${reason}
-      Text: "${text}"
+[MIX RULES]:
+- mix MUST contain exactly 3 emotions
+- key MUST be one of: joy, sadness, anger, anxiety, regret, neutral
+- rate MUST sum to 100
 
-      OUTPUT FORMAT:
-      {
-        "mix": [
-          { "key": "${mainEmotion}", "label": "감정1", "rate": 60 },
-          { "key": "neutral", "label": "감정2", "rate": 25 },
-          { "key": "joy", "label": "감정3", "rate": 15 }
-        ],
-        "description": "Snap의 다정한 두 문장.",
-        "song": "Artist - Title"
-      }
-    `;
+[SCARCITY RULES]:
+- commonRate: realistic percentage (1~99, avoid round numbers)
+- rateLabel MUST be exactly 2 lines:
+  Line 1: "이 장면을 고른 사람은 n%야"
+  Line 2: poetic observation
+
+INPUT:
+Emotion: ${mainEmotion}
+Reason: ${reason}
+Text: "${text}"
+
+OUTPUT JSON:
+{
+  "appliedTone": "dry | cynical | neutral",
+  "mix": [
+    { "key": "...", "label": "...", "rate": 50 },
+    { "key": "...", "label": "...", "rate": 30 },
+    { "key": "...", "label": "...", "rate": 20 }
+  ],
+  "commonRate": "n%",
+  "rateLabel": "이 장면을 고른 사람은 n%야\\n관측 문장",
+  "description": "첫 줄\\n둘째 줄",
+  "song": "Artist - Title"
+}
+`;
+
     const result = await model.generateContent(prompt);
-    const rawText = result.response.text();
-    
-    // 디버깅을 위한 로그 (해결책 6 적용)
-    console.log("RAW GEMINI RESPONSE:", rawText);
+    const raw = result.response.text();
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("JSON parse failed");
 
-    // 3. 파싱 방어 로직 (해결책 2 적용: 정규식 추출)
-    let data;
-    try {
-      // 텍스트 중 { } 중괄호로 둘러싸인 부분만 추출하여 파싱
-      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error("No JSON found in response");
-      
-      data = JSON.parse(jsonMatch[0]);
-    } catch (e) {
-      console.error("JSON 파싱 실패, Fallback 실행:", e);
-      throw new Error("Parsing Failed");
+    let data = JSON.parse(jsonMatch[0]);
+
+    /* ================================
+       🧩 서버 보정 (Reject 없음)
+    ================================ */
+    data.description = sanitizeDescription(data.description);
+    data.description = softenSnapText(data.description);
+
+    if (!data.description.includes("\n")) {
+      const mid = Math.floor(data.description.length / 2);
+      data.description =
+        data.description.slice(0, mid) + "\n" + data.description.slice(mid);
     }
 
     return NextResponse.json(data);
 
   } catch (error) {
-    console.error("최종 API 에러:", error);
-    
-    // 4. 어떤 상황에서도 서비스는 돌아가야 함 (Fallback)
-    const fallbackEmotion = requestData?.mainEmotion || 'neutral';
+    console.error("Snap API Error:", error);
+
+    /* ================================
+       🪂 안전한 Fallback
+    ================================ */
     return NextResponse.json({
+      appliedTone: "neutral",
       mix: [
-        { key: fallbackEmotion, rate: 75 },
-        { key: "neutral", rate: 15 },
-        { key: "joy", rate: 10 }
+        { key: requestData?.mainEmotion || "neutral", label: "남겨진 마음", rate: 60 },
+        { key: "neutral", label: "정지된 장면", rate: 30 },
+        { key: "anxiety", label: "미세한 떨림", rate: 10 },
       ],
-      description: "당신의 마음을 소중하게 읽어내고 있습니다. 지금은 잠시 분석이 지연되어 기본적인 위로를 전해드려요.",
-      song: "아이유 - 밤편지"
+      commonRate: "18%",
+      rateLabel: "이 장면을 고른 사람은 18%야\n드물게 포착되는 주파수",
+      description: "창밖은 이미 어둡고\n방은 아직 조용하다",
+      song: "우효 - 민들레",
     });
   }
 }
