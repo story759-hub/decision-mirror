@@ -6,7 +6,7 @@ import Link from 'next/link';
 export default function ArticleTwelve() {
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans pb-20 overflow-x-hidden">
-      {/* 메인 로고 디자인 유지 */}
+      {/* 헤더 */}
       <header className="max-w-xl mx-auto pt-14 pb-8 text-center border-b border-slate-50">
         <Link href="/">
           <h1 
@@ -20,78 +20,78 @@ export default function ArticleTwelve() {
       </header>
 
       <main className="max-w-xl mx-auto px-6 py-12">
-        {/* 수정된 목록 경로와 문구 */}
         <Link href="/articles" className="text-[#E91E63] font-bold mb-8 inline-block hover:underline">
-          ← Insights 목록으로 돌아가기
+          ← 인사이트 목록으로 돌아가기
         </Link>
 
         <article className="animate-in fade-in slide-in-from-bottom-4 duration-700">
           <header className="mb-10">
-            {/* 카테고리 태그 */}
             <div className="mb-4">
-              <span className="bg-pink-50 text-[#E91E63] text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border border-pink-100">
-                Relationship & Defense
+              <span className="bg-rose-50 text-rose-600 text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border border-rose-100">
+                Relationship Dynamics
               </span>
             </div>
             
             <h2 className="text-3xl md:text-4xl font-black text-[#0F172A] leading-tight tracking-tighter">
-              내 감정이 의심될 때: <br/>정서적 조종 '가스라이팅' 식별법
+              관계의 구도: <br/>적당한 거리가 만드는 가장 선명한 순간
             </h2>
-            <p className="text-slate-400 mt-4 font-medium text-sm">작성일: 2026. 01. 24 • 5 min read</p>
+            <p className="text-slate-400 mt-4 font-medium text-sm">작성일: 2026. 02. 10 • 8 min read</p>
           </header>
 
           <section className="space-y-8 text-lg text-slate-600 leading-relaxed font-medium">
             <p className="break-keep">
-              "네가 너무 예민한 거 아니야?", "다 너 잘되라고 하는 소리야." 이런 말들을 들으며 어느 순간 나의 판단력이 흐려지고 상대방의 말이 진리처럼 느껴진다면, 당신은 <strong>가스라이팅(Gaslighting)</strong>의 피해를 입고 있을 가능성이 큽니다.
+              카메라 렌즈에는 '최단 초점 거리'라는 것이 있습니다. 피사체에 너무 가까이 다가가면 렌즈는 초점을 잡지 못하고 화면 전체가 흐릿해지고 말죠. 인간관계도 이와 놀랍도록 닮아 있습니다. 우리는 흔히 가까울수록 좋다고 믿지만, 실상은 너무 가까워지는 순간 상대의 전체 모습 대신 단점이라는 잡티만 크게 보이거나, 나 자신의 정체성이 상대의 그림자에 가려 흐릿해지곤 합니다.
             </p>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">1. 가스라이팅이란 무엇인가?</h3>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">1. 클로즈업의 함정: 보이지 않는 전체상</h3>
             <p className="break-keep">
-              상황을 조작해 타인이 자기 자신을 의심하게 만들고, 판단력을 상실하게 하여 정서적으로 지배하는 행위를 말합니다. 친밀한 연인, 부모, 혹은 직장 동료 사이에서 교묘하게 일어나기 때문에 알아차리기가 매우 어렵습니다.
+              상대를 너무 사랑하거나 의지할 때, 우리는 자꾸만 그에게 '밀착'하려고 합니다. 하지만 밀착된 관계에서는 '구도'라는 것이 존재할 수 없습니다. 상대가 무엇을 생각하는지, 어떤 배경을 가지고 살아가는지 이해하기보다는 지금 당장 나에게 보여주는 반응 하나하나에 일희일비하게 되죠. 관계의 숨통을 틔워주는 것은 밀착이 아니라, 한 걸음 뒤로 물러나 상대를 하나의 독립된 피사체로 바라보는 '여백'입니다.
             </p>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">2. 내가 겪고 있다는 신호</h3>
-            <ul className="space-y-4">
-              <li className="flex items-start border-b border-slate-50 pb-2">
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">2. 황금 분할: 나와 타인의 균형점</h3>
+            <p className="break-keep">
+              좋은 사진은 피사체를 정중앙에 두기보다 황금 분할 선상에 배치하여 시각적 편안함을 줍니다. 관계에서도 나를 중심에 두면서도 타인의 자리를 존중하는 적절한 배치가 필요합니다.
+            </p>
+            <ul className="space-y-4 bg-slate-50 p-6 rounded-2xl border border-slate-100">
+              <li className="flex items-start">
                 <span className="text-[#E91E63] mr-2 font-bold">•</span>
-                <span>상대방에게 끊임없이 "미안해"라고 사과하게 된다.</span>
-              </li>
-              <li className="flex items-start border-b border-slate-50 pb-2">
-                <span className="text-[#E91E63] mr-2 font-bold">•</span>
-                <span>내가 너무 예민하고 이상한 사람인 것 같아 자책한다.</span>
+                <span><strong>건강한 거리 두기(Boundaries):</strong> 거리는 단절이 아닙니다. 오히려 상대를 가장 잘 관찰하고 존중할 수 있는 '최적의 시야'를 확보하는 행위입니다.</span>
               </li>
               <li className="flex items-start">
                 <span className="text-[#E91E63] mr-2 font-bold">•</span>
-                <span>간단한 결정조차 스스로 내리기 두려워진다.</span>
+                <span><strong>배경 수용하기:</strong> 피사체 뒤의 풍경이 인물을 돋보이게 하듯, 상대의 과거와 환경을 있는 그대로의 '배경'으로 인정할 때 관계의 해상도가 높아집니다.</span>
               </li>
             </ul>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">3. 정서적 지배에서 벗어나는 법</h3>
-            <p className="break-keep">
-              가장 중요한 것은 <strong>감정 기록하기</strong>입니다. 당시의 상황과 내 감정을 사실 그대로 적어두면 나중에 상대방이 상황을 왜곡할 때 객관적인 증거가 됩니다. 또한 물리적·심리적 거리를 두어 상대방의 판단이 나의 자아를 잠식하지 않도록 경계를 세워야 합니다.
-            </p>
-
-            {/* 인용구 박스 */}
-            <div className="bg-slate-50 border-l-4 border-[#E91E63] p-8 my-10 rounded-r-[32px] shadow-sm">
+            <div className="bg-rose-50 border-l-4 border-rose-400 p-8 my-10 rounded-r-[32px] shadow-sm">
               <p className="italic text-[#0F172A] text-xl font-bold leading-relaxed">
-                "당신의 감정은 당신만의 것입니다. <br/>누구도 그것을 틀렸다고 말할 권리는 없습니다."
+                "가장 아름다운 풍경은 <br/>적당한 거리에서 바라볼 때 비로소 완성됩니다."
               </p>
             </div>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">결론: Feeling Snap의 제언</h3>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">3. Feeling Snap: 관계의 온도 조절하기</h3>
             <p className="break-keep">
-              가스라이팅에서 벗어나는 가장 강력한 도구는 '나의 주관을 되찾는 기록'입니다. 혼란스러운 마음을 그대로 방치하지 마세요.
+              관심 있는 사람과의 관계에서 갈등이 생겼다면, 잠시 <strong>Feeling Snap</strong>을 켜고 현재의 구도를 점검해 보세요. 내가 너무 그 사람에게 초점을 맞추느라 내 삶의 수평을 잃어버리지는 않았는지, 혹은 너무 멀리 떨어져 방치하고 있지는 않은지 말입니다. 나의 감정 상태를 기록하는 것만으로도 뜨거워진 감정의 센서를 식히고, 다시금 선명하고 아름다운 관계의 구도를 찾아갈 수 있는 힘이 생깁니다.
             </p>
-            <p className="font-bold text-[#0F172A] p-6 bg-pink-50/50 rounded-2xl border border-pink-100">
-              Feeling Snap에서 지금 느낀 감정을 투명하게 기록해 보세요. AI가 당신의 감정 패턴을 분석하여, 타인의 목소리가 아닌 당신 내면의 진실한 목소리를 들을 수 있도록 돕겠습니다.
+
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">결론: 각자의 빛을 지켜주는 거리</h3>
+            <p className="break-keep">
+              모든 별은 서로 멀리 떨어져 있기에 고유한 빛을 낼 수 있습니다. 우리도 각자의 고유한 빛을 잃지 않으면서 서로를 비춰줄 수 있는 그 '적당한 거리'를 찾아야 합니다. 너무 가까워 상처 주지 않고, 너무 멀어 외롭지 않은 그 지점에서 당신의 인간관계는 가장 선명하고 따뜻한 스냅으로 기록될 것입니다.
             </p>
+            
+            <div className="p-6 bg-rose-50/50 rounded-2xl border border-rose-100 space-y-2">
+              <p className="font-bold text-[#0F172A] text-sm uppercase tracking-wider">Harmony Soundtrack</p>
+              <ul className="text-slate-600 text-base">
+                <li>• Norah Jones - Don't Know Why (부드러운 거리감의 정서)</li>
+                <li>• Kings of Convenience - Misread (오해와 이해 사이의 선율)</li>
+              </ul>
+            </div>
           </section>
 
-          {/* 하단 CTA 버튼 */}
           <footer className="mt-20 pt-10 border-t border-slate-100 text-center">
             <Link href="/">
               <button className="w-full max-w-xs bg-[#1A1F2C] text-white py-6 rounded-[24px] font-bold text-xl shadow-xl hover:scale-105 active:scale-95 transition-all">
-                내 감정 주권 되찾기 🛡️
+                건강한 거리 유지하며 기록하기 🌷
               </button>
             </Link>
           </footer>

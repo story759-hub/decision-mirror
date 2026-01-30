@@ -6,7 +6,7 @@ import Link from 'next/link';
 export default function ArticleSix() {
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans pb-20 overflow-x-hidden">
-      {/* 메인 로고 디자인 유지 */}
+      {/* 헤더 */}
       <header className="max-w-xl mx-auto pt-14 pb-8 text-center border-b border-slate-50">
         <Link href="/">
           <h1 
@@ -20,81 +20,78 @@ export default function ArticleSix() {
       </header>
 
       <main className="max-w-xl mx-auto px-6 py-12">
-        {/* 수정된 목록 경로와 문구 */}
         <Link href="/articles" className="text-[#E91E63] font-bold mb-8 inline-block hover:underline">
-          ← Insights 목록으로 돌아가기
+          ← 인사이트 목록으로 돌아가기
         </Link>
 
         <article className="animate-in fade-in slide-in-from-bottom-4 duration-700">
           <header className="mb-10">
-            {/* 카테고리 태그 */}
             <div className="mb-4">
-              <span className="bg-pink-50 text-[#E91E63] text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border border-pink-100">
-                Mental Health
+              <span className="bg-orange-50 text-orange-600 text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border border-orange-100">
+                Burnout & Recovery
               </span>
             </div>
             
             <h2 className="text-3xl md:text-4xl font-black text-[#0F172A] leading-tight tracking-tighter">
-              아무것도 하기 싫을 때: <br/>번아웃이 보내는 뇌의 SOS 신호
+              번아웃: 무기력이 보내는 뇌의 SOS 신호 <br/>열기를 식혀야 선명해지는 삶의 화각
             </h2>
-            <p className="text-slate-400 mt-4 font-medium text-sm">작성일: 2026. 01. 24 • 5 min read</p>
+            <p className="text-slate-400 mt-4 font-medium text-sm">작성일: 2026. 02. 04 • 8 min read</p>
           </header>
 
           <section className="space-y-8 text-lg text-slate-600 leading-relaxed font-medium">
             <p className="break-keep">
-              분명 열심히 살고 싶고 해야 할 일도 산더미인데, 정작 몸과 마음이 천근만근 무거워 손하나 까딱하기 싫은 날이 있습니다. 이는 의지력의 문제가 아니라, 당신의 뇌가 과부하를 막기 위해 스스로 전원을 내리는 <strong>'번아웃(Burnout)'</strong> 증상일 확률이 높습니다.
+              고성능 카메라로 뜨거운 태양 아래에서 너무 오랫동안 연사 촬영을 하다 보면, 어느 순간 'Overheated(과열)' 경고와 함께 전원이 꺼져버리곤 합니다. 센서를 보호하기 위해 기계 스스로가 내리는 강제 휴식이죠. 우리 삶의 **번아웃(Burnout)** 또한 이와 같습니다. 어느 날 갑자기 찾아온 무기력은 당신이 나태해서가 아니라, 당신의 마음 센서가 타버리지 않도록 뇌가 긴급하게 내린 '강제 종료' 신호입니다.
             </p>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">1. 뇌의 에너지가 고갈되었다는 증거</h3>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">1. 열정이라는 이름의 과다 노출</h3>
             <p className="break-keep">
-              우리 뇌의 전두엽은 의사결정과 실행력을 담당합니다. 하지만 만성적인 스트레스와 휴식 없는 몰입은 전두엽을 지치게 만듭니다. 이때 우리 뇌는 생존을 위해 '최소 전력 모드'로 전환하며, 이것이 우리가 느끼는 <strong>'무기력증'</strong>으로 나타납니다.
+              우리는 종종 '열심히'라는 조명 아래 스스로를 너무 오랫동안 세워둡니다. 완벽한 성과, 타인의 기대, 끊임없는 비교라는 강렬한 조명은 우리 삶의 디테일을 하얗게 날려버립니다(White-out). 번아웃은 이 과다한 빛에 지친 뇌가 "더 이상은 아무것도 기록할 수 없어"라고 선언하는 상태입니다. 이때 가장 위험한 것은 무기력해진 자신을 채찍질하며 다시 전원을 켜려고 시도하는 것입니다. 열이 식지 않은 상태에서 다시 돌리는 기계는 결국 영구적인 고장을 일으키기 때문입니다.
             </p>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">2. 번아웃의 주요 신호 3가지</h3>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">2. 암실(Darkroom)의 시간: 회복을 위한 어둠</h3>
             <p className="break-keep">
-              단순한 피로와 번아웃은 다릅니다. 다음 신호가 느껴진다면 즉시 멈춰야 합니다.
+              필름 사진이 형체를 갖추기 위해서는 반드시 어두운 암실에서의 시간이 필요합니다. 번아웃이 찾아왔을 때 우리에게 필요한 것도 바로 이 '의도적인 어둠'입니다. 아무것도 생산하지 않고, 누구의 기대도 충족시키지 않는 시간. 오직 자신의 호흡에만 집중하며 내면의 열기를 식히는 과정이죠. 
             </p>
-            <ul className="space-y-4">
+            <ul className="space-y-4 bg-slate-50 p-6 rounded-2xl border border-slate-100">
               <li className="flex items-start">
                 <span className="text-[#E91E63] mr-2 font-bold">•</span>
-                <span><strong>정서적 고갈:</strong> 예전에는 즐겁던 일이 아무런 감흥을 주지 못합니다.</span>
+                <span><strong>해상도 낮추기:</strong> 오늘 하루의 목표를 최소한으로 줄여보세요. "밥 먹기", "샤워하기" 정도면 충분합니다. 뇌에 가해지는 처리 부하를 줄여야 센서가 회복됩니다.</span>
               </li>
               <li className="flex items-start">
                 <span className="text-[#E91E63] mr-2 font-bold">•</span>
-                <span><strong>냉소적인 태도:</strong> 주변 사람이나 업무에 대해 무관심해집니다.</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-[#E91E63] mr-2 font-bold">•</span>
-                <span><strong>효능감 저하:</strong> "내가 잘할 수 있을까?"라는 자기 의심이 깊어집니다.</span>
+                <span><strong>저장하지 않는 순간:</strong> 모든 것을 의미 있게 만들려는 강박을 버리세요. 그냥 흘러가는 구름을 보듯, 목적 없는 시간을 허용해야 합니다.</span>
               </li>
             </ul>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">3. '진짜 휴식'을 위한 뇌 리셋 법</h3>
-            <p className="break-keep">
-              스마트폰을 보며 누워 있는 것은 뇌에게 휴식이 아닙니다. 하루 딱 1시간만이라도 모든 기기를 끄고 시각 정보를 차단하는 <strong>디지털 디톡스</strong>가 필요합니다. 멍하게 있는 시간을 의도적으로 만들어 뇌의 디폴트 모드 네트워크(DMN)를 정돈해야 합니다.
-            </p>
-
-            {/* 인용구 박스 */}
-            <div className="bg-slate-50 border-l-4 border-[#E91E63] p-8 my-10 rounded-r-[32px] shadow-sm">
+            <div className="bg-slate-50 border-l-4 border-orange-400 p-8 my-10 rounded-r-[32px] shadow-sm">
               <p className="italic text-[#0F172A] text-xl font-bold leading-relaxed">
-                "당신은 기계가 아닙니다. 가끔 멈추는 것은 <br/>퇴보가 아니라 다음 항해를 위한 정비 시간입니다."
+                "번아웃은 당신이 멈춘 것이 아니라, <br/>너무 멀리 왔기에 잠시 숨을 고르는 정거장에 도착한 것입니다."
               </p>
             </div>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">결론: Feeling Snap의 제언</h3>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">3. Feeling Snap: 희미한 빛부터 기록하기</h3>
             <p className="break-keep">
-              지금 아무것도 하기 싫다면, 그것은 당신이 그동안 누구보다 최선을 다해 달려왔다는 증거입니다. 자신을 채찍질하는 대신, 지금의 에너지가 몇 퍼센트 남았는지 솔직하게 대면해 보세요.
+              번아웃 상태에서는 긴 글을 쓰거나 깊은 생각을 하는 것조차 고통스러울 수 있습니다. 그럴 때는 <strong>Feeling Snap</strong>에 아주 작은 감각 하나만 남겨보세요. "차가운 물 촉감이 좋다", "방 안의 그림자가 길다" 같은 아주 짧은 관찰만으로도 충분합니다. 이 작은 스냅들이 모여 뇌 센서의 감도를 서서히 회복시키고, 다시 세상을 선명하게 바라볼 에너지를 만들어 줄 것입니다.
             </p>
-            <p className="font-bold text-[#0F172A] p-6 bg-pink-50/50 rounded-2xl border border-pink-100">
-              Feeling Snap에서 지금 당신의 무기력함의 깊이를 기록해 보세요. AI가 당신의 에너지를 회복할 수 있는 작은 첫걸음을 제안해 드립니다.
+
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">결론: 다시 켜질 당신을 믿으세요</h3>
+            <p className="break-keep">
+              지금 무기력의 늪에 빠져 있다면, 그것은 당신이 그만큼 뜨겁게 살아왔다는 훈장과도 같습니다. 충분히 식히고, 충분히 어두워지세요. 암실의 시간이 지나면 당신의 삶이라는 필름에는 이전보다 훨씬 깊고 풍부한 계조의 사진이 인화될 것입니다.
             </p>
+            
+            <div className="p-6 bg-orange-50/50 rounded-2xl border border-orange-100 space-y-2">
+              <p className="font-bold text-[#0F172A] text-sm uppercase tracking-wider">Soundtrack for Rest</p>
+              <ul className="text-slate-600 text-base">
+                <li>• Max Richter - Sleep (뇌의 이완을 돕는 현대 자장가)</li>
+                <li>• Sigur Rós - Untitled #1 (Vaka) (세상의 소음을 차단하는 신비로운 선율)</li>
+              </ul>
+            </div>
           </section>
 
-          {/* 하단 CTA 버튼 */}
           <footer className="mt-20 pt-10 border-t border-slate-100 text-center">
             <Link href="/">
               <button className="w-full max-w-xs bg-[#1A1F2C] text-white py-6 rounded-[24px] font-bold text-xl shadow-xl hover:scale-105 active:scale-95 transition-all">
-                지친 내 마음 진단하기 🔋
+                지친 내 마음 쉬게 해주기 ☁️
               </button>
             </Link>
           </footer>

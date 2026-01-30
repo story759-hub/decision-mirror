@@ -92,10 +92,6 @@ export async function POST(req: Request) {
       },
     });
 
-    /* ================================
-       🧠 톤 결정 + 문장 생성을
-       AI 단일 요청으로 통합
-    ================================ */
     const prompt = `
 SYSTEM:
 You are "Snap", an emotional observer.
@@ -117,9 +113,10 @@ You MUST choose ONE tone internally and return it as "appliedTone".
 - Leave emotional space (미완 느낌)
 
 [MIX RULES]:
-- mix MUST contain exactly 3 emotions
-- key MUST be one of: joy, sadness, anger, anxiety, regret, neutral
-- rate MUST sum to 100
+- mix MUST contain exactly 3 emotions.
+- key MUST be one of: joy, sadness, anger, anxiety, regret, neutral.
+- label: AI should analyze the context and create a creative and poetic Korean emotional name (e.g., "흩어진 마음", "서늘한 기분", "남겨진 미련" 등).
+- rate MUST sum to 100.
 
 [SCARCITY RULES]:
 - commonRate: realistic percentage (1~99, avoid round numbers)
@@ -136,9 +133,9 @@ OUTPUT JSON:
 {
   "appliedTone": "dry | cynical | neutral",
   "mix": [
-    { "key": "...", "label": "...", "rate": 50 },
-    { "key": "...", "label": "...", "rate": 30 },
-    { "key": "...", "label": "...", "rate": 20 }
+    { "key": "joy | sadness | anger | anxiety | regret | neutral", "label": "Poetic Label", "rate": 50 },
+    { "key": "joy | sadness | anger | anxiety | regret | neutral", "label": "Poetic Label", "rate": 30 },
+    { "key": "joy | sadness | anger | anxiety | regret | neutral", "label": "Poetic Label", "rate": 20 }
   ],
   "commonRate": "n%",
   "rateLabel": "이 장면을 고른 사람은 n%야\\n관측 문장",

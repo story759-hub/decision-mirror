@@ -6,7 +6,7 @@ import Link from 'next/link';
 export default function ArticleTen() {
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans pb-20 overflow-x-hidden">
-      {/* 메인 로고 디자인 유지 */}
+      {/* 헤더 */}
       <header className="max-w-xl mx-auto pt-14 pb-8 text-center border-b border-slate-50">
         <Link href="/">
           <h1 
@@ -20,77 +20,78 @@ export default function ArticleTen() {
       </header>
 
       <main className="max-w-xl mx-auto px-6 py-12">
-        {/* 수정된 목록 경로와 문구 */}
         <Link href="/articles" className="text-[#E91E63] font-bold mb-8 inline-block hover:underline">
-          ← Insights 목록으로 돌아가기
+          ← 인사이트 목록으로 돌아가기
         </Link>
 
         <article className="animate-in fade-in slide-in-from-bottom-4 duration-700">
           <header className="mb-10">
-            {/* 카테고리 태그 */}
             <div className="mb-4">
-              <span className="bg-pink-50 text-[#E91E63] text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border border-pink-100">
-                Self-Understanding
+              <span className="bg-slate-800 text-white text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border border-slate-900">
+                Emotional Alchemy
               </span>
             </div>
             
             <h2 className="text-3xl md:text-4xl font-black text-[#0F172A] leading-tight tracking-tighter">
-              내 감정의 이름을 부르면 사라지는 효과: <br/>'감정 명명하기(Affect Labeling)'
+              부정적 감정의 현상법: <br/>슬픔도 선명한 하나의 색깔이다
             </h2>
-            <p className="text-slate-400 mt-4 font-medium text-sm">작성일: 2026. 01. 24 • 5 min read</p>
+            <p className="text-slate-400 mt-4 font-medium text-sm">작성일: 2026. 02. 08 • 8 min read</p>
           </header>
 
           <section className="space-y-8 text-lg text-slate-600 leading-relaxed font-medium">
             <p className="break-keep">
-              막연하게 기분이 나쁘거나 답답할 때, 우리는 그 감정에 압도당하기 쉽습니다. 하지만 그 모호한 덩어리에 <strong>"나는 지금 억울함을 느끼고 있어"</strong>라고 이름을 붙이는 순간, 신기하게도 감정의 소용돌이는 잦아들기 시작합니다. 이것이 바로 심리학에서 말하는 <strong>'감정 명명하기(Affect Labeling)'</strong>의 힘입니다.
+              밝고 화사한 사진만이 정답이라고 믿는 시대입니다. 하지만 우리는 알고 있습니다. 흑백 사진이 주는 묵직한 울림이나, 짙은 그림자가 드리워진 정물 사진의 매력을 말이죠. 우리 마음도 마찬가지입니다. 슬픔, 우울, 분노와 같은 부정적인 감정들은 인생이라는 사진에서 지워야 할 '노출 부족'이 아니라, 삶의 질감을 풍성하게 만드는 **'그림자(Shadow)'**입니다.
             </p>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">1. 뇌는 '이름'을 붙일 때 안심한다</h3>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">1. 어둠이 있어야 빛이 정의된다</h3>
             <p className="break-keep">
-              UCLA 심리학과 연구팀에 따르면, 자신의 감정을 단어로 표현하는 순간 감정의 중추인 '편도체'의 활동은 줄어들고, 이성을 담당하는 '전전두피질'이 활성화됩니다. 막연한 공포가 구체적인 정보로 치환되면서, 뇌가 상황을 통제하고 있다고 판단하기 때문입니다.
+              사진학에서 완벽하게 하얀색으로만 가득한 사진은 아무런 정보를 담지 못합니다. 형태를 구분하고 깊이감을 만드는 것은 결국 어두운 부분입니다. 기쁨이 빛이라면, 슬픔은 그 기쁨의 형태를 선명하게 빚어내는 어둠입니다. 슬픔을 겪어본 사람만이 기쁨의 농도를 예민하게 감각할 수 있는 법이죠. 자신의 우울함을 억지로 밝게 보정하려 애쓰지 마세요. 그 어둠은 당신의 영혼이 가진 깊이입니다.
             </p>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">2. 감정 어휘력과 회복탄력성</h3>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">2. 감정의 암실: 현상을 거부하지 않기</h3>
             <p className="break-keep">
-              단순히 '좋다'나 '나쁘다'가 아니라, '복잡미묘하다', '무력하다' 등 세밀한 감정 단어를 사용하는 사람일수록 스트레스 상황에서 더 빠르게 회복합니다. 감정을 세분화할수록 그에 맞는 적절한 대처법을 찾기 쉬워지기 때문입니다.
+              필름은 암실의 차가운 약품 속에서 자신의 본모습을 드러냅니다. 부정적인 감정이 찾아왔을 때, 그것을 회피하는 것은 필름을 현상하지 않은 채 방치하는 것과 같습니다. 
             </p>
-
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">3. 어떻게 이름을 붙여야 할까?</h3>
-            <p className="break-keep">
-              감정 명명하기는 누구나 할 수 있는 가장 쉬운 심리 치료법입니다.
-            </p>
-            <ul className="space-y-4">
+            <ul className="space-y-4 bg-slate-50 p-6 rounded-2xl border border-slate-100">
               <li className="flex items-start">
                 <span className="text-[#E91E63] mr-2 font-bold">•</span>
-                <span><strong>주어와 함께 말하기:</strong> "짜증 나" 대신 "나는 지금 일정이 꼬여서 짜증이 난 상태야"라고 문장으로 완성해 보세요.</span>
+                <span><strong>슬픔의 계조(Tone) 인정하기:</strong> "그냥 슬프다"가 아니라 "오늘은 짙은 감청색의 슬픔이다"라고 이름을 붙여보세요. 구체적인 이름은 감정의 소용돌이에서 나를 지켜주는 안전장치가 됩니다.</span>
               </li>
               <li className="flex items-start">
                 <span className="text-[#E91E63] mr-2 font-bold">•</span>
-                <span><strong>기록으로 남기기:</strong> 머릿속으로 생각만 하는 것보다 직접 쓰고 눈으로 확인하는 것이 뇌의 진정 효과를 극대화합니다.</span>
+                <span><strong>대조(Contrast)의 미학:</strong> 힘든 시간을 통과하는 중이라면, 이것이 훗날 맞이할 눈부신 순간을 위한 극적인 대비 장치라고 믿어보세요.</span>
               </li>
             </ul>
 
-            {/* 인용구 박스 */}
-            <div className="bg-slate-50 border-l-4 border-[#E91E63] p-8 my-10 rounded-r-[32px] shadow-sm">
-              <p className="italic text-[#0F172A] text-xl font-bold leading-relaxed">
-                "이름을 불러주기 전까지 그것은 다만 하나의 몸짓에 지나지 않았으나, <br/>이름을 불렀을 때 그것은 비로소 나에게로 와서 꽃이 되었다."
+            <div className="bg-slate-900 text-white p-8 my-10 rounded-[32px] shadow-xl">
+              <p className="italic text-slate-200 text-xl font-bold leading-relaxed">
+                "가장 어두운 그림자를 가진 사진이 <br/>때로는 가장 많은 진실을 말해줍니다."
               </p>
             </div>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">결론: Feeling Snap의 제언</h3>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">3. Feeling Snap: 어둠 속에서 셔터 누르기</h3>
             <p className="break-keep">
-              감정은 무시할수록 커지고, 마주할수록 작아집니다. 오늘 당신의 마음을 스쳐 간 무수한 감정들에게 제각기 이름을 지어주었나요?
+              기분이 좋지 않을 때 <strong>Feeling Snap</strong>을 기록하는 것은 용기 있는 현상 과정입니다. 슬픔의 데이터를 회피하지 않고 직면할 때, 뇌는 그 감정을 '위협'이 아닌 '경험'으로 분류하기 시작합니다. 우울한 기분을 인화지에 옮겨 담듯 텍스트로 뱉어내 보세요. 기록된 슬픔은 더 이상 당신 내면을 갉아먹지 않고, 당신이 통과해 온 단단한 삶의 흔적으로 남게 될 것입니다.
             </p>
-            <p className="font-bold text-[#0F172A] p-6 bg-pink-50/50 rounded-2xl border border-pink-100">
-              Feeling Snap은 당신이 감정의 이름을 더 정확하게 부를 수 있도록 돕습니다. 지금 당신의 마음을 한 줄의 문장으로 적어보세요. AI가 그 속에 숨겨진 감정의 이름들을 찾아드리고, 당신의 마음이 꽃으로 피어날 수 있게 도와드릴게요.
+
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">결론: 당신의 모든 색을 사랑하세요</h3>
+            <p className="break-keep">
+              삶이라는 사진첩에는 원색의 기쁨도, 무채색의 슬픔도 모두 필요합니다. 오늘 당신의 마음이 조금 어둡다면, 그것은 당신이 그만큼 깊은 이야기를 써 내려가고 있다는 증거입니다. 그 어두운 색깔조차 당신만의 고유한 필터임을 잊지 마세요. 
             </p>
+            
+            <div className="p-6 bg-slate-100/50 rounded-2xl border border-slate-200 space-y-2">
+              <p className="font-bold text-[#0F172A] text-sm uppercase tracking-wider">Deep Blue Soundtrack</p>
+              <ul className="text-slate-600 text-base">
+                <li>• Adele - Someone Like You (슬픔의 정석적인 현상)</li>
+                <li>• Radiohead - No Surprises (고요한 우울의 질감)</li>
+              </ul>
+            </div>
           </section>
 
-          {/* 하단 CTA 버튼 */}
           <footer className="mt-20 pt-10 border-t border-slate-100 text-center">
             <Link href="/">
               <button className="w-full max-w-xs bg-[#1A1F2C] text-white py-6 rounded-[24px] font-bold text-xl shadow-xl hover:scale-105 active:scale-95 transition-all">
-                내 감정의 이름 불러주기 🏷️
+                있는 그대로의 나 현상하기 🌑
               </button>
             </Link>
           </footer>

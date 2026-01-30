@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 
-export default function ArticleTwo() {
+export default function ArticleOne() {
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans pb-20 overflow-x-hidden">
       {/* 메인 로고 디자인 유지 */}
@@ -20,74 +20,68 @@ export default function ArticleTwo() {
       </header>
 
       <main className="max-w-xl mx-auto px-6 py-12">
-        {/* 요청하신 경로와 문구로 수정 */}
         <Link href="/articles" className="text-[#E91E63] font-bold mb-8 inline-block hover:underline">
-          ← Insights 목록으로 돌아가기
+          ← 인사이트 목록으로 돌아가기
         </Link>
 
         <article className="animate-in fade-in slide-in-from-bottom-4 duration-700">
           <header className="mb-10">
             <div className="mb-4">
               <span className="bg-pink-50 text-[#E91E63] text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border border-pink-100">
-                Decision Strategy
+                Essay
               </span>
             </div>
             
             <h2 className="text-3xl md:text-4xl font-black text-[#0F172A] leading-tight tracking-tighter">
-              결정 장애를 극복하는 '70% 법칙': <br/>완벽한 타이밍보다 중요한 것
+              가끔은 멈춰서야 보이는 것들: <br/>빠르게 지나가는 일상 속에서 셔터를 누르는 이유
             </h2>
-            <p className="text-slate-400 mt-4 font-medium text-sm">작성일: 2026. 01. 22 • 5 min read</p>
+            <p className="text-slate-400 mt-4 font-medium text-sm">작성일: 2026. 01. 30 • 6 min read</p>
           </header>
 
           <section className="space-y-8 text-lg text-slate-600 leading-relaxed font-medium">
             <p className="break-keep">
-              현대인들은 매일 수천 가지의 선택 앞에 놓입니다. 점심 메뉴와 같은 사소한 것부터 이직, 투자, 관계의 정리와 같은 중대한 결정까지, 우리의 뇌는 끊임없이 에너지를 소모합니다. 하지만 많은 이들이 '완벽한 선택'을 하려다 결국 아무것도 결정하지 못하는 <strong>'분석 마비(Analysis Paralysis)'</strong> 상태에 빠지곤 합니다.
+              우리는 너무 자주, 그리고 너무 빨리 걷는다. 손목 위의 시계와 스마트폰 속의 일정표는 끊임없이 우리를 어딘가로 밀어낸다. 아침의 서두름은 점심의 분주함으로, 다시 저녁의 피로함으로 꼬리를 물고 이어진다. 그렇게 속도에 몸을 맡기다 보면, 정작 내가 지금 어떤 표정을 짓고 있는지조차 잊게 됩니다.
             </p>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">1. 아마존의 제프 베이조스가 강조한 70%의 힘</h3>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">1. 멈추지 않으면 보이지 않는 것들</h3>
             <p className="break-keep">
-              세계적인 기업 아마존의 창업자 제프 베이조스는 주주들에게 보내는 서신에서 의사결정의 속도에 대해 강조한 바 있습니다. 그는 <strong>"대부분의 결정은 당신이 원하는 정보의 약 70% 정도만 확보했을 때 내려져야 한다"</strong>고 말합니다. 만약 90% 이상의 정보를 기다린다면, 그 결정은 이미 늦었을 가능성이 높기 때문입니다.
+              조리개 값을 조정하고 초점을 맞추는 짧은 시간 동안, 우리는 비로소 대상을 마주합니다. 길가에 핀 이름 모를 들꽃, 오후의 낮은 햇살이 그어놓은 긴 그림자, 그리고 그 풍경을 바라보는 나의 복잡미묘한 마음까지. 바쁘게 달리는 기차 안에서는 풍경이 그저 긴 선으로 보일 뿐이지만, 기차에서 내려 발을 멈추면 비로소 한 송이 꽃의 꽃잎 결이 보이기 시작합니다.
             </p>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">2. 왜 100%는 위험한가?</h3>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">2. 셔터를 누르는 찰나의 용기</h3>
             <p className="break-keep">
-              완벽한 정보를 수집하려는 시도는 두 가지 치명적인 기회비용을 발생시킵니다. 
+              감정을 기록하기 위해 셔터를 누르는 데는 약간의 용기가 필요합니다. 우리는 흔히 행복한 순간만을 남기고 싶어 하지만, 삶의 진짜 질감은 때로 슬픔이나 불안 같은 어두운 색조에서 더 선명하게 드러나기도 합니다. 지금 내 마음이 조용히 가라앉아 있음을 인정하고 기록하는 순간, 그 감정은 나를 휘두르는 괴물이 아니라 내가 관찰할 수 있는 하나의 '장면'이 됩니다.
             </p>
-            <ul className="space-y-4">
-              <li className="flex items-start">
-                <span className="text-[#E91E63] mr-2 font-bold">•</span>
-                <span><strong>속도의 상실:</strong> 시장이나 상황은 기다려주지 않습니다. 완벽을 기하는 동안 경쟁자가 먼저 움직이거나 상황이 변해버립니다.</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-[#E91E63] mr-2 font-bold">•</span>
-                <span><strong>인지적 과부하:</strong> 정보가 많아질수록 뇌는 핵심을 놓치고 지엽적인 데이터에 매몰됩니다. 이는 오히려 잘못된 판단으로 이어질 확률을 높입니다.</span>
-              </li>
-            </ul>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">3. 틀린 결정을 내렸을 때의 복구 능력</h3>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">3. 인화된 마음이 주는 위로</h3>
             <p className="break-keep">
-              70% 법칙의 핵심은 <strong>'가역성(Reversibility)'</strong>에 있습니다. 베이조스는 결정을 '돌이킬 수 없는 문(Type 1)'과 '언제든 돌아올 수 있는 문(Type 2)'으로 나눕니다. 우리가 일상에서 마주하는 대부분의 결정은 후자입니다. 70%의 정보로 빠르게 결정하고 실행한 뒤, 발생하는 피드백을 보고 수정하는 것이 100%의 정보를 기다리며 멈춰있는 것보다 훨씬 효율적입니다.
+              시간이 흐른 뒤에 꺼내 보는 사진이 특별한 이유는, 그때의 공기와 감각을 고스란히 소환하기 때문입니다. <strong>Feeling Snap</strong>을 통해 남긴 오늘의 기록은 훗날 우리에게 말을 걸 것입니다. "그때 너는 이런 이유로 흔들렸지만, 동시에 스스로를 다독일 줄 아는 사람이었어"라고 말이죠.
             </p>
 
             <div className="bg-slate-50 border-l-4 border-[#E91E63] p-8 my-10 rounded-r-[32px] shadow-sm">
               <p className="italic text-[#0F172A] text-xl font-bold leading-relaxed">
-                "실행하지 않은 완벽한 계획보다, <br/>지금 실행하는 70%의 계획이 당신의 삶을 전진시킵니다."
+                "기록되지 않은 시간은 망각 속으로 사라지지만, <br/>당신이 머물러 준 감정의 순간은 빛이 되어 당신을 지킵니다."
               </p>
             </div>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">결론: Feeling Snap의 제언</h3>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">결론: 당신만의 조리개를 열어두세요</h3>
             <p className="break-keep">
-              머릿속이 복잡해 결정을 내리지 못하고 있다면, 지금 당신이 쥐고 있는 정보가 몇 퍼센트인지 자문해 보십시오. 만약 절반 이상의 확신이 있다면, 일단 그 생각을 밖으로 꺼내어 구조화해야 합니다. 
+              세상이 정해준 속도가 아니라 당신만의 속도로 셔터를 누를 때, 비로소 인생이라는 긴 필름은 당신만의 색채로 채워지기 시작할 것입니다. 주저하지 말고 지금 이 순간의 당신을 기록해 보세요.
             </p>
-            <p className="font-bold text-[#0F172A] p-6 bg-pink-50/50 rounded-2xl border border-pink-100">
-              Feeling Snap에서 지금 당신의 혼란을 기록하고, 객관적인 상태 선언을 확인해 보세요. 정리가 시작되는 순간, 결정은 쉬워집니다.
-            </p>
+            
+            <div className="p-6 bg-pink-50/50 rounded-2xl border border-pink-100 space-y-2">
+              <p className="font-bold text-[#0F172A] text-sm uppercase tracking-wider">Today's Recommend Soundtrack</p>
+              <ul className="text-slate-600 text-base">
+                <li>• Bill Evans - Peace Piece</li>
+                <li>• 어떤날 - 출발</li>
+              </ul>
+            </div>
           </section>
 
           <footer className="mt-20 pt-10 border-t border-slate-100 text-center">
             <Link href="/">
               <button className="w-full max-w-xs bg-[#1A1F2C] text-white py-6 rounded-[24px] font-bold text-xl shadow-xl hover:scale-105 active:scale-95 transition-all">
-                나의 혼란 정리하러 가기 ✨
+                지금 내 감정 기록하기 📷
               </button>
             </Link>
           </footer>

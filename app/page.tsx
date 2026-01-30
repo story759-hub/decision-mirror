@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { toPng } from 'html-to-image';
+import Link from 'next/link'; // 🔹 Link 임포트 추가 확인
 
 // 🔹 globals.css에 'Bongsoong-Tint' 폰트가 등록되어 있어야 합니다.
 
@@ -150,6 +151,43 @@ export default function FeelingSnapFinal() {
     } catch (err) { alert("추출 실패"); }
   };
 
+  // 공통 아티클 컴포넌트
+  const ArticleSection = () => (
+    <div className="pt-10 pb-10 space-y-5 animate-in fade-in duration-700">
+      <div className="flex justify-between items-end px-1">
+        <div className="space-y-1">
+          <span className="text-[10px] font-black text-[#E91E63] uppercase tracking-widest">Recommended</span>
+          <h4 className="text-xl font-black text-slate-800 tracking-tighter">기록을 위한 아티클</h4>
+        </div>
+        {/* 🔹 전체보기 연결 수정 완료 */}
+        <Link href="/articles">
+          <span className="text-[11px] font-bold text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+            전체보기 +
+          </span>
+        </Link>
+      </div>
+
+      <div className="space-y-3">
+        {[
+          { id: 1, title: "가끔은 멈춰서야 보이는 것들", desc: "빠르게 지나가는 일상 속에서 셔터를 누르는 이유", tag: "Essay" },
+          { id: 2, title: "무채색의 감정이 주는 위로", desc: "선명하지 않아도 괜찮은 우리의 기록 방식", tag: "Column" }
+        ].map((post) => (
+          <div 
+            key={post.id} 
+            onClick={() => window.location.href = `/articles/${post.id}`}
+            className="group p-5 bg-[#F8FAFC] rounded-[32px] border border-slate-50 hover:border-slate-200 transition-all cursor-pointer"
+          >
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-[9px] font-black bg-white px-2 py-0.5 rounded text-slate-400 uppercase tracking-tighter">{post.tag}</span>
+            </div>
+            <h5 className="font-bold text-slate-800 mb-1 group-hover:text-[#E91E63] transition-colors">{post.title}</h5>
+            <p className="text-xs text-slate-400 font-medium">{post.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-white text-slate-900 pb-10 overflow-x-hidden font-sans">
       <header className="max-w-xl mx-auto pt-10 pb-6 text-center">
@@ -162,8 +200,8 @@ export default function FeelingSnapFinal() {
 
       <main className="max-w-md mx-auto px-6">
         {stage === 'pick' && (
-          <div className="text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="space-y-2">
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="text-center space-y-2">
               <h2 className="text-xl sm:text-2xl font-bold text-[#2D3E50]">지금 순간을 찍어볼까.</h2>
               <p className="text-slate-400 text-base sm:text-lg font-medium">제일 먼저 생각나는 감정을 골라봐.</p>
             </div>
@@ -176,6 +214,7 @@ export default function FeelingSnapFinal() {
                 </button>
               ))}
             </div>
+            <ArticleSection />
           </div>
         )}
 
@@ -325,6 +364,7 @@ export default function FeelingSnapFinal() {
                 <span>다시찍기</span>
               </button>
             </div>
+            <ArticleSection />
           </div>
         )}
       </main>

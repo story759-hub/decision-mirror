@@ -6,7 +6,7 @@ import Link from 'next/link';
 export default function ArticleFive() {
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans pb-20 overflow-x-hidden">
-      {/* 메인 로고 디자인 유지 */}
+      {/* 헤더 */}
       <header className="max-w-xl mx-auto pt-14 pb-8 text-center border-b border-slate-50">
         <Link href="/">
           <h1 
@@ -20,77 +20,68 @@ export default function ArticleFive() {
       </header>
 
       <main className="max-w-xl mx-auto px-6 py-12">
-        {/* 수정된 목록 경로와 문구 */}
         <Link href="/articles" className="text-[#E91E63] font-bold mb-8 inline-block hover:underline">
-          ← Insights 목록으로 돌아가기
+          ← 인사이트 목록으로 돌아가기
         </Link>
 
         <article className="animate-in fade-in slide-in-from-bottom-4 duration-700">
           <header className="mb-10">
-            {/* 카테고리 태그 */}
             <div className="mb-4">
-              <span className="bg-pink-50 text-[#E91E63] text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border border-pink-100">
-                Happiness & Brain
+              <span className="bg-green-50 text-green-600 text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border border-green-100">
+                Happiness Science
               </span>
             </div>
             
             <h2 className="text-3xl md:text-4xl font-black text-[#0F172A] leading-tight tracking-tighter">
-              도파민과 세로토닌의 차이: <br/>지속 가능한 행복을 찾는 법
+              도파민과 세로토닌: <br/>번쩍이는 플래시와 은은한 자연광 사이의 균형
             </h2>
-            <p className="text-slate-400 mt-4 font-medium text-sm">작성일: 2026. 01. 24 • 5 min read</p>
+            <p className="text-slate-400 mt-4 font-medium text-sm">작성일: 2026. 02. 03 • 7 min read</p>
           </header>
 
           <section className="space-y-8 text-lg text-slate-600 leading-relaxed font-medium">
             <p className="break-keep">
-              우리는 기분이 좋을 때 흔히 "도파민 터진다"라는 표현을 씁니다. 하지만 우리가 느끼는 '기쁨'에는 두 가지 전혀 다른 얼굴이 있다는 사실을 아시나요? 강렬하지만 금방 사라지는 자극과 은은하지만 오래 지속되는 평온함, 이 두 사이의 균형을 이해하는 것이 행복의 핵심입니다.
+              우리는 흔히 '기분 좋다'는 표현 하나로 모든 긍정적인 상태를 뭉뚱그려 말하곤 합니다. 하지만 우리 뇌 속에서는 전혀 다른 두 종류의 화학 물질이 행복의 색깔을 결정합니다. 바로 **도파민(Dopamine)**과 **세로토닌(Serotonin)**입니다. 사진에 비유하자면 도파민은 어둠을 한순간에 밝히는 강렬한 '플래시'이고, 세로토닌은 공간 전체를 포근하게 감싸는 '오후의 자연광'과 같습니다.
             </p>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">1. 도파민(Dopamine): 짜릿한 성취의 쾌락</h3>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">1. 도파민: 더 강한 자극을 원하는 '하이라이트'</h3>
             <p className="break-keep">
-              도파민은 '보상'의 호르몬입니다. 무언가를 쟁취하거나, 새로운 자극을 받았을 때 분출됩니다. 에너지가 넘치고 흥분되는 기쁨을 주지만, 내성이 생겨 더 큰 자극을 원하게 만든다는 특징이 있습니다.
+              숏폼 영상을 볼 때, 맛있는 음식을 먹을 때, 혹은 SNS의 '좋아요' 알림이 울릴 때 분비되는 도파민은 우리에게 강력한 쾌락을 선사합니다. 하지만 도파민에는 치명적인 약점이 있습니다. 바로 '내성'입니다. 어두운 곳에서 너무 강한 플래시를 터뜨리면 피사체의 디테일이 날아가 버리듯(Whiteout), 도파민에 중독된 뇌는 웬만한 일상에서는 즐거움을 느끼지 못하는 상태가 됩니다. 더 강하고, 더 자극적인 빛만을 갈구하게 되는 것이죠.
             </p>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">2. 세로토닌(Serotonin): 은은한 존재의 행복</h3>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">2. 세로토닌: 일상을 지탱하는 '적정 노출'</h3>
             <p className="break-keep">
-              세로토닌은 '안정'의 호르몬입니다. 따뜻한 햇볕 아래 산책을 하거나, 감사함을 느낄 때 활성화됩니다. 평온하고 만족스러운 기쁨을 주며 중독성이 없고 몸과 마음의 면역력을 높여줍니다.
+              반면 세로토닌은 자극적이지 않습니다. 아침 햇살을 받으며 산책할 때, 사랑하는 사람과 가만히 눈을 맞출 때, 혹은 깊은 숨을 들이마실 때 서서히 차오릅니다. 이는 사진에서 암부와 명부의 균형이 완벽하게 잡힌 상태와 같습니다. 화려하진 않지만 오래 보아도 눈이 피로하지 않고, 삶 전체에 안정감을 부여합니다. 지속 가능한 행복의 핵심은 바로 이 세로토닌의 '적정 노출'을 유지하는 데 있습니다.
             </p>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">3. 행복의 골든 스코어 만드는 법</h3>
-            <p className="break-keep">
-              현대인들은 도파민 과잉의 시대에 살고 있습니다. 자극적인 쾌락 끝에 오는 무기력증을 막으려면 의도적으로 세로토닌의 비중을 높여야 합니다.
-            </p>
-            <ul className="space-y-4">
-              <li className="flex items-start">
-                <span className="text-[#E91E63] mr-2 font-bold">•</span>
-                <span><strong>느린 보상 즐기기:</strong> 즉각적인 자극 대신 독서나 요리 같은 긴 호흡의 활동하기.</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-[#E91E63] mr-2 font-bold">•</span>
-                <span><strong>작은 감사의 기록:</strong> 오늘 하루 당연했던 것들 중 좋았던 점 3가지만 적어보기.</span>
-              </li>
-            </ul>
-
-            {/* 인용구 박스 */}
-            <div className="bg-slate-50 border-l-4 border-[#E91E63] p-8 my-10 rounded-r-[32px] shadow-sm">
+            <div className="bg-slate-50 border-l-4 border-green-400 p-8 my-10 rounded-r-[32px] shadow-sm">
               <p className="italic text-[#0F172A] text-xl font-bold leading-relaxed">
-                "행복은 자극의 강도가 아니라, <br/>평온함의 빈도에 달려 있습니다."
+                "도파민은 '무엇을 얻었을 때' 오지만, <br/>세로토닌은 '지금 이대로 괜찮을 때' 찾아옵니다."
               </p>
             </div>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">결론: Feeling Snap의 제언</h3>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">3. Feeling Snap으로 행복의 밸런스 맞추기</h3>
             <p className="break-keep">
-              지금 당신이 느끼는 기쁨이 쾌락에 가까운지, 평온에 가까운지 관찰해 보세요. 어떤 종류의 기쁨이든 그 순간을 온전히 만끽하는 것이 중요합니다.
+              지나치게 자극적인 일상에 지쳐있다면, 의도적으로 세로토닌의 스냅을 찍어야 합니다. <strong>Feeling Snap</strong>에 당신의 소소한 평온함을 기록해 보세요. 거창한 성공담이 아니어도 좋습니다. "오늘 마신 차가 따뜻했다", "바람의 감촉이 부드러웠다"와 같은 기록은 도파민으로 과다 노출된 당신의 마음 렌즈에 'ND 필터(빛의 양을 줄여주는 필터)' 역할을 해줄 것입니다.
             </p>
-            <p className="font-bold text-[#0F172A] p-6 bg-pink-50/50 rounded-2xl border border-pink-100">
-              Feeling Snap에서 오늘의 긍정적인 감정을 기록해 보세요. 기록하는 행위 자체가 뇌의 세로토닌 수치를 높여주며, 당신의 소중한 기쁨을 더 오래 머물게 도와줄 것입니다.
+
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">결론: 당신의 사진첩은 어떤 빛으로 가득한가요?</h3>
+            <p className="break-keep">
+              번쩍이는 플래시 뒤에 오는 공허함에 지쳤다면, 이제는 은은한 자연광을 기록할 차례입니다. 오늘 당신의 마음속에 머문 가장 평온한 순간을 한 문장으로 현상해 보세요. 그 기록들이 모여 당신의 삶을 지탱하는 가장 단단한 바탕색이 될 것입니다.
             </p>
+            
+            <div className="p-6 bg-green-50/50 rounded-2xl border border-green-100 space-y-2">
+              <p className="font-bold text-[#0F172A] text-sm uppercase tracking-wider">Serotonin Boost Soundtrack</p>
+              <ul className="text-slate-600 text-base">
+                <li>• Norah Jones - Don't Know Why (안정감을 주는 보이스)</li>
+                <li>• Jack Johnson - Better Together (소박한 일상의 즐거움)</li>
+              </ul>
+            </div>
           </section>
 
-          {/* 하단 CTA 버튼 */}
           <footer className="mt-20 pt-10 border-t border-slate-100 text-center">
             <Link href="/">
               <button className="w-full max-w-xs bg-[#1A1F2C] text-white py-6 rounded-[24px] font-bold text-xl shadow-xl hover:scale-105 active:scale-95 transition-all">
-                오늘의 기쁨 스냅 찍기 ✨
+                평온한 일상 인화하기 🌿
               </button>
             </Link>
           </footer>

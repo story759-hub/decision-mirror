@@ -6,7 +6,7 @@ import Link from 'next/link';
 export default function ArticleThree() {
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans pb-20 overflow-x-hidden">
-      {/* 메인 로고 디자인 유지 */}
+      {/* 헤더 */}
       <header className="max-w-xl mx-auto pt-14 pb-8 text-center border-b border-slate-50">
         <Link href="/">
           <h1 
@@ -20,91 +20,81 @@ export default function ArticleThree() {
       </header>
 
       <main className="max-w-xl mx-auto px-6 py-12">
-        {/* 수정된 목록 경로와 문구 */}
         <Link href="/articles" className="text-[#E91E63] font-bold mb-8 inline-block hover:underline">
-          ← Insights 목록으로 돌아가기
+          ← 인사이트 목록으로 돌아가기
         </Link>
 
         <article className="animate-in fade-in slide-in-from-bottom-4 duration-700">
           <header className="mb-10">
-            {/* 카테고리 태그 */}
             <div className="mb-4">
-              <span className="bg-pink-50 text-[#E91E63] text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border border-pink-100">
-                Brain Science
+              <span className="bg-blue-50 text-blue-600 text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border border-blue-100">
+                Anxiety
               </span>
             </div>
             
             <h2 className="text-3xl md:text-4xl font-black text-[#0F172A] leading-tight tracking-tighter">
-              6초의 기적: 욱하는 화를 다스리는 <br/>뇌 과학적 메커니즘
+              불안이라는 이름의 흔들림: <br/>희미한 일상 속에서 초점을 맞추는 법
             </h2>
-            <p className="text-slate-400 mt-4 font-medium text-sm">작성일: 2026. 01. 24 • 6 min read</p>
+            <p className="text-slate-400 mt-4 font-medium text-sm">작성일: 2026. 02. 01 • 7 min read</p>
           </header>
 
           <section className="space-y-8 text-lg text-slate-600 leading-relaxed font-medium">
             <p className="break-keep">
-              누구나 한 번쯤은 울컥하는 감정을 참지 못해 후회할 말을 내뱉거나 행동한 적이 있을 것입니다. 분노는 불꽃처럼 순식간에 타오르지만, 그 짧은 찰나를 다스리는 것만으로도 우리는 수많은 갈등과 자책에서 벗어날 수 있습니다. 뇌 과학이 증명하는 분노 조절의 핵심은 바로 <strong>'6초'</strong>에 있습니다.
+              카메라를 들고 중요한 순간을 포착하려 할 때, 가장 당혹스러운 경험은 셔터를 누르려는 찰나 화면이 뿌옇게 흐려지는 '핸드 블러(Hand Blur)' 현상입니다. 손끝의 아주 작은 떨림이 렌즈를 통과해 이미지 전체를 무너뜨리죠. 우리 삶의 **불안(Anxiety)** 역시 이와 닮아 있습니다. 미래에 대한 작은 걱정이 마음이라는 렌즈를 흔들고, 결국 지금 이 순간의 선명한 풍경을 흐릿하게 만들어버립니다.
             </p>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">1. 감정의 뇌 vs 이성의 뇌</h3>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">1. 불안은 '고장'이 아니라 '반응'입니다</h3>
             <p className="break-keep">
-              우리가 분노를 느낄 때, 뇌의 편도체(Amygdala)는 비상경보를 울립니다. 이는 생존을 위한 본능적인 반응이지만, 동시에 이성적인 판단을 담당하는 전두엽(Prefrontal Cortex)의 기능을 일시적으로 마비시킵니다. 이를 심리학에서는 <strong>'편도체 납치(Amygdala Hijack)'</strong>라고 부릅니다.
+              많은 이들이 불안을 느끼면 스스로의 마음이 고장 났다고 생각합니다. 하지만 카메라는 빛이 부족한 곳(어두운 미래)에서 셔터 스피드를 확보하지 못해 흔들리는 것일 뿐, 기계 자체의 결함이 아닙니다. 불안 또한 마찬가지입니다. 당신의 뇌는 지금 위험을 감지하고, 당신을 보호하기 위해 모든 신경을 곤두세우고 있는 것입니다. 
+            </p>
+            <p className="break-keep">
+              불안을 '없애야 할 적'으로 규정하는 순간, 마음의 떨림은 더 심해집니다. 대신 "아, 지금 내 마음의 셔터 스피드가 확보되지 않을 만큼 상황이 불투명하구나"라고 객관적으로 인지해 보세요. 흔들림을 인정하는 것이 초점을 맞추는 첫 번째 단계입니다.
             </p>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">2. 왜 하필 '6초'인가?</h3>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">2. 초점 거리를 '현재'로 조정하기</h3>
             <p className="break-keep">
-              편도체가 발화하여 온몸에 분노 호르몬을 뿌리고, 다시 전두엽이 상황을 파악하여 제어력을 회복하는 데 걸리는 최소한의 시간이 바로 6초입니다. 
+              불안이 우리를 지배할 때, 우리의 마음은 대개 아주 먼 미래(망원 렌즈)에 가 있거나 이미 지나간 과거(역광)에 머물러 있습니다. 멀리 있는 것을 억지로 당겨 찍으려니 흔들림이 배가 되는 것이죠. 
             </p>
-            <ul className="space-y-4">
+            <ul className="space-y-4 bg-slate-50 p-6 rounded-2xl border border-slate-100">
               <li className="flex items-start">
                 <span className="text-[#E91E63] mr-2 font-bold">•</span>
-                <span><strong>초기 2초:</strong> 강렬한 감정 에너지가 분출되는 시점입니다.</span>
+                <span><strong>수동 초점(Manual Focus):</strong> 막연한 걱정이 몰려올 때, 지금 당장 내 손에 닿는 구체적인 작업에 집중해 보세요. 커피를 마시는 감각, 키보드를 두드리는 소리 같은 사소한 것들이 마음의 지지대가 됩니다.</span>
               </li>
               <li className="flex items-start">
                 <span className="text-[#E91E63] mr-2 font-bold">•</span>
-                <span><strong>중간 2초:</strong> 심장 박동이 빨라지고 신체적 반응이 정점에 달합니다.</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-[#E91E63] mr-2 font-bold">•</span>
-                <span><strong>마지막 2초:</strong> 전두엽이 활성화되며 "이게 정말 화낼 일인가?"라고 묻기 시작합니다.</span>
+                <span><strong>조리개 열기:</strong> 완벽해야 한다는 강박을 버리고 조리개를 활짝 열어보세요. 빛을 더 많이 받아들이듯, "실수해도 괜찮다"는 허용의 마음을 가질 때 화면은 다시 선명해집니다.</span>
               </li>
             </ul>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">3. 6초를 벌어주는 실전 기술</h3>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">3. 흔들린 사진도 하나의 작품이 됩니다</h3>
             <p className="break-keep">
-              화가 치밀어 오를 때 단순히 참으려고 하면 오히려 역효과가 날 수 있습니다. 대신 뇌의 주의를 다른 곳으로 돌리는 전략이 필요합니다.
+              모든 사진이 칼날처럼 날카로울 필요는 없습니다. 때로는 의도적인 흔들림이 사진에 역동성을 부여하듯, 우리의 불안했던 시간 또한 삶의 생동감을 증명하는 기록이 됩니다. Feeling Snap에 기록된 당신의 흔들리는 문장들은, 당신이 그만큼 삶을 진지하게 대하고 있으며 더 나은 미래를 갈망하고 있다는 뜨거운 증거입니다.
             </p>
-            <ul className="space-y-4">
-              <li className="flex items-start">
-                <span className="text-[#E91E63] mr-2 font-bold">•</span>
-                <span><strong>숫자 세기:</strong> 1부터 6까지 천천히 숫자를 세며 호흡합니다.</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-[#E91E63] mr-2 font-bold">•</span>
-                <span><strong>객관적 묘사:</strong> "나는 지금 화가 났다"라고 자신의 상태를 제3자처럼 관찰합니다.</span>
-              </li>
-            </ul>
 
-            {/* 인용구 박스 */}
-            <div className="bg-slate-50 border-l-4 border-[#E91E63] p-8 my-10 rounded-r-[32px] shadow-sm">
+            <div className="bg-slate-50 border-l-4 border-blue-400 p-8 my-10 rounded-r-[32px] shadow-sm">
               <p className="italic text-[#0F172A] text-xl font-bold leading-relaxed">
-                "분노는 다른 사람에게 던지려고 뜨거운 석탄을 손에 쥐는 것과 같습니다. <br/>결국 화상을 입는 것은 자기 자신입니다."
+                "불안은 당신의 앞길이 어둡기 때문이 아니라, <br/>당신이 그만큼 빛나는 곳으로 가고 싶어 하기 때문에 생기는 그림자입니다."
               </p>
             </div>
 
-            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">결론: Feeling Snap의 제언</h3>
+            <h3 className="text-2xl font-bold text-[#0F172A] mt-12 mb-4">결론: 다시 셔터를 누를 힘</h3>
             <p className="break-keep">
-              분노는 무조건 나쁜 것이 아닙니다. 하지만 조절되지 않은 분노는 당신의 에너지를 갉아먹습니다. 욱하는 순간이 찾아온다면, 바로 대응하기보다 그 마음을 짧게라도 기록해 보세요. 
+              지금 마음이 흔들리고 있다면 잠시 숨을 고르고 <strong>Feeling Snap</strong>을 켜보세요. 당신의 혼란스러운 마음을 텍스트로 현상하는 과정에서, 흐릿했던 삶의 초점이 서서히 현재의 당신에게로 맞춰지는 것을 느낄 수 있을 것입니다. 
             </p>
-            <p className="font-bold text-[#0F172A] p-6 bg-pink-50/50 rounded-2xl border border-pink-100">
-              지금 Feeling Snap에 당신의 답답한 마음을 쏟아내 보세요. AI 분석이 당신의 감정 온도를 낮춰주고, 전두엽이 다시 명확한 판단을 내릴 수 있도록 도와줄 것입니다.
-            </p>
+            
+            <div className="p-6 bg-blue-50/50 rounded-2xl border border-blue-100 space-y-2">
+              <p className="font-bold text-[#0F172A] text-sm uppercase tracking-wider">Focus Aid Soundtrack</p>
+              <ul className="text-slate-600 text-base">
+                <li>• Olafur Arnalds - Saman (평온한 리듬의 회복)</li>
+                <li>• 이루마 - River Flows In You (흐르는 마음의 안정)</li>
+              </ul>
+            </div>
           </section>
 
-          {/* 하단 CTA 버튼 */}
           <footer className="mt-20 pt-10 border-t border-slate-100 text-center">
             <Link href="/">
               <button className="w-full max-w-xs bg-[#1A1F2C] text-white py-6 rounded-[24px] font-bold text-xl shadow-xl hover:scale-105 active:scale-95 transition-all">
-                내 감정 온도 낮추러 가기 🌡️
+                흔들리는 마음 고정하기 ⚓
               </button>
             </Link>
           </footer>
