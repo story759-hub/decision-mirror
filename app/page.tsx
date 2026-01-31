@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { toPng } from 'html-to-image';
-import Link from 'next/link'; // 🔹 Link 임포트 추가 확인
+import Link from 'next/link';
 
 // 🔹 globals.css에 'Bongsoong-Tint' 폰트가 등록되어 있어야 합니다.
 
@@ -151,7 +151,6 @@ export default function FeelingSnapFinal() {
     } catch (err) { alert("추출 실패"); }
   };
 
-  // 공통 아티클 컴포넌트
   const ArticleSection = () => (
     <div className="pt-10 pb-10 space-y-5 animate-in fade-in duration-700">
       <div className="flex justify-between items-end px-1">
@@ -159,30 +158,26 @@ export default function FeelingSnapFinal() {
           <span className="text-[10px] font-black text-[#E91E63] uppercase tracking-widest">Recommended</span>
           <h4 className="text-xl font-black text-slate-800 tracking-tighter">기록을 위한 아티클</h4>
         </div>
-        {/* 🔹 전체보기 연결 수정 완료 */}
         <Link href="/articles">
-          <span className="text-[11px] font-bold text-slate-400 hover:text-slate-600 transition-colors cursor-pointer">
+          <span className="text-[11px] font-bold text-slate-400 hover:text-slate-600 transition-colors cursor-pointer text-nowrap">
             전체보기 +
           </span>
         </Link>
       </div>
-
       <div className="space-y-3">
         {[
           { id: 1, title: "가끔은 멈춰서야 보이는 것들", desc: "빠르게 지나가는 일상 속에서 셔터를 누르는 이유", tag: "Essay" },
           { id: 2, title: "무채색의 감정이 주는 위로", desc: "선명하지 않아도 괜찮은 우리의 기록 방식", tag: "Column" }
         ].map((post) => (
-          <div 
-            key={post.id} 
-            onClick={() => window.location.href = `/articles/${post.id}`}
-            className="group p-5 bg-[#F8FAFC] rounded-[32px] border border-slate-50 hover:border-slate-200 transition-all cursor-pointer"
-          >
-            <div className="flex justify-between items-start mb-2">
-              <span className="text-[9px] font-black bg-white px-2 py-0.5 rounded text-slate-400 uppercase tracking-tighter">{post.tag}</span>
+          <Link key={post.id} href={`/articles/${post.id}`}>
+            <div className="group p-5 bg-[#F8FAFC] rounded-[32px] border border-slate-50 hover:border-slate-200 transition-all cursor-pointer mb-3">
+              <div className="flex justify-between items-start mb-2">
+                <span className="text-[9px] font-black bg-white px-2 py-0.5 rounded text-slate-400 uppercase tracking-tighter">{post.tag}</span>
+              </div>
+              <h5 className="font-bold text-slate-800 mb-1 group-hover:text-[#E91E63] transition-colors">{post.title}</h5>
+              <p className="text-xs text-slate-400 font-medium">{post.desc}</p>
             </div>
-            <h5 className="font-bold text-slate-800 mb-1 group-hover:text-[#E91E63] transition-colors">{post.title}</h5>
-            <p className="text-xs text-slate-400 font-medium">{post.desc}</p>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
@@ -257,15 +252,18 @@ export default function FeelingSnapFinal() {
           </div>
         )}
 
-        {stage === 'result' && resultData && (
-          <div className="space-y-6 animate-in zoom-in-95 duration-700">
-            <div ref={cardRef} className="relative w-full rounded-[44px] overflow-hidden shadow-2xl bg-black" style={{ aspectRatio: '3 / 4.8' }}>
+{stage === 'result' && resultData && (
+          <div className="animate-in zoom-in-95 duration-700">
+            {/* 1. 결과 카드 (마진 조정: mb-3) */}
+            <div ref={cardRef} className="relative w-full rounded-[44px] overflow-hidden shadow-2xl bg-black mb-3" style={{ aspectRatio: '3 / 4.8' }}>
               <img src={resultData.mainEmotion.img} alt="bg" className="absolute inset-0 w-full h-full object-cover opacity-50" />
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40" />
+              
               <div className="absolute inset-0 p-8 sm:p-10 flex flex-col justify-between text-white">
+                {/* 헤더 */}
                 <div className="flex justify-between items-start">
                   <div className="space-y-1">
-                    <div className="text-lg font-black tracking-tighter" style={{ WebkitTextStroke: '0' }}>
+                    <div className="text-lg font-black tracking-tighter">
                       <span>Feeling</span><span className="text-[#E91E63] ml-0.5">Snap</span>
                     </div>
                     <div className="text-[10px] font-bold text-white/40 tracking-widest uppercase italic">
@@ -275,14 +273,29 @@ export default function FeelingSnapFinal() {
                   <span className="text-[9px] font-black border border-white/20 px-2.5 py-1 rounded-full uppercase tracking-widest text-white/50 backdrop-blur-sm">Snap Shot</span>
                 </div>
                 
-                <div className="mt-4 mb-auto space-y-3 transform translate-y-4">
-                  <h3 className="text-2xl sm:text-3xl font-black leading-tight tracking-tighter opacity-60 italic">{resultData.subName}</h3>
-                  <p className="text-[19px] sm:text-[20px] font-medium whitespace-pre-line leading-[1.45] text-white drop-shadow-2xl pr-4" style={{ fontFamily: "'Bongsoong-Tint', sans-serif" }}>
-                    {resultData.description}
-                  </p>
+                {/* 결과 텍스트 영역 */}
+                <div className="mt-4 mb-auto space-y-4 transform translate-y-4">
+                  <h3 className="text-[11px] font-black tracking-widest uppercase text-white/45 italic">
+                    {resultData.subName}
+                  </h3>
+                  
+                  <div className="space-y-3">
+                    <p className="text-[22px] sm:text-[20px] font-medium leading-snug text-white border-l-2 border-[#E91E63] pl-4 drop-shadow-2xl" 
+                       style={{ fontFamily: "'Bongsoong-Tint', sans-serif" }}>
+                      {resultData.description.split('\n')[0]}
+                    </p>
+                    {resultData.description.split('\n')[1] && (
+                      <p className="text-[18px] sm:text-[18px] font-medium leading-relaxed text-white/70 pl-4 drop-shadow-xl"
+                         style={{ fontFamily: "'Bongsoong-Tint', sans-serif" }}>
+                        {resultData.description.split('\n')[1]}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
+                {/* 하단 화이트 보드 */}
                 <div className="bg-white/95 backdrop-blur-xl rounded-[36px] p-6 sm:p-8 space-y-5 text-slate-900 shadow-2xl">
+                  {/* 감정 믹스 바 */}
                   <div className="space-y-3.5">
                     {resultData.mix && resultData.mix.map((item: any, index: number) => (
                       <div key={index} className="space-y-1.5">
@@ -296,6 +309,7 @@ export default function FeelingSnapFinal() {
                     ))}
                   </div>
 
+                  {/* 사운드트랙 */}
                   <div className="pt-2 border-t border-slate-100 flex justify-between items-center">
                     <div className="flex flex-col min-w-0 pr-4">
                       <span className="text-[8px] font-black text-[#E91E63] uppercase mb-0.5 tracking-widest opacity-70">Soundtrack</span>
@@ -307,38 +321,53 @@ export default function FeelingSnapFinal() {
                     </button>
                   </div>
 
-                  <div className="pt-4 border-t border-slate-50 flex justify-between items-end">
-                    <div className="text-[10px] font-bold leading-[1.6] text-slate-400">
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <div className="flex items-center gap-1 px-1.5 py-0.5 bg-slate-50 rounded text-[8px] text-slate-500 font-black tracking-tighter uppercase">
-                          <span className="w-1 h-1 bg-[#E91E63] rounded-full animate-pulse" />
-                          Captured
-                        </div>
-                        <span className="text-[#E91E63] font-black text-[16px] tracking-tighter tabular-nums leading-none">
-                          {resultData.displayStats.commonRate}
-                        </span>
-                      </div>
-                      <div className="text-slate-700 font-medium tracking-tight leading-tight whitespace-pre-line">
-                        {resultData.displayStats.rateLabel}
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <span className="text-[8px] text-slate-300 font-black uppercase tracking-widest mb-0.5">Today's snap</span>
-                      <div className="text-[20px] font-black text-slate-800 tracking-tighter font-mono">
-                        #{resultData.displayStats.totalCount}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  {/* 🔥 복구된 통계 섹션 (Captured / Today's Snap) */}
+{/* 🔥 수정된 통계 섹션: 좌우 영역 분리 및 간격 확보 */}
+<div className="pt-4 border-t border-slate-50 flex justify-between items-end gap-4">
+  {/* 왼쪽 영역: 텍스트가 오른쪽을 침범하지 않도록 max-width 설정 */}
+  <div className="flex-1 min-w-0 text-[10px] font-bold leading-[1.6] text-slate-400">
+    <div className="flex items-center gap-1.5 mb-1">
+      <div className="flex items-center gap-1 px-1.5 py-0.5 bg-slate-50 rounded text-[8px] text-slate-500 font-black tracking-tighter uppercase">
+        <span className="w-1 h-1 bg-[#E91E63] rounded-full animate-pulse" />
+        Captured
+      </div>
+      <span className="text-[#E91E63] font-black text-[16px] tracking-tighter tabular-nums leading-none">
+        {resultData.displayStats.commonRate}
+      </span>
+    </div>
+    
+    {/* max-w-[140px] 정도를 주어 글자가 번호 쪽으로 넘어가지 않게 가둡니다 */}
+    <div className="text-slate-700 font-medium tracking-tight leading-tight whitespace-pre-line max-w-[160px] sm:max-w-[160px]">
+      {resultData.displayStats.rateLabel}
+    </div>
+  </div>
+
+  {/* 오른쪽 영역: 고정 너비 느낌으로 유지 */}
+  <div className="flex flex-col items-end flex-shrink-0">
+    <span className="text-[8px] text-slate-300 font-black uppercase tracking-widest mb-0.5">Today's snap</span>
+    <div className="text-[22px] font-black text-slate-600 tracking-tighter font-mono">
+      #{resultData.displayStats.totalCount}
+    </div>
+  </div>
+</div>                </div>
               </div>
             </div>
             
-            <div className="grid grid-cols-3 gap-3">
-              <button onClick={handleSaveImage} className="py-5 bg-white rounded-[28px] font-bold text-[13px] shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-1 active:bg-slate-50 transition-all">
-                <span>🎞️</span>
-                <span>간직하기</span>
-              </button>
+            {/* 2. 여운 문장 배치 (마진 mb-2) */}
+            <p className="text-center text-[11px] text-slate-400 font-medium leading-relaxed px-6 mb-2">
+              이 문장, 지금 상태 그대로 남겨도 괜찮아
+            </p>
 
+            {/* 3. 수정된 메인 버튼 (이 장면 간직하기) */}
+            <button
+              onClick={handleSaveImage}
+              className="w-full py-5 bg-white rounded-[28px] font-bold text-[13px] shadow-sm border border-slate-100 active:scale-95 transition-all mb-4"
+            >
+              🎞️ 이 장면 간직하기
+            </button>
+
+            {/* 4. 보조 기능 (공유 및 다시찍기) */}
+            <div className="grid grid-cols-2 gap-3 mb-10">
               <button 
                 onClick={async () => {
                   if (navigator.share) {
@@ -353,21 +382,18 @@ export default function FeelingSnapFinal() {
                     alert('공유하기를 지원하지 않는 브라우저입니다. 링크를 복사해주세요!');
                   }
                 }}
-                className="py-5 bg-white rounded-[28px] font-bold text-[13px] shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-1 active:bg-slate-50 transition-all"
+                className="py-4 bg-slate-50 text-slate-400 rounded-[24px] font-bold text-[12px] flex items-center justify-center gap-2 active:bg-slate-100 transition-all"
               >
-                <span>🔗</span>
-                <span>공유하기</span>
+                <span>🔗</span> 공유하기
               </button>
-
-              <button onClick={() => window.location.reload()} className="py-5 bg-[#1A1F2C] text-white rounded-[28px] font-bold text-[13px] flex flex-col items-center justify-center gap-1 active:scale-95 shadow-lg transition-all">
-                <span>↻</span>
-                <span>다시찍기</span>
+              <button onClick={() => window.location.reload()} className="py-4 bg-[#1A1F2C] text-white/80 rounded-[24px] font-bold text-[12px] flex items-center justify-center gap-2 active:scale-95 transition-all">
+                <span>↻</span> 다시 찍기
               </button>
             </div>
+
             <ArticleSection />
           </div>
-        )}
-      </main>
+        )}      </main>
     </div>
   );
 }
