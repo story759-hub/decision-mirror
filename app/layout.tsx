@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
 import Link from "next/link";
+import { Analytics } from "@vercel/analytics/react"; // 1. 분석 컴포넌트 임포트
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -73,6 +74,8 @@ export default function RootLayout({
             당신의 모든 스냅은 인지적 공감을 위해 분석됩니다.
           </p>
         </footer>
+        
+        <Analytics /> {/* 2. Vercel 분석 도구 활성화 */}
       </body>
     </html>
   );
