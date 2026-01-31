@@ -84,14 +84,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid Setup" }, { status: 400 });
     }
 
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
-      generationConfig: {
-        responseMimeType: "application/json",
-        temperature: 1.0,
-      },
-    });
-
     const prompt = `
 SYSTEM:
 너는 감정을 설명하는 AI가 아니라,
@@ -106,7 +98,7 @@ SYSTEM:
    - 요약, 판단, 설명처럼 느껴지지 않아야 한다.
    - “아직 / 이미 / 그냥 / 조금 / 그대로” 같은 상태 부사를 자연스럽게 사용한다.
    - ‘상태를 잠깐 멈춰 세운 문장’처럼 느껴져야 한다.
-   3. 두 번째 줄은:
+3. 두 번째 줄은:
    - 첫 줄에서 다 정리되지 않은 감정의 잔여물이다.
    - 이유를 말하지 말고, 여운처럼 남겨라.
 4. 주어(나, 너, 우리는) 사용 금지.
@@ -152,7 +144,24 @@ OUTPUT JSON:
 }
 `;
 
-    const result = await model.generateContent(prompt);
+    let result;
+    try {
+      // 1차 시도: gemini-2.0-flash
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.0-flash",
+        generationConfig: { responseMimeType: "application/json", temperature: 1.0 },
+      });
+      result = await model.generateContent(prompt);
+    } catch (apiError: any) {
+      // 429 에러(할당량 초과) 발생 시 1.5-flash로 즉시 우회
+      console.warn("Gemini 2.0 실패, 1.5로 재시도합니다.");
+      const fallbackModel = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash",
+        generationConfig: { responseMimeType: "application/json", temperature: 1.0 },
+      });
+      result = await fallbackModel.generateContent(prompt);
+    }
+
     const raw = result.response.text();
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("JSON parse failed");
@@ -160,7 +169,7 @@ OUTPUT JSON:
     let data = JSON.parse(jsonMatch[0]);
 
     /* ================================
-       🧩 서버 보정 (Reject 없음)
+        🧩 서버 보정 (Reject 없음)
     ================================ */
     data.description = sanitizeDescription(data.description);
     data.description = softenSnapText(data.description);
@@ -177,7 +186,7 @@ OUTPUT JSON:
     console.error("Snap API Error:", error);
 
     /* ================================
-       🪂 안전한 Fallback
+        🪂 안전한 Fallback (API 완전 차단 시)
     ================================ */
     return NextResponse.json({
       appliedTone: "neutral",
