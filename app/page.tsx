@@ -3,62 +3,62 @@
 import { useState, useRef, useEffect } from 'react';
 import { toPng } from 'html-to-image';
 import Link from 'next/link';
-
-// 🔹 globals.css에 'Bongsoong-Tint' 폰트가 등록되어 있어야 합니다.
+// ✅ 아이콘 라이브러리 추가
+import { Sparkles, Droplets, Flame, Tornado, Mail, Leaf, Play } from 'lucide-react';
 
 type Stage = 'pick' | 'resonate' | 'deep' | 'analyzing' | 'result';
 
 const EMOTION_DATA: { [key: string]: any } = {
   joy: {
     label: "기쁨",
-    icon: "✨",
+    icon: <Sparkles size={40} strokeWidth={1.2} className="text-yellow-500" />,
     color: "from-yellow-400 to-orange-400",
-    bgColor: "bg-yellow-50",
+    bgColor: "bg-yellow-50/50",
     img: "/images/joy.png",
     resonate: "밝은 쪽으로 기울어진 상태",
     reasons: ['남아 있는 여운', '확인된 결과', '예상 밖의 보상', '잠깐의 고조', '충분한 여백']
   },
   sadness: {
     label: "슬픔",
-    icon: "💧",
+    icon: <Droplets size={40} strokeWidth={1.2} className="text-blue-500" />,
     color: "from-blue-400 to-indigo-500",
-    bgColor: "bg-blue-50",
+    bgColor: "bg-blue-50/50",
     img: "/images/sadness.png",
     resonate: "조용히 가라앉은 지점",
     reasons: ['마침표 이후', '지나간 장면', '불투명한 상태', '기대가 무너진 쪽']
   },
   anger: {
     label: "분노",
-    icon: "🔥",
+    icon: <Flame size={40} strokeWidth={1.2} className="text-red-500" />,
     color: "from-red-500 to-rose-600",
-    bgColor: "bg-red-50",
+    bgColor: "bg-red-50/50",
     img: "/images/anger.png",
     resonate: "온도가 올라간 채로",
     reasons: ['어긋난 상황', '반복된 방해', '넘어진 선', '참지 않기로 한 쪽']
   },
   anxiety: {
     label: "불안",
-    icon: "🌀",
+    icon: <Tornado size={40} strokeWidth={1.2} className="text-purple-500" />,
     color: "from-purple-500 to-indigo-600",
-    bgColor: "bg-purple-50",
+    bgColor: "bg-purple-50/50",
     img: "/images/anxiety.png",
     resonate: "아직 좌표가 없다",
     reasons: ['정해지지 않은 방향', '시선이 많은 자리', '예측 불가']
   },
   regret: {
     label: "미안",
-    icon: "✉️",
+    icon: <Mail size={40} strokeWidth={1.2} className="text-slate-500" />,
     color: "from-slate-500 to-slate-700",
-    bgColor: "bg-slate-50",
+    bgColor: "bg-slate-50/50",
     img: "/images/regret.png",
     resonate: "이미 지나간 쪽",
     reasons: ['전하지 못한 말', '늦은 인식', '돌릴 수 없는 선택']
   },
   neutral: {
     label: "평온",
-    icon: "🌿",
+    icon: <Leaf size={40} strokeWidth={1.2} className="text-emerald-500" />,
     color: "from-emerald-400 to-teal-500",
-    bgColor: "bg-emerald-50",
+    bgColor: "bg-emerald-50/50",
     img: "/images/neutral.png",
     resonate: "특별한 흔들림 없음",
     reasons: ['정돈된 흐름', '방해 없는 정지', '평균선 위']
@@ -204,7 +204,7 @@ export default function FeelingSnapFinal() {
               {Object.keys(EMOTION_DATA).map((key) => (
                 <button key={key} onClick={() => { setSelectedKey(key); setStage('resonate'); }}
                   className={`${EMOTION_DATA[key].bgColor} p-8 sm:p-10 rounded-[32px] hover:scale-105 active:scale-95 transition-all shadow-sm flex flex-col items-center justify-center`}>
-                  <div className="text-4xl sm:text-5xl mb-3">{EMOTION_DATA[key].icon}</div>
+                  <div className="mb-3">{EMOTION_DATA[key].icon}</div>
                   <div className="font-bold text-lg sm:text-xl text-slate-700">{EMOTION_DATA[key].label}</div>
                 </button>
               ))}
@@ -253,147 +253,291 @@ export default function FeelingSnapFinal() {
         )}
 
 {stage === 'result' && resultData && (
+
           <div className="animate-in zoom-in-95 duration-700">
+
             {/* 1. 결과 카드 (마진 조정: mb-3) */}
+
             <div ref={cardRef} className="relative w-full rounded-[44px] overflow-hidden shadow-2xl bg-black mb-3" style={{ aspectRatio: '3 / 4.8' }}>
+
               <img src={resultData.mainEmotion.img} alt="bg" className="absolute inset-0 w-full h-full object-cover opacity-50" />
+
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40" />
+
               
+
               <div className="absolute inset-0 p-8 sm:p-10 flex flex-col justify-between text-white">
+
                 {/* 헤더 */}
+
                 <div className="flex justify-between items-start">
+
                   <div className="space-y-1">
+
                     <div className="text-lg font-black tracking-tighter">
+
                       <span>Feeling</span><span className="text-[#E91E63] ml-0.5">Snap</span>
+
                     </div>
+
                     <div className="text-[10px] font-bold text-white/40 tracking-widest uppercase italic">
+
                       {stamp.date}  {stamp.time}
+
                     </div>
+
                   </div>
+
                   <span className="text-[9px] font-black border border-white/20 px-2.5 py-1 rounded-full uppercase tracking-widest text-white/50 backdrop-blur-sm">Snap Shot</span>
+
                 </div>
+
                 
+
                 {/* 결과 텍스트 영역 */}
+
                 <div className="mt-4 mb-auto space-y-4 transform translate-y-4">
+
                   <h3 className="text-[11px] font-black tracking-widest uppercase text-white/45 italic">
+
                     {resultData.subName}
+
                   </h3>
+
                   
+
                   <div className="space-y-3">
+
                     <p className="text-[22px] sm:text-[20px] font-medium leading-snug text-white border-l-2 border-[#E91E63] pl-4 drop-shadow-2xl" 
+
                        style={{ fontFamily: "'Bongsoong-Tint', sans-serif" }}>
+
                       {resultData.description.split('\n')[0]}
+
                     </p>
+
                     {resultData.description.split('\n')[1] && (
+
                       <p className="text-[18px] sm:text-[18px] font-medium leading-relaxed text-white/70 pl-4 drop-shadow-xl"
+
                          style={{ fontFamily: "'Bongsoong-Tint', sans-serif" }}>
+
                         {resultData.description.split('\n')[1]}
+
                       </p>
+
                     )}
+
                   </div>
+
                 </div>
+
+
 
                 {/* 하단 화이트 보드 */}
+
                 <div className="bg-white/95 backdrop-blur-xl rounded-[36px] p-6 sm:p-8 space-y-5 text-slate-900 shadow-2xl">
+
                   {/* 감정 믹스 바 */}
+
                   <div className="space-y-3.5">
+
                     {resultData.mix && resultData.mix.map((item: any, index: number) => (
+
                       <div key={index} className="space-y-1.5">
+
                         <div className="flex justify-between text-[9px] font-black text-slate-400 uppercase tracking-tight">
+
                           <span>{item.label}</span><span className="text-[#E91E63]">{item.rate}%</span>
+
                         </div>
+
                         <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+
                           <div className={`h-full bg-gradient-to-r ${item.color} transition-all duration-1000`} style={{ width: `${item.rate}%` }} />
+
                         </div>
+
                       </div>
+
                     ))}
+
                   </div>
+
+
 
                   {/* 사운드트랙 */}
+
                   <div className="pt-2 border-t border-slate-100 flex justify-between items-center">
+
                     <div className="flex flex-col min-w-0 pr-4">
+
                       <span className="text-[8px] font-black text-[#E91E63] uppercase mb-0.5 tracking-widest opacity-70">Soundtrack</span>
+
                       <p className="text-[14px] font-black text-slate-800 truncate">{resultData.song.split(' - ')[1] || resultData.song}</p>
+
                       <p className="text-[10px] font-bold text-slate-400 tracking-tight">{resultData.song.split(' - ')[0]}</p>
+
                     </div>
+
                     <button onClick={() => openYouTubeSearch(resultData.song)} className="w-10 h-10 bg-[#E91E63] rounded-full flex items-center justify-center flex-shrink-0 shadow-lg shadow-pink-100 active:scale-90 transition-transform">
+
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z" /></svg>
+
                     </button>
+
                   </div>
 
+
+
                   {/* 🔥 복구된 통계 섹션 (Captured / Today's Snap) */}
+
 {/* 🔥 수정된 통계 섹션: 좌우 영역 분리 및 간격 확보 */}
+
 <div className="pt-4 border-t border-slate-50 flex justify-between items-end gap-4">
+
   {/* 왼쪽 영역: 텍스트가 오른쪽을 침범하지 않도록 max-width 설정 */}
+
   <div className="flex-1 min-w-0 text-[10px] font-bold leading-[1.6] text-slate-400">
+
     <div className="flex items-center gap-1.5 mb-1">
+
       <div className="flex items-center gap-1 px-1.5 py-0.5 bg-slate-50 rounded text-[8px] text-slate-500 font-black tracking-tighter uppercase">
+
         <span className="w-1 h-1 bg-[#E91E63] rounded-full animate-pulse" />
+
         Captured
+
       </div>
+
       <span className="text-[#E91E63] font-black text-[16px] tracking-tighter tabular-nums leading-none">
+
         {resultData.displayStats.commonRate}
+
       </span>
+
     </div>
+
     
+
     {/* max-w-[140px] 정도를 주어 글자가 번호 쪽으로 넘어가지 않게 가둡니다 */}
+
     <div className="text-slate-700 font-medium tracking-tight leading-tight whitespace-pre-line max-w-[160px] sm:max-w-[160px]">
+
       {resultData.displayStats.rateLabel}
+
     </div>
+
   </div>
+
+
 
   {/* 오른쪽 영역: 고정 너비 느낌으로 유지 */}
+
   <div className="flex flex-col items-end flex-shrink-0">
+
     <span className="text-[8px] text-slate-300 font-black uppercase tracking-widest mb-0.5">Today's snap</span>
+
     <div className="text-[22px] font-black text-slate-600 tracking-tighter font-mono">
+
       #{resultData.displayStats.totalCount}
+
     </div>
+
   </div>
+
 </div>                </div>
+
               </div>
+
             </div>
+
             
+
             {/* 2. 여운 문장 배치 (마진 mb-2) */}
+
             <p className="text-center text-[11px] text-slate-400 font-medium leading-relaxed px-6 mb-2">
+
               이 문장, 지금 상태 그대로 남겨도 괜찮아
+
             </p>
 
+
+
             {/* 3. 수정된 메인 버튼 (이 장면 간직하기) */}
+
             <button
+
               onClick={handleSaveImage}
+
               className="w-full py-5 bg-white rounded-[28px] font-bold text-[13px] shadow-sm border border-slate-100 active:scale-95 transition-all mb-4"
+
             >
+
               🎞️ 이 장면 간직하기
+
             </button>
 
+
+
             {/* 4. 보조 기능 (공유 및 다시찍기) */}
+
             <div className="grid grid-cols-2 gap-3 mb-10">
+
               <button 
+
                 onClick={async () => {
+
                   if (navigator.share) {
+
                     try {
+
                       await navigator.share({
+
                         title: 'Feeling Snap',
+
                         text: `나의 감정 스냅: ${resultData.description.replace('\n', ' ')}`,
+
                         url: window.location.href,
+
                       });
+
                     } catch (err) { console.log('공유 취소'); }
+
                   } else {
+
                     alert('공유하기를 지원하지 않는 브라우저입니다. 링크를 복사해주세요!');
+
                   }
+
                 }}
+
                 className="py-4 bg-slate-50 text-slate-400 rounded-[24px] font-bold text-[12px] flex items-center justify-center gap-2 active:bg-slate-100 transition-all"
+
               >
+
                 <span>🔗</span> 공유하기
+
               </button>
+
               <button onClick={() => window.location.reload()} className="py-4 bg-[#1A1F2C] text-white/80 rounded-[24px] font-bold text-[12px] flex items-center justify-center gap-2 active:scale-95 transition-all">
+
                 <span>↻</span> 다시 찍기
+
               </button>
+
             </div>
 
+
+
             <ArticleSection />
+
           </div>
+
         )}      </main>
+
     </div>
+
   );
+
 }
