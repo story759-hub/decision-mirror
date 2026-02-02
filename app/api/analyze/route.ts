@@ -144,22 +144,27 @@ OUTPUT JSON:
 }
 `;
 
+    // ✅ Gemini 2.0 모델 고정 설정
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+      generationConfig: { 
+        responseMimeType: "application/json", 
+        temperature: 1.0 
+      },
+    });
+
     let result;
     try {
       // 1차 시도: gemini-2.0-flash
-      const model = genAI.getGenerativeModel({
-        model: "gemini-2.0-flash",
-        generationConfig: { responseMimeType: "application/json", temperature: 1.0 },
-      });
       result = await model.generateContent(prompt);
     } catch (apiError: any) {
-      // 429 에러(할당량 초과) 발생 시 1.5-flash로 즉시 우회
-      console.warn("Gemini 2.0 실패, 1.5로 재시도합니다.");
-      const fallbackModel = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
-        generationConfig: { responseMimeType: "application/json", temperature: 1.0 },
-      });
-      result = await fallbackModel.generateContent(prompt);
+      // ✅ 모델 다운그레이드 없이 동일 모델(2.0)로 1회 재시도
+      console.warn("Gemini 2.0 일시 오류, 동일 모델로 재시도합니다.");
+      
+      // 300ms 딜레이 후 재시도
+      await new Promise(res => setTimeout(res, 300));
+      
+      result = await model.generateContent(prompt);
     }
 
     const raw = result.response.text();

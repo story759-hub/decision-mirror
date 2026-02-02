@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { toPng } from 'html-to-image';
 import Link from 'next/link';
-// ✅ 아이콘 라이브러리 추가
 import { Sparkles, Droplets, Flame, Tornado, Mail, Leaf, Play } from 'lucide-react';
 
 type Stage = 'pick' | 'resonate' | 'deep' | 'analyzing' | 'result';
@@ -252,292 +251,142 @@ export default function FeelingSnapFinal() {
           </div>
         )}
 
-{stage === 'result' && resultData && (
-
+        {stage === 'result' && resultData && (
           <div className="animate-in zoom-in-95 duration-700">
-
-            {/* 1. 결과 카드 (마진 조정: mb-3) */}
-
-            <div ref={cardRef} className="relative w-full rounded-[44px] overflow-hidden shadow-2xl bg-black mb-3" style={{ aspectRatio: '3 / 4.8' }}>
-
+            {/* 결과 카드 레이아웃 유지 및 최적화 */}
+            <div ref={cardRef} className="relative w-full rounded-[44px] overflow-hidden shadow-2xl bg-black mb-3" 
+                 style={{ minHeight: '600px', aspectRatio: '3 / 4.8' }}>
               <img src={resultData.mainEmotion.img} alt="bg" className="absolute inset-0 w-full h-full object-cover opacity-50" />
-
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40" />
-
               
-
-              <div className="absolute inset-0 p-8 sm:p-10 flex flex-col justify-between text-white">
-
+              <div className="absolute inset-0 p-8 sm:p-10 flex flex-col text-white">
                 {/* 헤더 */}
-
-                <div className="flex justify-between items-start">
-
+                <div className="flex justify-between items-start mb-4">
                   <div className="space-y-1">
-
-                    <div className="text-lg font-black tracking-tighter">
-
+                    <div className="text-lg font-black tracking-tighter leading-none">
                       <span>Feeling</span><span className="text-[#E91E63] ml-0.5">Snap</span>
-
                     </div>
-
-                    <div className="text-[10px] font-bold text-white/40 tracking-widest uppercase italic">
-
+                    <div className="text-[10px] font-bold text-white/40 tracking-widest uppercase italic font-mono">
                       {stamp.date}  {stamp.time}
-
                     </div>
-
                   </div>
-
                   <span className="text-[9px] font-black border border-white/20 px-2.5 py-1 rounded-full uppercase tracking-widest text-white/50 backdrop-blur-sm">Snap Shot</span>
-
                 </div>
-
                 
-
-                {/* 결과 텍스트 영역 */}
-
-                <div className="mt-4 mb-auto space-y-4 transform translate-y-4">
-
-                  <h3 className="text-[11px] font-black tracking-widest uppercase text-white/45 italic">
-
-                    {resultData.subName}
-
-                  </h3>
-
-                  
-
-                  <div className="space-y-3">
-
-                    <p className="text-[22px] sm:text-[20px] font-medium leading-snug text-white border-l-2 border-[#E91E63] pl-4 drop-shadow-2xl" 
-
-                       style={{ fontFamily: "'Bongsoong-Tint', sans-serif" }}>
-
-                      {resultData.description.split('\n')[0]}
-
-                    </p>
-
-                    {resultData.description.split('\n')[1] && (
-
-                      <p className="text-[18px] sm:text-[18px] font-medium leading-relaxed text-white/70 pl-4 drop-shadow-xl"
-
-                         style={{ fontFamily: "'Bongsoong-Tint', sans-serif" }}>
-
-                        {resultData.description.split('\n')[1]}
-
+                {/* 텍스트 영역: 유연한 높이 조절로 짤림 방지 */}
+                <div className="flex-1 flex flex-col justify-center min-h-0 mb-4 overflow-hidden">
+                  <div className="space-y-4">
+                    <h3 className="text-[11px] font-black tracking-widest uppercase text-[#E91E63] italic">
+                      {resultData.subName}
+                    </h3>
+                    
+                    <div className="space-y-3">
+                      <p className="text-[20px] sm:text-[22px] font-medium leading-tight text-white border-l-2 border-[#E91E63] pl-4 drop-shadow-2xl break-keep" 
+                         style={{ fontFamily: "'Bongsoong-Tint', sans-serif", wordBreak: 'keep-all' }}>
+                        {resultData.description.split('\n')[0]}
                       </p>
-
-                    )}
-
+                      {resultData.description.split('\n')[1] && (
+                        <p className="text-[16px] sm:text-[18px] font-medium leading-relaxed text-white/70 pl-4 drop-shadow-xl break-keep"
+                           style={{ fontFamily: "'Bongsoong-Tint', sans-serif", wordBreak: 'keep-all' }}>
+                          {resultData.description.split('\n')[1]}
+                        </p>
+                      )}
+                    </div>
                   </div>
-
                 </div>
-
-
 
                 {/* 하단 화이트 보드 */}
-
-                <div className="bg-white/95 backdrop-blur-xl rounded-[36px] p-6 sm:p-8 space-y-5 text-slate-900 shadow-2xl">
-
-                  {/* 감정 믹스 바 */}
-
+                <div className="bg-white/95 backdrop-blur-xl rounded-[36px] p-6 sm:p-8 space-y-5 text-slate-900 shadow-2xl mt-auto">
                   <div className="space-y-3.5">
-
                     {resultData.mix && resultData.mix.map((item: any, index: number) => (
-
                       <div key={index} className="space-y-1.5">
-
                         <div className="flex justify-between text-[9px] font-black text-slate-400 uppercase tracking-tight">
-
                           <span>{item.label}</span><span className="text-[#E91E63]">{item.rate}%</span>
-
                         </div>
-
                         <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-
                           <div className={`h-full bg-gradient-to-r ${item.color} transition-all duration-1000`} style={{ width: `${item.rate}%` }} />
-
                         </div>
-
                       </div>
-
                     ))}
-
                   </div>
-
-
-
-                  {/* 사운드트랙 */}
 
                   <div className="pt-2 border-t border-slate-100 flex justify-between items-center">
-
                     <div className="flex flex-col min-w-0 pr-4">
-
                       <span className="text-[8px] font-black text-[#E91E63] uppercase mb-0.5 tracking-widest opacity-70">Soundtrack</span>
-
-                      <p className="text-[14px] font-black text-slate-800 truncate">{resultData.song.split(' - ')[1] || resultData.song}</p>
-
+                      <p className="text-[13px] font-black text-slate-800 truncate">{resultData.song.split(' - ')[1] || resultData.song}</p>
                       <p className="text-[10px] font-bold text-slate-400 tracking-tight">{resultData.song.split(' - ')[0]}</p>
-
                     </div>
-
-                    <button onClick={() => openYouTubeSearch(resultData.song)} className="w-10 h-10 bg-[#E91E63] rounded-full flex items-center justify-center flex-shrink-0 shadow-lg shadow-pink-100 active:scale-90 transition-transform">
-
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z" /></svg>
-
+                    <button onClick={() => openYouTubeSearch(resultData.song)} className="w-9 h-9 bg-[#E91E63] rounded-full flex items-center justify-center flex-shrink-0 shadow-lg shadow-pink-100 active:scale-90 transition-transform">
+                      <Play size={14} fill="white" className="text-white ml-0.5" />
                     </button>
-
                   </div>
 
+                  <div className="pt-4 border-t border-slate-50 flex justify-between items-end gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <div className="flex items-center gap-1 px-1.5 py-0.5 bg-slate-50 rounded text-[8px] text-slate-500 font-black tracking-tighter uppercase">
+                          <span className="w-1 h-1 bg-[#E91E63] rounded-full animate-pulse" />
+                          Captured
+                        </div>
+                        <span className="text-[#E91E63] font-black text-[16px] tracking-tighter tabular-nums leading-none">
+                          {resultData.displayStats.commonRate}
+                        </span>
+                      </div>
+                      <div className="text-slate-700 font-medium text-[10px] tracking-tight leading-tight max-w-[140px] break-keep">
+                        {resultData.displayStats.rateLabel}
+                      </div>
+                    </div>
 
-
-                  {/* 🔥 복구된 통계 섹션 (Captured / Today's Snap) */}
-
-{/* 🔥 수정된 통계 섹션: 좌우 영역 분리 및 간격 확보 */}
-
-<div className="pt-4 border-t border-slate-50 flex justify-between items-end gap-4">
-
-  {/* 왼쪽 영역: 텍스트가 오른쪽을 침범하지 않도록 max-width 설정 */}
-
-  <div className="flex-1 min-w-0 text-[10px] font-bold leading-[1.6] text-slate-400">
-
-    <div className="flex items-center gap-1.5 mb-1">
-
-      <div className="flex items-center gap-1 px-1.5 py-0.5 bg-slate-50 rounded text-[8px] text-slate-500 font-black tracking-tighter uppercase">
-
-        <span className="w-1 h-1 bg-[#E91E63] rounded-full animate-pulse" />
-
-        Captured
-
-      </div>
-
-      <span className="text-[#E91E63] font-black text-[16px] tracking-tighter tabular-nums leading-none">
-
-        {resultData.displayStats.commonRate}
-
-      </span>
-
-    </div>
-
-    
-
-    {/* max-w-[140px] 정도를 주어 글자가 번호 쪽으로 넘어가지 않게 가둡니다 */}
-
-    <div className="text-slate-700 font-medium tracking-tight leading-tight whitespace-pre-line max-w-[160px] sm:max-w-[160px]">
-
-      {resultData.displayStats.rateLabel}
-
-    </div>
-
-  </div>
-
-
-
-  {/* 오른쪽 영역: 고정 너비 느낌으로 유지 */}
-
-  <div className="flex flex-col items-end flex-shrink-0">
-
-    <span className="text-[8px] text-slate-300 font-black uppercase tracking-widest mb-0.5">Today's snap</span>
-
-    <div className="text-[22px] font-black text-slate-600 tracking-tighter font-mono">
-
-      #{resultData.displayStats.totalCount}
-
-    </div>
-
-  </div>
-
-</div>                </div>
-
+                    <div className="flex flex-col items-end flex-shrink-0">
+                      <span className="text-[8px] text-slate-300 font-black uppercase tracking-widest mb-0.5">Today's snap</span>
+                      <div className="text-[20px] font-black text-slate-600 tracking-tighter font-mono leading-none">
+                        #{resultData.displayStats.totalCount}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-
             </div>
-
             
-
-            {/* 2. 여운 문장 배치 (마진 mb-2) */}
-
             <p className="text-center text-[11px] text-slate-400 font-medium leading-relaxed px-6 mb-2">
-
               이 문장, 지금 상태 그대로 남겨도 괜찮아
-
             </p>
 
-
-
-            {/* 3. 수정된 메인 버튼 (이 장면 간직하기) */}
-
             <button
-
               onClick={handleSaveImage}
-
               className="w-full py-5 bg-white rounded-[28px] font-bold text-[13px] shadow-sm border border-slate-100 active:scale-95 transition-all mb-4"
-
             >
-
               🎞️ 이 장면 간직하기
-
             </button>
 
-
-
-            {/* 4. 보조 기능 (공유 및 다시찍기) */}
-
             <div className="grid grid-cols-2 gap-3 mb-10">
-
               <button 
-
                 onClick={async () => {
-
                   if (navigator.share) {
-
                     try {
-
                       await navigator.share({
-
                         title: 'Feeling Snap',
-
                         text: `나의 감정 스냅: ${resultData.description.replace('\n', ' ')}`,
-
                         url: window.location.href,
-
                       });
-
                     } catch (err) { console.log('공유 취소'); }
-
                   } else {
-
                     alert('공유하기를 지원하지 않는 브라우저입니다. 링크를 복사해주세요!');
-
                   }
-
                 }}
-
                 className="py-4 bg-slate-50 text-slate-400 rounded-[24px] font-bold text-[12px] flex items-center justify-center gap-2 active:bg-slate-100 transition-all"
-
               >
-
                 <span>🔗</span> 공유하기
-
               </button>
-
               <button onClick={() => window.location.reload()} className="py-4 bg-[#1A1F2C] text-white/80 rounded-[24px] font-bold text-[12px] flex items-center justify-center gap-2 active:scale-95 transition-all">
-
                 <span>↻</span> 다시 찍기
-
               </button>
-
             </div>
 
-
-
             <ArticleSection />
-
           </div>
-
-        )}      </main>
-
+        )}
+      </main>
     </div>
-
   );
-
 }
