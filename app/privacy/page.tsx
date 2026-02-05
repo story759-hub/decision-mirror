@@ -9,8 +9,8 @@ export default function PrivacyPolicy() {
     <div className="min-h-screen bg-white text-slate-800 pb-20">
       {/* 헤더 */}
       <header className="max-w-2xl mx-auto pt-10 pb-6 px-6 flex justify-between items-center">
-        <h1 
-          className="text-2xl font-black text-[#E91E63] cursor-pointer"
+        <h1
+          className="text-2xl font-black text-[#0F172A] cursor-pointer"
           onClick={() => router.push('/')}
         >
           Feeling <span className="text-[#E91E63]">Snap</span>
@@ -63,8 +63,7 @@ export default function PrivacyPolicy() {
         <section className="space-y-4">
           <h3 className="text-xl font-bold text-slate-900">5. 문의처</h3>
           <p className="leading-relaxed text-slate-600">
-            서비스 이용 중 개인정보 관련 문의사항이 있으시면 아래 메일로 연락 부탁드립니다.<br/>
-            <span className="text-[#E91E63] font-bold">bullet9372@gmail.com</span>
+            서비스 이용 중 개인정보 관련 문의사항이 있으시면 Contact를 참고 부탁드립니다.<br/>
           </p>
         </section>
 

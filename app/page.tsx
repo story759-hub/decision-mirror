@@ -195,6 +195,18 @@ export default function FeelingSnapFinal() {
       <main className="max-w-md mx-auto px-6">
         {stage === 'pick' && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <section className="mb-8 px-2">
+  <h2 className="text-sm font-black text-slate-800 tracking-tight mb-2">
+    Feeling Snap은 무엇인가요?
+  </h2>
+  <p className="text-xs leading-relaxed text-slate-500">
+    Feeling Snap은 지금 이 순간의 감정을 분석하거나 판단하지 않고,
+    기록 가능한 문장으로 정리하는 도구입니다.
+    이 서비스는 조언, 상담, 치료, 결정을 제공하지 않으며
+    사용자가 선택한 감정의 조합을 하나의 상태 기록으로 남깁니다.
+  </p>
+</section>
+
             <div className="text-center space-y-2">
               <h2 className="text-xl sm:text-2xl font-bold text-[#2D3E50]">지금 순간을 찍어볼까.</h2>
               <p className="text-slate-400 text-base sm:text-lg font-medium">제일 먼저 생각나는 감정을 골라봐.</p>

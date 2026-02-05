@@ -55,7 +55,10 @@ export default function RootLayout({
             </h2>
           </div>
           
-          <div className="flex justify-center space-x-6 mb-6 text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">
+          <div className="flex justify-center space-x-6 mb-6 text-[9px] font-bold uppercase tracking-[0.1em] text-slate-400">
+            <Link href="/about" className="hover:text-pink-500 transition-colors">
+              about us
+            </Link>
             <Link href="/privacy" className="hover:text-pink-500 transition-colors">
               Privacy Policy
             </Link>
