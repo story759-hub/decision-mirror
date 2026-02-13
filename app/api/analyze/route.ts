@@ -1,73 +1,59 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
-const apiKey = process.env.GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(apiKey || "");
+// ✅ 1. 외부 설정 (싱글톤)
+const supabaseUrl = process.env.SUPABASE_URL || "";
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const apiKey = process.env.GEMINI_API_KEY || "";
+
+const supabase = (supabaseUrl && supabaseServiceKey) 
+  ? createClient(supabaseUrl, supabaseServiceKey) 
+  : null;
+
+const genAI = new GoogleGenerativeAI(apiKey);
 
 /* ================================
-   🧠 Snap 문장 딱딱함 완화 로직
+   🧠 유틸리티 & 안전 장치
 ================================ */
+
+function safeJsonParse(text: string) {
+  try {
+    const cleaned = text.replace(/```json|```/g, "").trim();
+    const start = cleaned.indexOf("{");
+    const end = cleaned.lastIndexOf("}");
+    if (start === -1 || end === -1) throw new Error("JSON_NOT_FOUND");
+    const jsonStr = cleaned.slice(start, end + 1);
+    return JSON.parse(jsonStr);
+  } catch (e) {
+    console.error("AI Response Parsing Failed. Raw Text:", text);
+    return null;
+  }
+}
+
 const SOFT_ENDINGS: [string, string][] = [
-  ["이다.", "같다."],
-  ["있다.", "남아 있다."],
-  ["없다.", "없는 편이다."],
-  ["끝났다.", "여기까지다."],
-  ["정해졌다.", "정해진 것 같다."],
-  ["멈췄다.", "멈춰 있다."],
-];
-
-const HARD_ADVERBS: [string, string][] = [
-  ["이미", "어느새"],
-  ["완전히", "거의"],
-  ["분명히", "조금은"],
-  ["딱", "그쯤"],
-];
-
-const NOUN_SOFTEN: [string, string][] = [
-  ["상태", "느낌"],
-  ["지점", "쯤"],
-  ["결과", "모양"],
-  ["방향", "쪽"],
+  ["이다.", "같다."], ["있다.", "남아 있다."], ["없다.", "없는 편이다."],
+  ["끝났다.", "여기까지다."], ["정해졌다.", "정해진 것 같다."], ["멈췄다.", "멈춰 있다."],
 ];
 
 function softenSnapText(sentence: string): string {
+  if (!sentence) return "";
   let result = sentence;
-
-  const applySoft = (pairs: [string, string][], probability: number) => {
-    pairs.forEach(([hard, soft]) => {
-      if (result.includes(hard) && Math.random() < probability) {
-        result = result.replace(hard, soft);
-      }
-    });
-  };
-
-  applySoft(SOFT_ENDINGS, 0.5);
-  applySoft(HARD_ADVERBS, 0.3);
-  applySoft(NOUN_SOFTEN, 0.3);
-
+  SOFT_ENDINGS.forEach(([hard, soft]) => {
+    if (result.includes(hard) && Math.random() < 0.5) {
+      result = result.replace(hard, soft);
+    }
+  });
   return result;
 }
 
-/* ================================
-   🧹 금지어 제거 (Reject ❌)
-================================ */
-const FORBIDDEN_REPLACEMENTS: [RegExp, string][] = [
-  [/나\s?/g, ""],
-  [/너\s?/g, ""],
-  [/당신/g, ""],
-  [/우리/g, ""],
-  [/괜찮/g, "조용한"],
-  [/힘내/g, ""],
-  [/해요/g, "하다"],
-  [/하세요/g, "한다"],
-];
-
 function sanitizeDescription(text: string): string {
-  let result = text;
-  FORBIDDEN_REPLACEMENTS.forEach(([pattern, replacement]) => {
-    result = result.replace(pattern, replacement);
-  });
-  return result.trim();
+  if (!text) return "";
+  return text
+    .replace(/나\s?|너\s?|당신|우리/g, "")
+    .replace(/해요/g, "하다")
+    .replace(/하세요/g, "한다")
+    .trim();
 }
 
 /* ================================
@@ -77,133 +63,99 @@ export async function POST(req: Request) {
   let requestData: any = {};
 
   try {
-    requestData = await req.json();
-    const { mainEmotion, reason, text } = requestData;
-
-    if (!mainEmotion || !apiKey) {
-      return NextResponse.json({ error: "Invalid Setup" }, { status: 400 });
+    if (!supabase || !apiKey) {
+      throw new Error("서버 환경 변수가 설정되지 않았습니다.");
     }
 
-    const prompt = `
-SYSTEM:
-너는 감정을 설명하는 AI가 아니라,
-사용자의 머릿속 상태를 ‘정리된 문장’으로 옮겨 적는 편집자다.
+    requestData = await req.json();
+    const { mainEmotion, reason, text, fingerprint } = requestData;
 
-아래 규칙을 반드시 지켜서 결과 문장을 생성해라.
+    if (!mainEmotion) {
+      return NextResponse.json({ error: "Invalid Request" }, { status: 400 });
+    }
 
-[출력 규칙]
-1. 결과는 반드시 두 줄이다.
-2. 첫 줄은:
-   - 지금 이 순간의 감정 상태를 한 문장으로 정리한 ‘결론 문장’이다.
-   - 요약, 판단, 설명처럼 느껴지지 않아야 한다.
-   - “아직 / 이미 / 그냥 / 조금 / 그대로” 같은 상태 부사를 자연스럽게 사용한다.
-   - ‘상태를 잠깐 멈춰 세운 문장’처럼 느껴져야 한다.
-3. 두 번째 줄은:
-   - 첫 줄에서 다 정리되지 않은 감정의 잔여물이다.
-   - 이유를 말하지 말고, 여운처럼 남겨라.
-4. 주어(나, 너, 우리는) 사용 금지.
-5. 조언, 위로, 해결책, 분석 금지.
-6. 감정 단어를 직접 나열하지 말 것.
-7. 문장 끝에 마침표 사용 금지.
-8. 전체 톤은 담담하고 조용해야 한다.
-9. 시처럼 보이려고 하지 말고, 기록처럼 써라.
-
-[목표]
-사용자가 이 문장을 읽고
-“아… 이 상태였구나”라고 느끼게 만들어라.
-
-[MIX RULES]:
-- mix MUST contain exactly 3 emotions.
-- key MUST be one of: joy, sadness, anger, anxiety, regret, neutral.
-- label: AI should analyze the context and create a creative and poetic Korean emotional name (e.g., "흩어진 마음", "서늘한 기분", "남겨진 미련" 등).
-- rate MUST sum to 100.
-
-[SCARCITY RULES]:
-- commonRate: realistic percentage (1~99, avoid round numbers)
-- rateLabel MUST be exactly 2 lines:
-  Line 1: "이 장면을 고른 사람은 n%야"
-  Line 2: poetic observation
-
-INPUT:
-Emotion: ${mainEmotion}
-Reason: ${reason}
-Text: "${text}"
-
-OUTPUT JSON:
-{
-  "appliedTone": "dry | cynical | neutral",
-  "mix": [
-    { "key": "joy | sadness | anger | anxiety | regret | neutral", "label": "Poetic Label", "rate": 50 },
-    { "key": "joy | sadness | anger | anxiety | regret | neutral", "label": "Poetic Label", "rate": 30 },
-    { "key": "joy | sadness | anger | anxiety | regret | neutral", "label": "Poetic Label", "rate": 20 }
-  ],
-  "commonRate": "n%",
-  "rateLabel": "이 장면을 고른 사람은 n%야\\n관측 문장",
-  "description": "첫 줄\\n둘째 줄",
-  "song": "Artist - Title"
-}
-`;
-
-    // ✅ Gemini 2.0 모델 고정 설정
     const model = genAI.getGenerativeModel({
       model: "gemini-2.0-flash",
       generationConfig: { 
         responseMimeType: "application/json", 
-        temperature: 1.0 
+        temperature: 0.9 // 유동적인 묘사를 위해 온도를 살짝 높임
       },
     });
 
-    let result;
-    try {
-      // 1차 시도: gemini-2.0-flash
-      result = await model.generateContent(prompt);
-    } catch (apiError: any) {
-      // ✅ 모델 다운그레이드 없이 동일 모델(2.0)로 1회 재시도
-      console.warn("Gemini 2.0 일시 오류, 동일 모델로 재시도합니다.");
-      
-      // 300ms 딜레이 후 재시도
-      await new Promise(res => setTimeout(res, 300));
-      
-      result = await model.generateContent(prompt);
+    // ✅ [강화] 레이블 유동화 및 노래 추천 지침
+    const prompt = `
+SYSTEM: 당신은 사용자의 찰나의 마음을 포착하여 '감정 인덱스'와 '음악'으로 기록하는 사진작가입니다.
+
+[출력 지침]
+1. 'mix': 고정된 단어를 쓰지 마세요. 현재 상황(Reason, Text)을 바탕으로 각 감정 요소의 성질을 은유적인 짧은 문구로 표현하세요. (예: "가라앉은 침묵", "희미한 기대", "차가운 공기" 등)
+2. 'song': 상황에 완벽히 어울리는 실제 아티스트와 곡을 선정하세요. 반드시 "아티스트 - 곡 제목" 형식을 지키세요.
+3. 'description': 마침표 없이 담담하게 두 줄로 작성하세요. 주어는 생략합니다.
+
+OUTPUT JSON FORMAT:
+{
+  "appliedTone": "poetic | calm | cold",
+  "mix": [
+    { "key": "${mainEmotion}", "label": "상황에 맞는 감성적 표현", "rate": 70 },
+    { "key": "neutral", "label": "상황에 맞는 감성적 표현", "rate": 30 }
+  ],
+  "commonRate": "15%",
+  "rateLabel": "이 장면을 고른 사람은 15%야\\n관측 문장",
+  "description": "감성적인 첫 줄\\n감성적인 둘째 줄",
+  "song": "Artist - Title"
+}
+
+INPUT: Emotion: ${mainEmotion} | Reason: ${reason} | Text: "${text}"
+`;
+
+    const aiResult = await model.generateContent(prompt);
+    const rawText = aiResult.response.text();
+    let data = safeJsonParse(rawText);
+
+    if (!data || !data.description) {
+      throw new Error("DATA_PROCESSING_ERROR");
     }
 
-    const raw = result.response.text();
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("JSON parse failed");
+    // mix 배열 방어 및 레이블 검증
+    if (!Array.isArray(data.mix)) {
+      data.mix = [
+        { key: mainEmotion, label: "기록된 마음", rate: 100 },
+        { key: "neutral", label: "정지된 장면", rate: 0 }
+      ];
+    }
 
-    let data = JSON.parse(jsonMatch[0]);
-
-    /* ================================
-        🧩 서버 보정 (Reject 없음)
-    ================================ */
-    data.description = sanitizeDescription(data.description);
-    data.description = softenSnapText(data.description);
-
+    // 텍스트 보정
+    data.description = softenSnapText(sanitizeDescription(data.description));
     if (!data.description.includes("\n")) {
       const mid = Math.floor(data.description.length / 2);
-      data.description =
-        data.description.slice(0, mid) + "\n" + data.description.slice(mid);
+      data.description = data.description.slice(0, mid) + "\n" + data.description.slice(mid);
     }
 
+    // ✅ 비동기 저장
+    supabase.from('snaps').insert([{ 
+      emotion_key: mainEmotion, 
+      reason: reason, 
+      description: data.description,
+      user_fingerprint: fingerprint || 'anonymous'
+    }]).then(({ error }) => {
+      if (error) console.error("DB Insert Error:", error.message);
+    });
+
+    data.displayStats = { totalCount: "1,240" };
     return NextResponse.json(data);
 
-  } catch (error) {
-    console.error("Snap API Error:", error);
-
-    /* ================================
-        🪂 안전한 Fallback (API 완전 차단 시)
-    ================================ */
+  } catch (error: any) {
+    console.error("🔥 Snap API Critical Error:", error.message);
     return NextResponse.json({
       appliedTone: "neutral",
       mix: [
-        { key: requestData?.mainEmotion || "neutral", label: "남겨진 마음", rate: 60 },
-        { key: "neutral", label: "정지된 장면", rate: 30 },
-        { key: "anxiety", label: "미세한 떨림", rate: 10 },
+        { key: "neutral", label: "남겨진 마음", rate: 70 },
+        { key: "neutral", label: "조용한 정리", rate: 30 }
       ],
       commonRate: "18%",
-      rateLabel: "이 장면을 고른 사람은 18%야\n드물게 포착되는 주파수",
+      rateLabel: "이 장면을 고른 사람은 18%야\n관측 문장",
       description: "창밖은 이미 어둡고\n방은 아직 조용하다",
       song: "우효 - 민들레",
+      displayStats: { totalCount: "1,240" }
     });
   }
 }
