@@ -6,6 +6,22 @@ const supabaseUrl = process.env.SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 const apiKey = process.env.GEMINI_API_KEY || "";
 
+// ✅ 어떤 변수가 비어있는지 로그로 확인 (보안을 위해 값은 출력하지 않음)
+console.log("변수 체크:", {
+  url: !!supabaseUrl,
+  key: !!supabaseServiceKey,
+  gemini: !!apiKey
+});
+
+if (!supabaseUrl || !supabaseServiceKey || !apiKey) {
+  // 어떤 변수가 누락되었는지 에러 메시지에 명시
+  const missing = [];
+  if (!supabaseUrl) missing.push("SUPABASE_URL");
+  if (!supabaseServiceKey) missing.push("SUPABASE_SERVICE_ROLE_KEY");
+  if (!apiKey) missing.push("GEMINI_API_KEY");
+  
+  throw new Error(`서버 환경 변수 누락: ${missing.join(", ")}`);
+}
 const supabase = (supabaseUrl && supabaseServiceKey) 
   ? createClient(supabaseUrl, supabaseServiceKey) 
   : null;
