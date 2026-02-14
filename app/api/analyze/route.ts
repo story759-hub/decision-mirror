@@ -2,33 +2,24 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+// 환경 변수 로드
 const supabaseUrl = process.env.SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 const apiKey = process.env.GEMINI_API_KEY || "";
 
-// ✅ 어떤 변수가 비어있는지 로그로 확인 (보안을 위해 값은 출력하지 않음)
-console.log("변수 체크:", {
-  url: !!supabaseUrl,
-  key: !!supabaseServiceKey,
-  gemini: !!apiKey
+// ✅ 서버 로그 확인용 (Vercel Logs 탭에서 확인 가능)
+console.log("🛠️ 서버 환경 변수 상태 체크:", {
+  SUPABASE_URL: !!supabaseUrl,
+  SUPABASE_SERVICE_ROLE_KEY: !!supabaseServiceKey,
+  GEMINI_API_KEY: !!apiKey,
 });
 
-if (!supabaseUrl || !supabaseServiceKey || !apiKey) {
-  // 어떤 변수가 누락되었는지 에러 메시지에 명시
-  const missing = [];
-  if (!supabaseUrl) missing.push("SUPABASE_URL");
-  if (!supabaseServiceKey) missing.push("SUPABASE_SERVICE_ROLE_KEY");
-  if (!apiKey) missing.push("GEMINI_API_KEY");
-  
-  throw new Error(`서버 환경 변수 누락: ${missing.join(", ")}`);
-}
 const supabase = (supabaseUrl && supabaseServiceKey) 
   ? createClient(supabaseUrl, supabaseServiceKey) 
   : null;
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-// 감정 키와 라벨 매핑 (서버측 보강용)
 const EMOTION_LABELS: { [key: string]: string } = {
   joy: "기쁨",
   sadness: "슬픔",
@@ -51,9 +42,6 @@ function safeJsonParse(text: string) {
   }
 }
 
-/**
- * ✅ 문장 부호 제거 및 정제 (줄바꿈 \n 은 보존해야 함)
- */
 function sanitizeDescription(text: string): string {
   if (!text) return "";
   return text
@@ -70,7 +58,12 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const fingerprint = searchParams.get('fp');
 
-    if (!supabase || !fingerprint) {
+    // GET에서도 환경 변수 체크
+    if (!supabase) {
+      return NextResponse.json({ error: "Supabase not initialized" }, { status: 500 });
+    }
+
+    if (!fingerprint) {
       return NextResponse.json({ error: "Invalid Request" }, { status: 400 });
     }
 
@@ -94,8 +87,21 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    if (!supabase || !apiKey) {
-      throw new Error("서버 환경 변수가 설정되지 않았습니다.");
+    /* ===================================================
+       [디버깅] 환경 변수 존재 여부 정밀 확인
+    ====================================================== */
+    if (!supabaseUrl || !supabaseServiceKey || !apiKey) {
+      const missing = [];
+      if (!supabaseUrl) missing.push("SUPABASE_URL");
+      if (!supabaseServiceKey) missing.push("SUPABASE_SERVICE_ROLE_KEY");
+      if (!apiKey) missing.push("GEMINI_API_KEY");
+      
+      // ⚠️ 프론트엔드 콘솔에서 범인을 바로 확인할 수 있도록 에러 메시지에 포함
+      throw new Error(`서버 환경 변수 누락: ${missing.join(", ")}`);
+    }
+
+    if (!supabase) {
+      throw new Error("Supabase 클라이언트 초기화 실패");
     }
 
     const requestData = await req.json();
@@ -106,11 +112,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid Request" }, { status: 400 });
     }
 
-    /* ===================================================
-       [Step 1] Gemini AI 분석 (먼저 수행)
-       분석이 실패하면 여기서 Error를 던져 이후 과정을 중단함
-    ====================================================== */
-    let aiData: any = null;
     const model = genAI.getGenerativeModel({
       model: "gemini-2.0-flash",
       generationConfig: { responseMimeType: "application/json", temperature: 0.7 },
@@ -127,16 +128,12 @@ export async function POST(req: Request) {
     `;
 
     const aiResult = await model.generateContent(prompt);
-    aiData = safeJsonParse(aiResult.response.text());
+    const aiData = safeJsonParse(aiResult.response.text());
 
-    // AI 데이터가 비정상적이면 에러를 발생시켜 catch 블록으로 보냄 (저장 방지)
     if (!aiData || !aiData.mix || !aiData.description) {
       throw new Error("AI 분석 데이터 생성 실패");
     }
 
-    /* ===================================================
-       [Step 2] 데이터 정제 (Sanitize)
-    ====================================================== */
     const lines = aiData.description.split('\n').map((l: string) => sanitizeDescription(l));
     aiData.description = lines.length >= 2 ? lines.slice(0, 2).join('\n') : lines[0] + "\n" + "기록된 찰나";
     
@@ -145,10 +142,6 @@ export async function POST(req: Request) {
       label: m.label || EMOTION_LABELS[m.key] || "기록"
     }));
 
-    /* ===================================================
-       [Step 3] DB 저장 및 통계 업데이트 (AI 성공 시에만 실행)
-    ====================================================== */
-    // 1. 메인 기록 저장
     const { error: insertError } = await supabase.from('emotions').insert([{ 
       emotion_key: mainEmotion, 
       reason: reason, 
@@ -158,18 +151,14 @@ export async function POST(req: Request) {
       mix_data: aiData.mix 
     }]);
 
-    if (insertError) throw insertError; // 저장 실패 시 중단
+    if (insertError) throw insertError;
 
-    // 2. 통계 카운트 업데이트 (RPC 호출)
     try {
       await supabase.rpc('increment_emotion_count', { target_key: mainEmotion });
     } catch (e) { 
       console.error("RPC Error:", e); 
-      // 통계 업데이트 실패는 기록 저장만큼 치명적이지 않으므로 진행 가능하지만, 
-      // 엄격하게 하려면 여기서도 throw 가능
     }
 
-    // 3. 최신 통계 데이터 가져오기
     const { data: allStats } = await supabase.from('emotion_stats').select('count, emotion_key');
     const { count: userSnapCount } = await supabase
       .from('emotions')
@@ -179,7 +168,6 @@ export async function POST(req: Request) {
     const totalArchiveCount = allStats?.reduce((acc, cur) => acc + Number(cur.count || 0), 0) || 0;
     const currentEmotionTotal = allStats?.find(s => s.emotion_key === mainEmotion)?.count || 1;
 
-    // 최종 응답
     return NextResponse.json({
       ...aiData,
       displayStats: { 
@@ -190,9 +178,7 @@ export async function POST(req: Request) {
     });
 
   } catch (error: any) {
-    console.error("🔥 POST Error (저장되지 않음):", error.message);
-    // 에러 발생 시 500 에러와 함께 실패 메시지 반환. 
-    // 이 경우 프론트엔드는 stage를 'pick'으로 돌리거나 에러 UI를 보여주게 됨.
+    console.error("🔥 POST Error:", error.message);
     return NextResponse.json(
       { error: "Analysis failed", message: error.message }, 
       { status: 500 }
