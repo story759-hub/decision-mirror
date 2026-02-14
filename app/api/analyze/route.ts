@@ -181,5 +181,5 @@ export async function POST(req: Request) {
       { error: "Analysis failed", message: error.message }, 
       { status: 500 }
     );
-  }
+  } 
 }
