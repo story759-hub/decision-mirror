@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-// ✅ 1. 외부 설정 (싱글톤)
+// ✅ 1. 환경 변수 및 싱글톤 설정
 const supabaseUrl = process.env.SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 const apiKey = process.env.GEMINI_API_KEY || "";
@@ -22,11 +22,10 @@ function safeJsonParse(text: string) {
     const cleaned = text.replace(/```json|```/g, "").trim();
     const start = cleaned.indexOf("{");
     const end = cleaned.lastIndexOf("}");
-    if (start === -1 || end === -1) throw new Error("JSON_NOT_FOUND");
+    if (start === -1 || end === -1) return null;
     const jsonStr = cleaned.slice(start, end + 1);
     return JSON.parse(jsonStr);
   } catch (e) {
-    console.error("AI Response Parsing Failed. Raw Text:", text);
     return null;
   }
 }
@@ -57,105 +56,141 @@ function sanitizeDescription(text: string): string {
 }
 
 /* ================================
-   🧩 API Handler
+   🧩 API Handlers
 ================================ */
-export async function POST(req: Request) {
-  let requestData: any = {};
 
+/**
+ * 🟢 GET: 특정 사용자의 지난 기록들 가져오기
+ */
+export async function GET(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const fingerprint = searchParams.get('fp');
+
+    if (!supabase || !fingerprint) {
+      return NextResponse.json({ error: "Invalid Request" }, { status: 400 });
+    }
+
+    const { data, error } = await supabase
+      .from('snaps')
+      .select('*')
+      .eq('user_fingerprint', fingerprint)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    if (error) throw error;
+    return NextResponse.json(data);
+  } catch (error: any) {
+    console.error("🔥 History GET Error:", error.message);
+    return NextResponse.json([], { status: 500 });
+  }
+}
+
+/**
+ * 🟢 POST: 새로운 감정 분석 및 저장
+ */
+export async function POST(req: Request) {
   try {
     if (!supabase || !apiKey) {
       throw new Error("서버 환경 변수가 설정되지 않았습니다.");
     }
 
-    requestData = await req.json();
+    const requestData = await req.json();
     const { mainEmotion, reason, text, fingerprint } = requestData;
+    const userFingerprint = fingerprint || 'anonymous';
 
     if (!mainEmotion) {
       return NextResponse.json({ error: "Invalid Request" }, { status: 400 });
     }
 
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
-      generationConfig: { 
-        responseMimeType: "application/json", 
-        temperature: 0.9 // 유동적인 묘사를 위해 온도를 살짝 높임
-      },
-    });
+    // --- [Step 1] DB 작업: 카운트 증가 및 통계 조회 ---
+    await supabase.rpc('increment_emotion_count', { target_key: mainEmotion });
 
-    // ✅ [강화] 레이블 유동화 및 노래 추천 지침
-    const prompt = `
-SYSTEM: 당신은 사용자의 찰나의 마음을 포착하여 '감정 인덱스'와 '음악'으로 기록하는 사진작가입니다.
+    const { data: allStats } = await supabase.from('emotion_stats').select('*');
+    const { count: userSnapCount } = await supabase
+      .from('snaps')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_fingerprint', userFingerprint);
 
-[출력 지침]
-1. 'mix': 고정된 단어를 쓰지 마세요. 현재 상황(Reason, Text)을 바탕으로 각 감정 요소의 성질을 은유적인 짧은 문구로 표현하세요. (예: "가라앉은 침묵", "희미한 기대", "차가운 공기" 등)
-2. 'song': 상황에 완벽히 어울리는 실제 아티스트와 곡을 선정하세요. 반드시 "아티스트 - 곡 제목" 형식을 지키세요.
-3. 'description': 마침표 없이 담담하게 두 줄로 작성하세요. 주어는 생략합니다.
+    const totalArchiveCount = allStats?.reduce((acc, cur) => acc + Number(cur.total_count), 0) || 0;
+    const currentEmotionTotal = allStats?.find(s => s.emotion_key === mainEmotion)?.total_count || 1;
 
-OUTPUT JSON FORMAT:
-{
-  "appliedTone": "poetic | calm | cold",
-  "mix": [
-    { "key": "${mainEmotion}", "label": "상황에 맞는 감성적 표현", "rate": 70 },
-    { "key": "neutral", "label": "상황에 맞는 감성적 표현", "rate": 30 }
-  ],
-  "commonRate": "15%",
-  "rateLabel": "이 장면을 고른 사람은 15%야\\n관측 문장",
-  "description": "감성적인 첫 줄\\n감성적인 둘째 줄",
-  "song": "Artist - Title"
-}
+    // --- [Step 2] Gemini AI 분석 ---
+    let data: any = null;
 
-INPUT: Emotion: ${mainEmotion} | Reason: ${reason} | Text: "${text}"
-`;
+    try {
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.0-flash",
+        generationConfig: { responseMimeType: "application/json", temperature: 0.7 },
+      });
 
-    const aiResult = await model.generateContent(prompt);
-    const rawText = aiResult.response.text();
-    let data = safeJsonParse(rawText);
+      const { data: userHistory } = await supabase
+        .from('snaps')
+        .select('emotion_key')
+        .eq('user_fingerprint', userFingerprint)
+        .order('created_at', { ascending: false })
+        .limit(3);
 
-    if (!data || !data.description) {
-      throw new Error("DATA_PROCESSING_ERROR");
+      const recentEmotions = userHistory?.map(h => h.emotion_key).join(', ') || '첫 기록';
+
+      const prompt = `
+        SYSTEM: 사용자의 찰나를 기록하는 사진작가입니다. 
+        USER HISTORY: 최근 감정 기록: [${recentEmotions}]
+        [출력 지침]
+        1. 'mix': 상황에 맞는 은유적 감정 레이블 2개 생성.
+        2. 'song': 실제 "아티스트 - 곡 제목" 추천.
+        3. 'description': 담담한 문체로 두 줄 작성 (마침표, 쉼표, 따옴표 등 생략).
+        Emotion: ${mainEmotion} | Reason: ${reason} | Text: "${text}"
+      `;
+
+      const aiResult = await model.generateContent(prompt);
+      data = safeJsonParse(aiResult.response.text());
+      if (!data) throw new Error("AI_PARSE_ERROR");
+
+    } catch (aiError: any) {
+      console.error("⚠️ AI Fallback Mode:", aiError.message);
+      data = {
+        mix: [
+          { key: mainEmotion, label: "말하지 못한 마음", rate: 75 },
+          { key: "neutral", label: "고요한 공기", rate: 25 }
+        ],
+        description: "선명하지 않아도 괜찮은\n지금 이대로의 충분한 기록",
+        song: "아이유 - 마음"
+      };
     }
 
-    // mix 배열 방어 및 레이블 검증
-    if (!Array.isArray(data.mix)) {
-      data.mix = [
-        { key: mainEmotion, label: "기록된 마음", rate: 100 },
-        { key: "neutral", label: "정지된 장면", rate: 0 }
-      ];
-    }
-
-    // 텍스트 보정
+    // --- [Step 3] 최종 데이터 가공 및 저장 ---
     data.description = softenSnapText(sanitizeDescription(data.description));
+    
     if (!data.description.includes("\n")) {
       const mid = Math.floor(data.description.length / 2);
       data.description = data.description.slice(0, mid) + "\n" + data.description.slice(mid);
     }
 
-    // ✅ 비동기 저장
-    supabase.from('snaps').insert([{ 
+    // DB에 최종 결과 저장
+    await supabase.from('snaps').insert([{ 
       emotion_key: mainEmotion, 
       reason: reason, 
       description: data.description,
-      user_fingerprint: fingerprint || 'anonymous'
-    }]).then(({ error }) => {
-      if (error) console.error("DB Insert Error:", error.message);
-    });
+      user_fingerprint: userFingerprint
+    }]);
 
-    data.displayStats = { totalCount: "1,240" };
+    // 실시간 통계 주입
+    data.displayStats = { 
+      totalCount: (totalArchiveCount + 1).toLocaleString(), // 방금 추가된 것 포함
+      emotionSpecificCount: currentEmotionTotal,
+      userSnapCount: (userSnapCount || 0) + 1
+    };
+
     return NextResponse.json(data);
 
   } catch (error: any) {
-    console.error("🔥 Snap API Critical Error:", error.message);
+    console.error("🔥 Critical Error:", error.message);
     return NextResponse.json({
-      appliedTone: "neutral",
-      mix: [
-        { key: "neutral", label: "남겨진 마음", rate: 70 },
-        { key: "neutral", label: "조용한 정리", rate: 30 }
-      ],
-      commonRate: "18%",
-      rateLabel: "이 장면을 고른 사람은 18%야\n관측 문장",
-      description: "창밖은 이미 어둡고\n방은 아직 조용하다",
-      song: "우효 - 민들레",
-      displayStats: { totalCount: "1,240" }
-    });
+      mix: [{ key: "neutral", label: "정지된 장면", rate: 100 }],
+      description: "잠시 후 다시 기록해 주세요\n마음은 소중히 보관 중입니다",
+      song: "Feeling Snap - Recording...",
+      displayStats: { totalCount: "1,200+", emotionSpecificCount: 0, userSnapCount: 1 }
+    }, { status: 200 });
   }
 }
