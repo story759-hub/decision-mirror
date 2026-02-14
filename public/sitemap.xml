@@ -2,43 +2,43 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://feeling-snap.vercel.app/</loc>
-    <lastmod>2026-01-24</lastmod>
-    <changefreq>daily</changefreq>
+    <lastmod>2026-02-15</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
-    <loc>https://feeling-snap.vercel.app/terms</loc>
-    <lastmod>2026-01-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-
-  <url>
-    <loc>https://feeling-snap.vercel.app/privacy</loc>
-    <lastmod>2026-01-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-
-  <url>
-    <loc>https://feeling-snap.vercel.app/contact</loc>
-    <lastmod>2026-01-24</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.3</priority>
-  </url>
-
-  <url>
     <loc>https://feeling-snap.vercel.app/articles</loc>
-    <lastmod>2026-01-24</lastmod>
+    <lastmod>2026-02-15</lastmod>
     <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://feeling-snap.vercel.app/about</loc>
+    <lastmod>2026-02-15</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
-    <url>
-    <loc>https://feeling-snap.vercel.app/about</loc>
-    <lastmod>2026-02-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
+  <url><loc>https://feeling-snap.vercel.app/articles/things-seen-when-stopped</loc><lastmod>2026-01-01</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://feeling-snap.vercel.app/articles/comfort-in-monochrome-emotions</loc><lastmod>2026-01-04</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://feeling-snap.vercel.app/articles/shaking-called-anxiety</loc><lastmod>2026-01-09</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://feeling-snap.vercel.app/articles/capturing-fleeting-joy</loc><lastmod>2026-01-11</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://feeling-snap.vercel.app/articles/darkroom-of-sadness</loc><lastmod>2026-01-14</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://feeling-snap.vercel.app/articles/red-noise-anger</loc><lastmod>2026-01-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://feeling-snap.vercel.app/articles/psychology-of-feeling-behind</loc><lastmod>2026-01-19</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://feeling-snap.vercel.app/articles/filter-of-perfectionism</loc><lastmod>2026-01-22</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://feeling-snap.vercel.app/articles/mind-shutter-speed</loc><lastmod>2026-01-25</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://feeling-snap.vercel.app/articles/developing-negative-emotions</loc><lastmod>2026-01-29</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://feeling-snap.vercel.app/articles/when-records-rule-memories</loc><lastmod>2026-02-02</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://feeling-snap.vercel.app/articles/composition-of-relationships</loc><lastmod>2026-02-04</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://feeling-snap.vercel.app/articles/burnout-overexposure</loc><lastmod>2026-02-08</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://feeling-snap.vercel.app/articles/snap-of-self-compassion</loc><lastmod>2026-02-11</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://feeling-snap.vercel.app/articles/portfolio-of-my-life</loc><lastmod>2026-02-13</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://feeling-snap.vercel.app/articles/guide-for-emotional-archivers</loc><lastmod>2026-02-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+
+  <url><loc>https://feeling-snap.vercel.app/terms</loc><lastmod>2026-02-15</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://feeling-snap.vercel.app/privacy</loc><lastmod>2026-02-15</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://feeling-snap.vercel.app/contact</loc><lastmod>2026-02-15</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
 </urlset>

@@ -1,490 +1,148 @@
-'use client';
-
-import { useState, useRef, useEffect } from 'react';
-import { toPng } from 'html-to-image';
 import Link from 'next/link';
-import { Sparkles, Droplets, Flame, Tornado, Mail, Leaf, Play, Clock, ChevronRight } from 'lucide-react';
-import { Nanum_Pen_Script, Nanum_Myeongjo } from 'next/font/google';
+import { Sparkles, BookOpen, Heart, ShieldCheck, Compass, ArrowRight, Camera } from 'lucide-react';
 
-const handwriting = Nanum_Pen_Script({
-  weight: '400',
-  subsets: ['latin'],
-  display: 'swap',
-});
-
-const myeongjo = Nanum_Myeongjo({
-  weight: ['400', '700'],
-  subsets: ['latin'],
-  display: 'swap',
-});
-
-type Stage = 'pick' | 'resonate' | 'deep' | 'analyzing' | 'result';
-
-const EMOTION_DATA: { [key: string]: any } = {
-  joy: {
-    label: "기쁨",
-    icon: <Sparkles size={40} strokeWidth={1.2} className="text-yellow-500" />,
-    color: "from-yellow-400 to-orange-400",
-    bgColor: "bg-yellow-50/50",
-    img: "/images/joy.png",
-    resonate: "밝은 쪽으로 기울어진 상태",
-    reasons: ['남아 있는 여운', '확인된 결과', '예상 밖의 보상', '잠깐의 고조', '충분한 여백']
-  },
-  sadness: {
-    label: "슬픔",
-    icon: <Droplets size={40} strokeWidth={1.2} className="text-blue-500" />,
-    color: "from-blue-400 to-indigo-500",
-    bgColor: "bg-blue-50/50",
-    img: "/images/sadness.png",
-    resonate: "조용히 가라앉은 지점",
-    reasons: ['마침표 이후', '지나간 장면', '불투명한 상태', '기대가 무너진 쪽']
-  },
-  anger: {
-    label: "분노",
-    icon: <Flame size={40} strokeWidth={1.2} className="text-red-500" />,
-    color: "from-red-500 to-rose-600",
-    bgColor: "bg-red-50/50",
-    img: "/images/anger.png",
-    resonate: "온도가 올라간 채로",
-    reasons: ['어긋난 상황', '반복된 방해', '넘어진 선', '참지 않기로 한 쪽']
-  },
-  anxiety: {
-    label: "불안",
-    icon: <Tornado size={40} strokeWidth={1.2} className="text-purple-500" />,
-    color: "from-purple-500 to-indigo-600",
-    bgColor: "bg-purple-50/50",
-    img: "/images/anxiety.png",
-    resonate: "아직 좌표가 없다",
-    reasons: ['정해지지 않은 방향', '시선이 많은 자리', '예측 불가']
-  },
-  regret: {
-    label: "미안",
-    icon: <Mail size={40} strokeWidth={1.2} className="text-slate-500" />,
-    color: "from-slate-500 to-slate-700",
-    bgColor: "bg-slate-50/50",
-    img: "/images/regret.png",
-    resonate: "이미 지나간 쪽",
-    reasons: ['전하지 못한 말', '늦은 인식', '돌릴 수 없는 선택']
-  },
-  neutral: {
-    label: "평온",
-    icon: <Leaf size={40} strokeWidth={1.2} className="text-emerald-500" />,
-    color: "from-emerald-400 to-teal-500",
-    bgColor: "bg-emerald-50/50",
-    img: "/images/neutral.png",
-    resonate: "특별한 흔들림 없음",
-    reasons: ['정돈된 흐름', '방해 없는 정지', '평균선 위']
-  }
-};
-
-export default function FeelingSnapFinal() {
-  const [stage, setStage] = useState<Stage>('pick');
-  const [selectedKey, setSelectedKey] = useState<string>('');
-  const [selectedReason, setSelectedReason] = useState<string>('');
-  const [textInput, setTextInput] = useState('');
-  const [resultData, setResultData] = useState<any>(null);
-  const [stamp, setStamp] = useState({ date: '', time: '' });
-  const [loadingText, setLoadingText] = useState('초점을 맞추는 중');
-  
-  const [history, setHistory] = useState<any[]>([]);
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  const fetchHistory = async () => {
-    const fp = localStorage.getItem('snap_fp');
-    if (!fp) return;
-    try {
-      const res = await fetch(`/api/analyze?fp=${fp}`);
-      const data = await res.json();
-      if (Array.isArray(data)) setHistory(data);
-    } catch (err) {
-      console.error("히스토리 로드 실패", err);
-    }
-  };
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      let fp = localStorage.getItem('snap_fp');
-      if (!fp) {
-        fp = 'fp_' + Math.random().toString(36).substring(2, 15);
-        localStorage.setItem('snap_fp', fp);
-      }
-      fetchHistory();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (stage === 'analyzing') {
-      const now = new Date();
-      setStamp({
-        date: `${String(now.getFullYear()).slice(-2)}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`,
-        time: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
-      });
-
-      const texts = ['조리개 값을 조정하는 중', '셔터를 누르는 찰나', '빛을 기록하는 중', '필름을 현상하는 중', '인화하는 중'];
-      let i = 0;
-      const interval = setInterval(() => {
-        i = (i + 1) % texts.length;
-        setLoadingText(texts[i]);
-      }, 1700);
-      return () => clearInterval(interval);
-    }
-  }, [stage]);
-
-  // ✅ 다시보기 기능: 히스토리 아이템을 결과 데이터 포맷으로 변환
-  const handleViewArchive = (item: any) => {
-    const dateObj = new Date(item.created_at);
-    setStamp({
-      date: `${String(dateObj.getFullYear()).slice(-2)}.${String(dateObj.getMonth() + 1).padStart(2, '0')}.${String(dateObj.getDate()).padStart(2, '0')}`,
-      time: `${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`
-    });
-
-    const archivedResult = {
-      description: item.description,
-      song: item.song,
-      mix: item.mix_data || [], // DB 저장 필드명에 맞춰 조정 필요
-      mainEmotion: EMOTION_DATA[item.emotion_key] || EMOTION_DATA.neutral,
-      subName: item.reason,
-      displayStats: {
-        userSnapCount: item.id, // 혹은 적절한 순번
-        totalCount: "ARCHIVED",
-        emotionSpecificCount: "PAST"
-      }
-    };
-
-    setResultData(archivedResult);
-    setStage('result');
-  };
-
-  const openYouTubeSearch = (songTitle: string) => {
-    const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(songTitle)}`;
-    window.open(searchUrl, '_blank');
-  };
-
-  const handleFinalAnalyze = async () => {
-    setStage('analyzing');
-    const startTime = Date.now();
-    const fingerprint = typeof window !== 'undefined' ? localStorage.getItem('snap_fp') : null;
-
-    try {
-      const response = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mainEmotion: selectedKey,
-          reason: selectedReason,
-          text: textInput || "특별한 설명 없음",
-          fingerprint
-        })
-      });
-      
-      const aiData = await response.json();
-      const elapsedTime = Date.now() - startTime;
-      const remainingTime = Math.max(0, 4000 - elapsedTime);
-
-      setTimeout(() => {
-        const finalData = {
-          ...aiData,
-          mix: (Array.isArray(aiData?.mix) ? aiData.mix : []).map((m: any) => ({
-            ...m,
-            label: m.label || EMOTION_DATA[m.key]?.label || "기록된 마음",
-            color: EMOTION_DATA[m.key]?.color || "from-slate-400 to-slate-500",
-          })),
-          mainEmotion: EMOTION_DATA[selectedKey] || EMOTION_DATA.neutral,
-          subName: selectedReason || EMOTION_DATA[selectedKey]?.label || "순간의 기록",
-        };
-        setResultData(finalData);
-        setStage('result');
-        fetchHistory();
-      }, remainingTime);
-    } catch (error) {
-      console.error("분석 중 에러 발생:", error);
-      setStage('pick');
-    }
-  };
-
-  const handleSaveImage = async () => {
-    if (!cardRef.current) return;
-    try {
-      const dataUrl = await toPng(cardRef.current, {
-        pixelRatio: 3,
-        cacheBust: true,
-        backgroundColor: '#0d0d0d'
-      });
-      const link = document.createElement('a');
-      link.download = `Snap_${stamp.date}_${stamp.time.replace(':', '')}.png`;
-      link.href = dataUrl;
-      link.click();
-    } catch (err) { alert("이미지 저장 실패"); }
-  };
-
-  const handleShare = async () => {
-    if (!cardRef.current) return;
-    try {
-      const dataUrl = await toPng(cardRef.current, { pixelRatio: 2, cacheBust: true });
-      const res = await fetch(dataUrl);
-      const blob = await res.blob();
-      const file = new File([blob], 'feeling_snap.png', { type: 'image/png' });
-
-      if (navigator.share && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: 'Feeling Snap',
-          text: '오늘 나의 순간을 기록했어요.',
-        });
-      } else {
-        alert("이미지를 저장해서 공유해 주세요!");
-      }
-    } catch (err) {
-      alert("공유 중 오류가 발생했습니다.");
-    }
-  };
-
-  const MyArchiveSection = () => (
-    <div className="pt-10 pb-4 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-1000">
-      <div className="flex justify-between items-end px-1">
-        <div className="space-y-1">
-          <span className="text-[10px] font-black text-[#E91E63] uppercase tracking-widest">My Archive</span>
-          <h4 className="text-xl font-black text-slate-800 tracking-tighter">지난 나의 기록들</h4>
-        </div>
-        <span className="text-[11px] font-bold text-slate-300">{history.length} Snapshots</span>
-      </div>
-
-      {history.length === 0 ? (
-        <div className="py-12 text-center bg-slate-50 rounded-[32px] border border-dashed border-slate-200">
-          <p className="text-[11px] text-slate-400 font-medium italic">아직 기록된 찰나가 없습니다.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-4">
-          {history.map((item) => (
-            <div 
-              key={item.id} 
-              onClick={() => handleViewArchive(item)} // ✅ 클릭 시 다시보기 실행
-              className="group p-6 bg-white rounded-[32px] border border-slate-100 shadow-sm hover:shadow-md hover:border-[#E91E63]/20 transition-all active:scale-[0.98] cursor-pointer"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-2 text-slate-300">
-                  <Clock size={10} />
-                  <span className="text-[10px] font-mono tracking-tighter">
-                    {new Date(item.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-                <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter
-                  ${item.emotion_key === 'joy' ? 'bg-yellow-50 text-yellow-600' : 
-                    item.emotion_key === 'sadness' ? 'bg-blue-50 text-blue-600' : 
-                    item.emotion_key === 'anger' ? 'bg-red-50 text-red-600' : 'bg-slate-50 text-slate-400'}`}>
-                  {EMOTION_DATA[item.emotion_key]?.label || item.emotion_key}
-                </span>
-              </div>
-              <p className={`${handwriting.className} text-2xl text-slate-700 leading-snug break-keep mb-3`}>
-                {item.description.split('\n')[0]}
-              </p>
-              <div className="flex justify-between items-center opacity-60">
-                <p className="text-[11px] text-slate-400 font-medium italic truncate max-w-[80%]">
-                  "{item.reason}"
-                </p>
-                <ChevronRight size={14} className="text-slate-300 group-hover:text-[#E91E63] transition-colors" />
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-
-  const ArticleSection = () => (
-    <div className="pt-10 pb-10 space-y-5 animate-in fade-in duration-700">
-      <div className="flex justify-between items-end px-1">
-        <div className="space-y-1">
-          <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Recommended</span>
-          <h4 className="text-xl font-black text-slate-800 tracking-tighter">기록을 위한 아티클</h4>
-        </div>
-        <Link href="/articles">
-          <span className="text-[11px] font-bold text-slate-400 hover:text-slate-600 transition-colors cursor-pointer text-nowrap">전체보기 +</span>
-        </Link>
-      </div>
-      <div className="space-y-3">
-        {[
-          { id: 1, title: "가끔은 멈춰서야 보이는 것들", desc: "빠르게 지나가는 일상 속에서 셔터를 누르는 이유", tag: "Essay" },
-          { id: 2, title: "무채색의 감정이 주는 위로", desc: "선명하지 않아도 괜찮은 우리의 기록 방식", tag: "Column" }
-        ].map((post) => (
-          <div key={post.id} className="group p-5 bg-[#F8FAFC] rounded-[32px] border border-slate-50 hover:border-slate-200 transition-all cursor-pointer mb-3">
-            <span className="text-[9px] font-black bg-white px-2 py-0.5 rounded text-slate-400 uppercase tracking-tighter mb-2 inline-block">{post.tag}</span>
-            <h5 className="font-bold text-slate-800 mb-1 group-hover:text-[#E91E63] transition-colors">{post.title}</h5>
-            <p className="text-xs text-slate-400 font-medium">{post.desc}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
+export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white text-slate-900 pb-10 overflow-x-hidden font-sans">
-      <header className="max-w-xl mx-auto pt-10 pb-6 text-center">
-        <h1 className="text-4xl sm:text-5xl font-black tracking-tighter cursor-pointer flex justify-center items-center"
-          onClick={() => { setStage('pick'); setTextInput(''); }} style={{ WebkitTextStroke: '1.2px currentColor' }}>
-          <span className="text-[#0F172A]">Feeling</span>
-          <span className="text-[#E91E63] ml-1">Snap</span>
-        </h1>
+    <div className="min-h-screen bg-white text-slate-900">
+      {/* 0. 상단 네비게이션 헤더 */}
+      <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-slate-50">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center group">
+            <div className="w-7 h-7 bg-[#E91E63] rounded flex items-center justify-center mr-2 group-hover:rotate-12 transition-transform">
+              <Camera size={16} className="text-white" />
+            </div>
+            <div className="text-xl font-black tracking-tighter">
+              <span className="text-[#0F172A]">Feeling</span>
+              <span className="text-[#E91E63] ml-1">Snap</span>
+            </div>
+          </Link>
+          <Link href="/snap">
+            <button className="text-sm font-bold text-[#E91E63] hover:bg-pink-50 px-4 py-2 rounded-full transition-colors">
+              기록하기
+            </button>
+          </Link>
+        </div>
       </header>
 
-      <main className="max-w-md mx-auto px-6">
-        {stage === 'pick' && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <section className="mb-8 px-2 border-l-2 border-[#E91E63]/20 pl-4 text-left">
-              <h2 className="text-sm font-black text-slate-800 tracking-tight mb-2 uppercase">Notice</h2>
-              <p className="text-[11px] leading-relaxed text-slate-400 font-medium">
-                Feeling Snap은 지금의 상태를 기록 문장으로 정리하는 도구입니다. 당신의 오늘을 보관하는 용도로만 사용해 주세요.
-              </p>
-            </section>
-            <div className="text-center space-y-2">
-              <h2 className="text-xl sm:text-2xl font-bold text-[#2D3E50]">지금 순간을 찍어볼까.</h2>
-              <p className="text-slate-400 text-base sm:text-lg font-medium">제일 먼저 생각나는 감정을 골라봐.</p>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              {Object.keys(EMOTION_DATA).map((key) => (
-                <button key={key} onClick={() => { setSelectedKey(key); setStage('resonate'); }}
-                  className={`${EMOTION_DATA[key].bgColor} p-8 sm:p-10 rounded-[32px] hover:scale-105 active:scale-95 transition-all shadow-sm flex flex-col items-center justify-center`}>
-                  <div className="mb-3">{EMOTION_DATA[key].icon}</div>
-                  <div className="font-bold text-lg sm:text-xl text-slate-700">{EMOTION_DATA[key].label}</div>
-                </button>
-              ))}
-            </div>
-            <MyArchiveSection />
-            <ArticleSection />
+      {/* 1. 히어로 섹션: 다시 가운데 정렬로 수정 */}
+      <section className="max-w-4xl mx-auto px-6 pt-40 pb-20 text-center">
+        <div className="inline-block px-4 py-1.5 mb-6 bg-slate-50 rounded-full text-[#E91E63] text-xs font-bold tracking-widest uppercase">
+          Emotional Archive Project
+        </div>
+        <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-[1.1] break-keep">
+          기록은 당신의 <span className="text-[#E91E63]">순간</span>을<br />
+          선명한 기억으로 인화합니다.
+        </h1>
+        <p className="text-xl md:text-2xl text-slate-500 font-medium mb-12 break-keep max-w-2xl mx-auto leading-relaxed">
+          복잡한 일기 대신, 지금 느껴지는 감정의 조각을 기록해 보세요. <br />
+          <span className="font-bold text-[#0F172A]">Feeling</span>
+          <span className="font-bold text-[#E91E63] ml-1">Snap</span>은 당신의 마음을 아카이빙하는 가장 쉬운 방법입니다.
+        </p>
+        <Link href="/snap">
+          <button className="bg-[#1A1F2C] text-white px-12 py-6 rounded-full font-bold text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300">
+            지금 기록 시작하기 📷
+          </button>
+        </Link>
+      </section>
+
+      {/* 2. 애드센스 승인용 롱폼 에세이 */}
+      <article className="max-w-3xl mx-auto px-6 py-24 border-y border-slate-50">
+        <h2 className="text-3xl font-black mb-12 text-slate-800 tracking-tight leading-snug break-keep text-center">
+          디지털 시대, 우리가 휘발되는 감정을 다시 '기록'해야 하는 이유
+        </h2>
+        
+        <div className="prose prose-slate max-w-none leading-[1.8] text-slate-600 space-y-10 text-lg">
+          <p>
+            우리는 하루에도 수만 가지의 생각을 하며 수많은 감정의 파도를 경험합니다. 하지만 바쁜 현대 사회의 속도는 우리로 하여금 그 감정들이 어디서 왔는지, 
+            어떤 형태를 띠고 있는지 깊이 들여다볼 여유를 허락하지 않습니다. <strong>Feeling Snap</strong>은 이러한 
+            감정의 파편들을 스쳐 지나가게 두지 않고, 그 찰나의 순간을 기록으로 남김으로써 스스로를 치유하고 성장시키는 도구입니다.
+          </p>
+
+          <div className="space-y-4">
+            <h3 className="text-2xl font-bold text-slate-800 border-l-4 border-[#E91E63] pl-4">1. 감정 명명하기: 마음의 소음을 잠재우는 첫걸음</h3>
+            <p>
+              심리학적 연구에 따르면, 자신의 감정을 단어로 명명하는 행위(Affect Labeling)만으로도 뇌의 편도체 활성도가 
+              낮아지며 정서적 안정을 찾는 데 큰 도움을 준다고 합니다. 일기를 길게 쓸 필요는 없습니다. 단지 오늘 내 마음이 
+              '기쁨'인지, 혹은 '약간의 불안'을 담고 있는지 인지하고 이름을 붙여주는 것만으로도 우리 뇌는 그 감정을 '통제 가능한 범위' 안에 두기 시작합니다.
+            </p>
           </div>
-        )}
 
-        {stage === 'resonate' && (
-          <div className="space-y-10 animate-in slide-in-from-right-4 duration-500 text-center">
-            <div className="space-y-3 pt-6">
-              <span className="text-[10px] font-black bg-slate-100 px-3 py-1 rounded-full text-slate-400 uppercase tracking-widest">Snap Point</span>
-              <p className="text-xl sm:text-2xl font-bold text-slate-700 leading-relaxed italic">"{EMOTION_DATA[selectedKey].resonate}"</p>
+          <div className="space-y-4">
+            <h3 className="text-2xl font-bold text-slate-800 border-l-4 border-[#E91E63] pl-4">2. 기록은 분석이 아닌 따뜻한 관찰입니다</h3>
+            <p>
+              많은 사람이 기록을 완벽해야 하는 숙제처럼 여깁니다. 하지만 우리가 지향하는 가치는 완벽한 문장이 아닙니다. 
+              마치 카메라 셔터를 누르듯 가볍게, 하지만 진실하게 나의 상태를 남기는 것입니다. 무채색이었던 하루가 기록을 통해 
+              각기 다른 채도를 가진 풍경화로 변하는 경험을 해보세요. 기록이 쌓이면 비로소 나만의 '감정 지도'가 보이기 시작합니다.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-2xl font-bold text-slate-800 border-l-4 border-[#E91E63] pl-4">3. 디지털 정서적 회복탄력성 키우기</h3>
+            <p>
+              스마트폰을 통해 타인의 화려한 삶을 끊임없이 관찰하는 시대에, 우리는 오히려 자신의 평범한 삶과 멀어지기 쉽습니다. 
+              Feeling Snap은 외부의 소음을 차단하고 오직 당신만의 고유한 아카이브 공간을 지향합니다. 
+              부정적인 감정이 찾아왔을 때 이를 회피하지 않고 기록으로 남기는 행위는 심리적 회복탄력성을 키우는 훌륭한 훈련이 됩니다.
+            </p>
+          </div>
+          
+          <p className="bg-slate-50 p-8 rounded-3xl italic text-slate-500 text-center border-t border-b border-slate-100">
+            "기록은 삶의 조각들을 연결하여 의미 있는 이야기로 만드는 마법입니다. 오늘 당신의 마음은 어떤 빛깔인가요?"
+          </p>
+        </div>
+      </article>
+
+      {/* 3. 내부 링크 섹션 */}
+      <section className="max-w-5xl mx-auto px-6 py-24">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl font-black tracking-tight mb-4">더 깊은 기록을 위한 가이드</h2>
+          <p className="text-slate-400 font-medium">감정의 기록이 일상이 되는 콘텐츠 허브</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div className="group p-10 bg-slate-50 rounded-[48px] hover:bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-transparent hover:border-slate-100">
+            <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6 group-hover:bg-[#E91E63] transition-colors mx-auto">
+              <BookOpen className="text-[#E91E63] group-hover:text-white" />
             </div>
-            <div className="grid grid-cols-1 gap-3">
-              {EMOTION_DATA[selectedKey].reasons.map((r: string) => (
-                <button key={r} onClick={() => { setSelectedReason(r); setStage('deep'); }}
-                  className="w-full py-4 sm:py-5 bg-white rounded-[24px] font-bold text-base sm:text-lg text-slate-500 border border-slate-100 shadow-sm active:bg-slate-50 transition-all">{r}</button>
-              ))}
+            <h4 className="text-2xl font-bold mb-4 text-slate-800 text-center">감정 아카이브 가이드</h4>
+            <p className="text-slate-500 leading-relaxed mb-8 text-center">
+              지금까지 쌓인 기록들을 어떻게 읽어야 할까요? 단순한 데이터 나열을 넘어, 당신의 삶의 패턴을 발견하는 분석 가이드를 제공합니다.
+            </p>
+            <div className="text-center">
+              <Link href="/articles" className="inline-flex items-center gap-2 font-bold text-[#E91E63] hover:underline">
+                전체 아카이브 목록 보기 <ArrowRight size={16} />
+              </Link>
             </div>
           </div>
-        )}
 
-        {stage === 'deep' && (
-          <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-            <div className="px-4 text-center text-slate-400 text-sm font-medium italic">같이 담겼으면 하는거 있어?</div>
-            <textarea className="w-full h-48 sm:h-56 bg-[#F8FAFC] rounded-[32px] p-6 sm:p-8 text-lg sm:text-xl outline-none shadow-inner"
-              value={textInput} onChange={(e) => setTextInput(e.target.value)} placeholder="지금 순간을 좀 더 자세히 담아보자. 없으면 그냥 넘겨도 돼" />
-            <button onClick={handleFinalAnalyze} className="w-full bg-[#1A1F2C] text-white py-5 sm:py-6 rounded-[24px] font-bold text-lg sm:text-xl shadow-xl active:scale-95 transition-all">SNAP 📷</button>
-          </div>
-        )}
-
-        {stage === 'analyzing' && (
-          <div className="py-32 text-center space-y-10 animate-in fade-in duration-1000">
-            <div className="relative w-20 h-20 mx-auto">
-              <div className="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
-              <div className="absolute inset-0 border-4 border-[#E91E63] border-t-transparent rounded-full animate-spin"></div>
+          <div className="group p-10 bg-slate-50 rounded-[48px] hover:bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-transparent hover:border-slate-100">
+            <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6 group-hover:bg-[#E91E63] transition-colors mx-auto">
+              <Heart className="text-[#E91E63] group-hover:text-white" />
             </div>
-            <div className="space-y-2">
-              <p className="text-xl font-black text-slate-800 tracking-tight">{loadingText}</p>
-              <p className="text-sm font-medium text-slate-400 italic">지금의 장면을 차분히 기록하는 중이야</p>
+            <h4 className="text-2xl font-bold mb-4 text-slate-800 text-center">마음의 온도 유지하기</h4>
+            <p className="text-slate-500 leading-relaxed mb-8 text-center">
+              감정의 기복 속에서도 나를 잃지 않는 법. 기록이 어떻게 심리적 방열판 역할을 하는지, 그 과학적인 원리와 실천법을 알아봅니다.
+            </p>
+            <div className="text-center">
+              <Link href="/articles/mindset" className="inline-flex items-center gap-2 font-bold text-[#E91E63] hover:underline">
+                전용 칼럼 읽기 <Sparkles size={16} />
+              </Link>
             </div>
           </div>
-        )}
-
-        {stage === 'result' && resultData && (
-          <div className="animate-in fade-in duration-1000 ease-in-out">
-            <div ref={cardRef} className="relative w-full bg-[#0d0d0d] mb-12 shadow-2xl rounded-[2px] overflow-hidden" style={{ minHeight: '740px' }}>
-              <div className="relative w-full aspect-[4/5] overflow-hidden">
-                <img src={resultData.mainEmotion.img} alt="snap" className="w-full h-full object-cover opacity-50 saturate-[0.8] contrast-[1.1]" />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80" />
-                <div className="absolute inset-0 p-8 sm:p-10 flex flex-col justify-between">
-                  <div className="flex justify-between items-start opacity-40">
-                    <div className="text-[10px] font-mono tracking-widest text-white uppercase">{stamp.date} / {stamp.time}</div>
-                    <div className="text-[10px] font-black tracking-tighter text-[#E91E63] italic">FEELING SNAP</div>
-                  </div>
-                  
-                  <div className="text-left space-y-4 px-1">
-                    <div className="flex items-center gap-2">
-                      <span className={`${myeongjo.className} text-[10px] font-bold tracking-[0.4em] text-white/30 uppercase`}>
-                        {resultData.subName}
-                      </span>
-                      <span className="text-[9px] bg-[#E91E63]/20 text-[#E91E63] px-2 py-0.5 rounded-full font-bold">
-                        {resultData.displayStats?.emotionSpecificCount === 'PAST' ? 'Archived Record' : `Today #${resultData.displayStats?.emotionSpecificCount || 1}`}
-                      </span>
-                    </div>
-                    <p className={`${handwriting.className} text-[32px] sm:text-[44px] leading-[1.3] text-white/95 drop-shadow-2xl break-keep`}
-                       style={{ wordBreak: 'keep-all', textShadow: '0 2px 15px rgba(0,0,0,0.8)' }}>
-                      {resultData.description.split('\n')[0]}
-                    </p>
-                  </div>
-                  
-                  <div className="text-[9px] font-mono text-white/20 tracking-[0.5em] text-center uppercase">
-                    Archive ID. {resultData.displayStats?.totalCount || "0,000"}
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-8 sm:p-10 space-y-10 bg-[#0d0d0d] text-white/60">
-                {resultData.description.split('\n')[1] && (
-                  <div className="relative">
-                    <div className="absolute -left-4 top-0 bottom-0 w-[1px] bg-[#E91E63]/30" />
-                    <p className={`${myeongjo.className} text-[14px] sm:text-[15px] font-medium leading-relaxed italic opacity-80 pl-4 break-keep`}>
-                      "{resultData.description.split('\n')[1]}"
-                    </p>
-                  </div>
-                )}
-
-                <div className="flex justify-between items-end border-t border-white/5 pt-8">
-                  <div className="space-y-4 text-left">
-                    <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em]">Emotion Mix</span>
-                    <div className="flex gap-4">
-                      {resultData.mix && resultData.mix.slice(0, 3).map((item: any, index: number) => (
-                        <div key={index} className="flex flex-col">
-                          <span className="text-[7px] font-bold text-white/10 uppercase mb-1">{item.label}</span>
-                          <span className="text-[11px] font-mono font-bold text-white/40">{item.rate}%</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="text-right space-y-2">
-                    <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em]">Now Playing</span>
-                    <div className="flex items-center justify-end gap-3 group cursor-pointer" onClick={() => openYouTubeSearch(resultData.song)}>
-                      <div className="text-right max-w-[140px]">
-                        <p className="text-[9px] font-medium text-white/20 group-hover:text-white transition-colors truncate">
-                          {resultData.song.includes(' - ') ? resultData.song.split(' - ')[0] : 'Artist'}
-                        </p>
-                        <p className={`${myeongjo.className} text-[11px] sm:text-[12px] font-bold text-white/40 group-hover:text-[#E91E63] transition-colors truncate italic`}>
-                          {resultData.song.includes(' - ') ? resultData.song.split(' - ')[1] : resultData.song}
-                        </p>
-                      </div>
-                      <div className="p-2 bg-white/5 group-hover:bg-[#E91E63]/20 rounded-full transition-all border border-white/10 group-hover:border-[#E91E63]/30">
-                        <Play size={10} className="text-[#E91E63] fill-[#E91E63]" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="px-8 space-y-5">
-              <button onClick={handleSaveImage} className="w-full py-5 bg-white text-black rounded-full font-black text-[14px] shadow-xl active:scale-95 transition-all">이 장면 앨범에 저장</button>
-              
-              <div className="text-center py-2">
-                <p className="text-[11px] text-slate-400">
-                  {resultData.displayStats?.emotionSpecificCount === 'PAST' ? '지난 소중한 순간의 기록입니다.' : `당신의 ${resultData.displayStats?.userSnapCount || 1}번째 찰나를 기록했습니다.`}
-                </p>
-              </div>
-
-              <div className="flex justify-center gap-10 pb-12">
-                <button onClick={() => setStage('pick')} className="text-[11px] font-bold text-slate-400 hover:text-slate-600">뒤로 가기</button>
-                <button onClick={handleShare} className="text-[11px] font-bold text-[#E91E63] hover:opacity-70 transition-opacity">순간 공유하기</button>
-              </div>
-            </div>
-            <ArticleSection />
-          </div>
-        )}
-      </main>
+        </div>
+      </section>
+      
+      {/* 4. 신뢰도 보강 섹션 */}
+      <section className="bg-slate-900 py-24 text-white rounded-t-[60px] md:rounded-t-[100px]">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <ShieldCheck className="mx-auto mb-6 text-[#E91E63]" size={48} />
+          <h2 className="text-3xl font-bold mb-6">개인정보와 보안</h2>
+          <p className="text-slate-400 leading-relaxed mb-10 break-keep">
+            Feeling Snap은 사용자의 감정 데이터를 소중히 다룹니다. 
+            모든 기록은 익명으로 처리되거나 로컬 보안 환경에서 관리되며, 
+            당신의 마음을 안전하게 보관하는 것이 우리의 첫 번째 원칙입니다.
+          </p>
+        </div>
+      </section>
     </div>
   );
 }

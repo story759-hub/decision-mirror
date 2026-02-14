@@ -2,7 +2,6 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-// ✅ 1. 환경 변수 및 싱글톤 설정
 const supabaseUrl = process.env.SUPABASE_URL || "";
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 const apiKey = process.env.GEMINI_API_KEY || "";
@@ -13,9 +12,15 @@ const supabase = (supabaseUrl && supabaseServiceKey)
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-/* ================================
-   🧠 유틸리티 & 안전 장치
-================================ */
+// 감정 키와 라벨 매핑 (서버측 보강용)
+const EMOTION_LABELS: { [key: string]: string } = {
+  joy: "기쁨",
+  sadness: "슬픔",
+  anger: "분노",
+  anxiety: "불안",
+  regret: "미안",
+  neutral: "평온"
+};
 
 function safeJsonParse(text: string) {
   try {
@@ -30,38 +35,20 @@ function safeJsonParse(text: string) {
   }
 }
 
-const SOFT_ENDINGS: [string, string][] = [
-  ["이다.", "같다."], ["있다.", "남아 있다."], ["없다.", "없는 편이다."],
-  ["끝났다.", "여기까지다."], ["정해졌다.", "정해진 것 같다."], ["멈췄다.", "멈춰 있다."],
-];
-
-function softenSnapText(sentence: string): string {
-  if (!sentence) return "";
-  let result = sentence;
-  SOFT_ENDINGS.forEach(([hard, soft]) => {
-    if (result.includes(hard) && Math.random() < 0.5) {
-      result = result.replace(hard, soft);
-    }
-  });
-  return result;
-}
-
+/**
+ * ✅ 문장 부호 제거 및 정제 (줄바꿈 \n 은 보존해야 함)
+ */
 function sanitizeDescription(text: string): string {
   if (!text) return "";
   return text
-    .replace(/나\s?|너\s?|당신|우리/g, "")
+    .replace(/["'‘“’”]/g, "") 
+    .replace(/[.?!]/g, "")    
+    .replace(/나\s?|너\s?|당신|우리/g, "") 
     .replace(/해요/g, "하다")
     .replace(/하세요/g, "한다")
     .trim();
 }
 
-/* ================================
-   🧩 API Handlers
-================================ */
-
-/**
- * 🟢 GET: 특정 사용자의 지난 기록들 가져오기
- */
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -72,23 +59,23 @@ export async function GET(req: Request) {
     }
 
     const { data, error } = await supabase
-      .from('snaps')
+      .from('emotions')
       .select('*')
-      .eq('user_fingerprint', fingerprint)
-      .order('created_at', { ascending: false })
-      .limit(20);
+      .eq('fingerprint', fingerprint)
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return NextResponse.json(data);
+    
+    return new NextResponse(JSON.stringify(data), {
+      status: 200,
+      headers: { 'Cache-Control': 'no-store, max-age=0' }
+    });
   } catch (error: any) {
     console.error("🔥 History GET Error:", error.message);
     return NextResponse.json([], { status: 500 });
   }
 }
 
-/**
- * 🟢 POST: 새로운 감정 분석 및 저장
- */
 export async function POST(req: Request) {
   try {
     if (!supabase || !apiKey) {
@@ -103,94 +90,96 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid Request" }, { status: 400 });
     }
 
-    // --- [Step 1] DB 작업: 카운트 증가 및 통계 조회 ---
-    await supabase.rpc('increment_emotion_count', { target_key: mainEmotion });
+    /* ===================================================
+       [Step 1] Gemini AI 분석 (먼저 수행)
+       분석이 실패하면 여기서 Error를 던져 이후 과정을 중단함
+    ====================================================== */
+    let aiData: any = null;
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+      generationConfig: { responseMimeType: "application/json", temperature: 0.7 },
+    });
 
-    const { data: allStats } = await supabase.from('emotion_stats').select('*');
-    const { count: userSnapCount } = await supabase
-      .from('snaps')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_fingerprint', userFingerprint);
+    const prompt = `
+      SYSTEM: 사용자의 감정을 기록하는 사진작가입니다.
+      [지침]
+      1. 'description': 담담하고 은유적인 짧은 문장 2개를 생성하되 반드시 중간에 줄바꿈(\\n)을 포함할 것. 문장 부호 절대 금지.
+      2. 'mix': 감정 레이블 3개와 비율(rate). 예시: [{"key": "joy", "label": "기쁨", "rate": 70}, ...]
+      3. 'song': 아티스트 - 곡 제목.
+      
+      Input: 감정=${mainEmotion}, 이유=${reason}, 본문="${text}"
+    `;
 
-    const totalArchiveCount = allStats?.reduce((acc, cur) => acc + Number(cur.total_count), 0) || 0;
-    const currentEmotionTotal = allStats?.find(s => s.emotion_key === mainEmotion)?.total_count || 1;
+    const aiResult = await model.generateContent(prompt);
+    aiData = safeJsonParse(aiResult.response.text());
 
-    // --- [Step 2] Gemini AI 분석 ---
-    let data: any = null;
-
-    try {
-      const model = genAI.getGenerativeModel({
-        model: "gemini-2.0-flash",
-        generationConfig: { responseMimeType: "application/json", temperature: 0.7 },
-      });
-
-      const { data: userHistory } = await supabase
-        .from('snaps')
-        .select('emotion_key')
-        .eq('user_fingerprint', userFingerprint)
-        .order('created_at', { ascending: false })
-        .limit(3);
-
-      const recentEmotions = userHistory?.map(h => h.emotion_key).join(', ') || '첫 기록';
-
-      const prompt = `
-        SYSTEM: 사용자의 찰나를 기록하는 사진작가입니다. 
-        USER HISTORY: 최근 감정 기록: [${recentEmotions}]
-        [출력 지침]
-        1. 'mix': 상황에 맞는 은유적 감정 레이블 2개 생성.
-        2. 'song': 실제 "아티스트 - 곡 제목" 추천.
-        3. 'description': 담담한 문체로 두 줄 작성 (마침표, 쉼표, 따옴표 등 생략).
-        Emotion: ${mainEmotion} | Reason: ${reason} | Text: "${text}"
-      `;
-
-      const aiResult = await model.generateContent(prompt);
-      data = safeJsonParse(aiResult.response.text());
-      if (!data) throw new Error("AI_PARSE_ERROR");
-
-    } catch (aiError: any) {
-      console.error("⚠️ AI Fallback Mode:", aiError.message);
-      data = {
-        mix: [
-          { key: mainEmotion, label: "말하지 못한 마음", rate: 75 },
-          { key: "neutral", label: "고요한 공기", rate: 25 }
-        ],
-        description: "선명하지 않아도 괜찮은\n지금 이대로의 충분한 기록",
-        song: "아이유 - 마음"
-      };
+    // AI 데이터가 비정상적이면 에러를 발생시켜 catch 블록으로 보냄 (저장 방지)
+    if (!aiData || !aiData.mix || !aiData.description) {
+      throw new Error("AI 분석 데이터 생성 실패");
     }
 
-    // --- [Step 3] 최종 데이터 가공 및 저장 ---
-    data.description = softenSnapText(sanitizeDescription(data.description));
+    /* ===================================================
+       [Step 2] 데이터 정제 (Sanitize)
+    ====================================================== */
+    const lines = aiData.description.split('\n').map((l: string) => sanitizeDescription(l));
+    aiData.description = lines.length >= 2 ? lines.slice(0, 2).join('\n') : lines[0] + "\n" + "기록된 찰나";
     
-    if (!data.description.includes("\n")) {
-      const mid = Math.floor(data.description.length / 2);
-      data.description = data.description.slice(0, mid) + "\n" + data.description.slice(mid);
-    }
+    aiData.mix = aiData.mix.map((m: any) => ({
+      ...m,
+      label: m.label || EMOTION_LABELS[m.key] || "기록"
+    }));
 
-    // DB에 최종 결과 저장
-    await supabase.from('snaps').insert([{ 
+    /* ===================================================
+       [Step 3] DB 저장 및 통계 업데이트 (AI 성공 시에만 실행)
+    ====================================================== */
+    // 1. 메인 기록 저장
+    const { error: insertError } = await supabase.from('emotions').insert([{ 
       emotion_key: mainEmotion, 
       reason: reason, 
-      description: data.description,
-      user_fingerprint: userFingerprint
+      description: aiData.description,
+      fingerprint: userFingerprint,
+      song: aiData.song,
+      mix_data: aiData.mix 
     }]);
 
-    // 실시간 통계 주입
-    data.displayStats = { 
-      totalCount: (totalArchiveCount + 1).toLocaleString(), // 방금 추가된 것 포함
-      emotionSpecificCount: currentEmotionTotal,
-      userSnapCount: (userSnapCount || 0) + 1
-    };
+    if (insertError) throw insertError; // 저장 실패 시 중단
 
-    return NextResponse.json(data);
+    // 2. 통계 카운트 업데이트 (RPC 호출)
+    try {
+      await supabase.rpc('increment_emotion_count', { target_key: mainEmotion });
+    } catch (e) { 
+      console.error("RPC Error:", e); 
+      // 통계 업데이트 실패는 기록 저장만큼 치명적이지 않으므로 진행 가능하지만, 
+      // 엄격하게 하려면 여기서도 throw 가능
+    }
+
+    // 3. 최신 통계 데이터 가져오기
+    const { data: allStats } = await supabase.from('emotion_stats').select('count, emotion_key');
+    const { count: userSnapCount } = await supabase
+      .from('emotions')
+      .select('*', { count: 'exact', head: true })
+      .eq('fingerprint', userFingerprint);
+
+    const totalArchiveCount = allStats?.reduce((acc, cur) => acc + Number(cur.count || 0), 0) || 0;
+    const currentEmotionTotal = allStats?.find(s => s.emotion_key === mainEmotion)?.count || 1;
+
+    // 최종 응답
+    return NextResponse.json({
+      ...aiData,
+      displayStats: { 
+        totalCount: totalArchiveCount.toLocaleString(),
+        emotionSpecificCount: currentEmotionTotal,
+        userSnapCount: userSnapCount || 0
+      }
+    });
 
   } catch (error: any) {
-    console.error("🔥 Critical Error:", error.message);
-    return NextResponse.json({
-      mix: [{ key: "neutral", label: "정지된 장면", rate: 100 }],
-      description: "잠시 후 다시 기록해 주세요\n마음은 소중히 보관 중입니다",
-      song: "Feeling Snap - Recording...",
-      displayStats: { totalCount: "1,200+", emotionSpecificCount: 0, userSnapCount: 1 }
-    }, { status: 200 });
+    console.error("🔥 POST Error (저장되지 않음):", error.message);
+    // 에러 발생 시 500 에러와 함께 실패 메시지 반환. 
+    // 이 경우 프론트엔드는 stage를 'pick'으로 돌리거나 에러 UI를 보여주게 됨.
+    return NextResponse.json(
+      { error: "Analysis failed", message: error.message }, 
+      { status: 500 }
+    );
   }
 }
