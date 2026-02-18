@@ -1,14 +1,24 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  // 1. 다크 모드 활성화 (클래스 방식)
+  darkMode: ["class"],
+  
   content: [
-    "./app/**/*.{js,ts,jsx,tsx,mdx}", // 이 부분이 반드시 있어야 합니다!
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+      },
+    },
   },
   plugins: [],
 };
+
 export default config;
