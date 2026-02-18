@@ -137,13 +137,7 @@ export default function AuthPage() {
               <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" alt="google" />
               Google로 시작하기
             </button>
-            <button 
-              onClick={() => handleSocialLogin('kakao')}
-              className="flex items-center justify-center gap-3 w-full py-4 bg-[#FEE500] text-[#3C1E1E] rounded-2xl font-bold hover:bg-[#FADA00] transition-all"
-            >
-              <span className="w-5 h-5 flex items-center justify-center bg-[#3C1E1E] rounded-full text-[10px] text-[#FEE500]">K</span>
-              카카오로 시작하기
-            </button>
+            
             <div className="relative py-4">
               <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-slate-100 dark:border-slate-800"></span></div>
               <div className="relative flex justify-center text-[10px] font-bold text-slate-300 dark:text-slate-600 uppercase tracking-widest bg-white dark:bg-[#0A0F1C] px-4">OR</div>
