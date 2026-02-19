@@ -1,6 +1,6 @@
 'use client';
 
-// 1. 모든 외부 라이브러리 import
+// 1. 모든 외부 라이브러리 및 폰트 import (최상단 배치)
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { toPng } from 'html-to-image';
 import Link from 'next/link';
@@ -9,29 +9,24 @@ import {
   ArrowLeft, Lock, AlertCircle, User, LogOut, Coffee, Zap, Heart, 
   CloudRain, Share2, Trash2, UserX, Type
 } from 'lucide-react';
-
-// 2. 폰트 및 외부 유틸리티 import
 import { Nanum_Pen_Script, Nanum_Myeongjo, Noto_Sans_KR, Bagel_Fat_One } from 'next/font/google';
 import { createClient } from "../../utils/supabase/client";
 
-// 3. 폰트 객체 선언 (변수명 통일)
+// 2. 폰트 객체 선언 (변수명 통일하여 중복 에러 방지)
 const fontHandwriting = Nanum_Pen_Script({ weight: '400', subsets: ['latin'], display: 'swap' });
 const fontMyeongjo = Nanum_Myeongjo({ weight: ['400', '700'], subsets: ['latin'], display: 'swap' });
 const fontGothic = Noto_Sans_KR({ weight: ['400', '900'], subsets: ['latin'], display: 'swap' });
 const fontDesign = Bagel_Fat_One({ weight: '400', subsets: ['latin'], display: 'swap' });
 
-// 4. 타입 정의 (중복 제거 및 4종 통합)
+// 3. 타입 정의 (중복 선언 제거)
 type Stage = 'pick' | 'intensity' | 'tags' | 'deep' | 'analyzing' | 'result' | 'archive';
 type FontType = 'handwriting' | 'myeongjo' | 'gothic' | 'design';
 
-// 5. 상수 설정
+// 4. 상수 설정
 const PRICING = { REPORT_FEE: 4900 }; 
 const MAX_TEXT_LENGTH = 70;
 
-/**
- * 감정 데이터 정의
- * 각 감정에 맞는 아이콘, 배경색, 이미지를 매핑합니다.
- */
+// 5. 감정 데이터 정의
 const EMOTION_DATA: { [key: string]: any } = {
   stable: { label: "안정", icon: <Heart size={40} strokeWidth={1.2} className="text-emerald-500" />, bgColor: "bg-emerald-50/50 dark:bg-emerald-900/20", img: "/images/stable.png" },
   joy: { label: "기쁨", icon: <Sparkles size={40} strokeWidth={1.2} className="text-yellow-500" />, bgColor: "bg-yellow-50/50 dark:bg-yellow-900/20", img: "/images/joy.png" },
