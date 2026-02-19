@@ -1,6 +1,6 @@
 'use client';
 
-// 1. 모든 외부 라이브러리 및 폰트 import (최상단 배치)
+// 1. 모든 외부 라이브러리 및 폰트 import
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { toPng } from 'html-to-image';
 import Link from 'next/link';
@@ -12,13 +12,13 @@ import {
 import { Nanum_Pen_Script, Nanum_Myeongjo, Noto_Sans_KR, Bagel_Fat_One } from 'next/font/google';
 import { createClient } from "../../utils/supabase/client";
 
-// 2. 폰트 객체 선언 (변수명 통일하여 중복 에러 방지)
-const fontHandwriting = Nanum_Pen_Script({ weight: '400', subsets: ['latin'], display: 'swap' });
-const fontMyeongjo = Nanum_Myeongjo({ weight: ['400', '700'], subsets: ['latin'], display: 'swap' });
-const fontGothic = Noto_Sans_KR({ weight: ['400', '900'], subsets: ['latin'], display: 'swap' });
-const fontDesign = Bagel_Fat_One({ weight: '400', subsets: ['latin'], display: 'swap' });
+// 2. 폰트 객체 선언 (변수명을 하단 참조부와 일치시킴)
+const handwriting = Nanum_Pen_Script({ weight: '400', subsets: ['latin'], display: 'swap' });
+const myeongjo = Nanum_Myeongjo({ weight: ['400', '700'], subsets: ['latin'], display: 'swap' });
+const gothic = Noto_Sans_KR({ weight: ['400', '900'], subsets: ['latin'], display: 'swap' });
+const design = Bagel_Fat_One({ weight: '400', subsets: ['latin'], display: 'swap' });
 
-// 3. 타입 정의 (중복 선언 제거)
+// 3. 타입 정의
 type Stage = 'pick' | 'intensity' | 'tags' | 'deep' | 'analyzing' | 'result' | 'archive';
 type FontType = 'handwriting' | 'myeongjo' | 'gothic' | 'design';
 
@@ -38,9 +38,7 @@ const EMOTION_DATA: { [key: string]: any } = {
   anxiety: { label: "불안", icon: <Droplets size={40} strokeWidth={1.2} className="text-indigo-500" />, bgColor: "bg-indigo-50/50 dark:bg-indigo-900/20", img: "/images/anxiety.png" },
 };
 
-/**
- * 맥락 태그 정의
- */
+/** 맥락 태그 정의 */
 const CONTEXT_TAGS = {
   trigger: { title: "원인/트리거", items: ['업무', '인간관계', '돈', '건강', '미래 고민', '외로움', '비교/열등감', '피로 누적'] },
   energy: { title: "에너지 상태", items: ['무기력', '과각성', '집중됨', '산만함', '충동적', '예민함'] },
@@ -72,9 +70,7 @@ export default function FeelingSnapFinal() {
     return "매우 강렬하게 온 마음을 뒤흔들고 있어요.";
   };
 
-  /**
-   * 기록 가져오기 (데이터베이스/로컬스토리지 연동)
-   */
+  /** 기록 가져오기 (데이터베이스/로컬스토리지 연동) */
   const fetchHistory = useCallback(async (userId: string | null) => {
     if (typeof window === 'undefined') return;
     let fp = localStorage.getItem('snap_fp');
@@ -152,7 +148,7 @@ export default function FeelingSnapFinal() {
 
   // 기록 삭제 처리
   const handleDeleteRecord = async (e: React.MouseEvent, recordId: string) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     if (!confirm("이 기록을 영구히 삭제할까요?\n삭제 후에는 분석 데이터에서도 제외됩니다.")) return;
     const fingerprint = localStorage.getItem('snap_fp');
     const userId = user?.id || null;
@@ -168,9 +164,7 @@ export default function FeelingSnapFinal() {
     } catch (err: any) { alert(err.message || "삭제 중 오류가 발생했습니다."); }
   };
 
-  /**
-   * 최종 분석 요청 함수
-   */
+  /** 최종 분석 요청 함수 */
   const handleFinalAnalyze = async () => {
     if (stage === 'analyzing') return;
     const currentUserInput = textInput.trim(); 
@@ -182,7 +176,6 @@ export default function FeelingSnapFinal() {
       date: `${String(now.getFullYear()).slice(-2)}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`,
       time: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
     });
-
     try {
       const response = await fetch('/api/analyze', {
         method: 'POST',
@@ -199,7 +192,6 @@ export default function FeelingSnapFinal() {
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "분석 실패");
-      
       const wait = Math.max(0, 5000 - (Date.now() - startTime));
       setTimeout(async () => {
         const processedMix = (result?.mix || result?.mix_data || []).map((m: any) => ({
@@ -265,9 +257,7 @@ export default function FeelingSnapFinal() {
     } catch (err) { alert("이미지 저장에 실패했습니다."); }
   };
 
-  /**
-   * 히스토리 카드 컴포넌트
-   */
+  /** 히스토리 카드 컴포넌트 */
   const ArchiveCard = ({ item, onClick }: { item: any, onClick: () => void }) => (
     <div onClick={onClick} className="group relative p-6 bg-white dark:bg-slate-900 rounded-[32px] border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden">
       <div className="flex justify-between items-start mb-4">
@@ -284,7 +274,7 @@ export default function FeelingSnapFinal() {
           </button>
         </div>
       </div>
-      <p className={`${item.font === 'myeongjo' ? myeongjo.className : handwriting.className} text-2xl text-slate-700 dark:text-slate-200 leading-snug truncate pr-4`}>
+      <p className={`${item.font === 'myeongjo' ? myeongjo.className : item.font === 'gothic' ? gothic.className : item.font === 'design' ? design.className : handwriting.className} text-2xl text-slate-700 dark:text-slate-200 leading-snug truncate pr-4`}>
         {(item.reason && item.reason !== "") ? item.reason : (item.description?.split('\n')[0] || "기록된 조각")}
       </p>
       <div className="flex justify-between items-center mt-3">
@@ -298,7 +288,6 @@ export default function FeelingSnapFinal() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#0F172A] text-slate-900 dark:text-slate-100 pb-10 flex flex-col transition-colors">
-      
       {/* 유료 리포트 유도 모달 */}
       {showPayModal && (
         <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
@@ -368,7 +357,7 @@ export default function FeelingSnapFinal() {
             <div className="grid grid-cols-2 gap-4">
               {Object.keys(EMOTION_DATA).map((key) => (
                 <button key={key} onClick={() => { setSelectedKey(key); setStage('intensity'); }}
-                  className={`${EMOTION_DATA[key].bgColor} p-6 rounded-[32px] hover:scale-105 active:scale-95 transition-all flex flex-col items-center border border-transparent shadow-sm`}>
+                className={`${EMOTION_DATA[key].bgColor} p-6 rounded-[32px] hover:scale-105 active:scale-95 transition-all flex flex-col items-center border border-transparent shadow-sm`}>
                   <div className="mb-3">{EMOTION_DATA[key].icon}</div>
                   <div className="font-bold text-slate-700 dark:text-slate-300">{EMOTION_DATA[key].label}</div>
                 </button>
@@ -439,8 +428,7 @@ export default function FeelingSnapFinal() {
                   <div className="flex flex-wrap gap-2">
                     {group.items.map(tag => (
                       <button key={tag} onClick={() => handleToggleTag(tag)}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all border 
-                          ${selectedTags.includes(tag) ? 'bg-[#E91E63] text-white border-[#E91E63]' : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-100 dark:border-slate-800'}`}>
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${selectedTags.includes(tag) ? 'bg-[#E91E63] text-white border-[#E91E63]' : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-100 dark:border-slate-800'}`}>
                         {tag}
                       </button>
                     ))}
@@ -461,37 +449,32 @@ export default function FeelingSnapFinal() {
               <p className="text-[13px] font-medium text-slate-400/80">쓰지않아도 괜찮아요. 할 말을 남기면 함께 snap이 됩니다.</p>
             </div>
             
-{/* 폰트 선택 토글 - stage === 'deep' 내부에 붙여넣기 */}
-<div className="grid grid-cols-2 gap-2 mb-4">
-  {[
-    { id: 'handwriting', name: '필기체', icon: <Type size={14} /> },
-    { id: 'myeongjo', name: '명조체', icon: <Type size={14} /> },
-    { id: 'gothic', name: '고딕체', icon: <Type size={14} /> },
-    { id: 'design', name: '디자인', icon: <Type size={14} /> }
-  ].map((f) => (
-    <button
-      key={f.id}
-      onClick={() => setSelectedFont(f.id as FontType)}
-      className={`flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all ${
-        selectedFont === f.id 
-        ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' 
-        : 'bg-slate-100 text-slate-400 dark:bg-slate-800'
-      }`}
-    >
-      {f.icon} {f.name}
-    </button>
-  ))}
-</div>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              {[
+                { id: 'handwriting', name: '필기체', icon: <Type size={14} /> },
+                { id: 'myeongjo', name: '명조체', icon: <Type size={14} /> },
+                { id: 'gothic', name: '고딕체', icon: <Type size={14} /> },
+                { id: 'design', name: '디자인', icon: <Type size={14} /> }
+              ].map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => setSelectedFont(f.id as FontType)}
+                  className={`flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all ${
+                    selectedFont === f.id 
+                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' 
+                    : 'bg-slate-100 text-slate-400 dark:bg-slate-800'
+                  }`}
+                >
+                  {f.icon} {f.name}
+                </button>
+              ))}
+            </div>
 
             <div className="relative">
               <textarea 
-                className={`w-full h-56 bg-[#F8FAFC] dark:bg-slate-900 rounded-[32px] p-8 text-xl outline-none shadow-inner border border-transparent dark:border-slate-800 focus:border-[#E91E63]/30 transition-all 
-    ${selectedFont === 'myeongjo' ? fontMyeongjo.className : 
-      selectedFont === 'gothic' ? fontGothic.className : 
-      selectedFont === 'design' ? fontDesign.className : 
-      fontHandwriting.className}`}
-  value={textInput} 
-  onChange={(e) => setTextInput(e.target.value.slice(0, MAX_TEXT_LENGTH))}
+                className={`w-full h-56 bg-[#F8FAFC] dark:bg-slate-900 rounded-[32px] p-8 text-xl outline-none shadow-inner border border-transparent dark:border-slate-800 focus:border-[#E91E63]/30 transition-all ${selectedFont === 'myeongjo' ? myeongjo.className : selectedFont === 'gothic' ? gothic.className : selectedFont === 'design' ? design.className : handwriting.className}`}
+                value={textInput} 
+                onChange={(e) => setTextInput(e.target.value.slice(0, MAX_TEXT_LENGTH))}
                 placeholder={`자유롭게 작성해주세요.\n*깔끔하게 snap찍는 Tip!\n- 최대 6줄까지 출력(한글 기준 1줄 최대 13글자)\n- 엔터를 쳐서 입력하면 더 깔끔해요!`} 
               />
               <div className="absolute bottom-6 right-8 text-xs font-bold text-slate-400">
@@ -518,12 +501,11 @@ export default function FeelingSnapFinal() {
         {/* 단계 5: 결과 화면 (카드) */}
         {stage === 'result' && resultData && (
           <div className="animate-in fade-in duration-1000 pb-20">
-            {/* 지표 변화 섹션 */}
             <div className="mb-8 p-6 bg-slate-50 dark:bg-slate-900/50 rounded-[32px] border border-slate-100 dark:border-slate-800">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-[10px] font-black text-[#E91E63] uppercase tracking-widest">Personal Delta</span>
                 <div className="flex gap-4 items-center">
-                   <button onClick={(e) => handleDeleteRecord(e, resultData.id)} className="flex items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-red-500 transition-colors">
+                  <button onClick={(e) => handleDeleteRecord(e, resultData.id)} className="flex items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-red-500 transition-colors">
                     <Trash2 size={12} /> 기록 삭제
                   </button>
                   {!user && <Link href="/login" className="text-[9px] font-bold text-slate-400 underline">데이터 영구 보관하기</Link>}
@@ -542,7 +524,6 @@ export default function FeelingSnapFinal() {
               </div>
             </div>
 
-            {/* 실제 스냅 카드 (이미지 저장 영역) */}
             <div ref={cardRef} className="relative w-full bg-[#0d0d0d] shadow-2xl rounded-[2px] overflow-hidden" style={{ minHeight: '850px' }}>
               <div className="relative w-full aspect-[4/5] overflow-hidden">
                 <img src={resultData.mainEmotion?.img || "/images/stable.png"} alt="snap" className="w-full h-full object-cover opacity-50 saturate-[0.8]" crossOrigin="anonymous" />
@@ -552,41 +533,21 @@ export default function FeelingSnapFinal() {
                     <div className="font-mono">{stamp.date} / {stamp.time}</div>
                     <div className="font-black italic uppercase tracking-widest">FEELING SNAP 2.0</div>
                   </div>
-<div className="space-y-4">
-  {/* 상단 서브 타이틀 (태그) */}
-  <span className={`${fontMyeongjo.className} text-[10px] font-bold text-white/30 uppercase tracking-[0.4em]`}>
-    {resultData.subName || "오늘의 조각"}
-  </span>
-
-  {/* 메인 텍스트 출력 영역 */}
-  <div 
-    className={`
-      ${resultData.selectedFont === 'myeongjo' ? fontMyeongjo.className : 
-        resultData.selectedFont === 'gothic' ? fontGothic.className : 
-        resultData.selectedFont === 'design' ? fontDesign.className : 
-        fontHandwriting.className} 
-      text-[44px] leading-[1.05] text-white break-words whitespace-pre-wrap line-clamp-6
-    `} 
-    style={{ maxWidth: '13em' }}
-  >
-    {(() => {
-      // 1. 우선 사용자가 입력한 텍스트가 있는지 확인
-      if (resultData.userInput && resultData.userInput.trim() !== "") {
-        return resultData.userInput;
-      }
-
-      // 2. 사용자 입력이 없으면 AI 응답(description)에서 첫 문장 추출
-      if (resultData.description) {
-        // 마침표(.)나 줄바꿈(\n) 중 먼저 나오는 것을 기준으로 분리 후 첫 번째 요소 선택
-        const firstSentence = resultData.description.split(/[.\n]/)[0].trim();
-        return firstSentence || "오늘의 감정 조각"; 
-      }
-
-      // 3. 둘 다 없으면 기본 문구 출력
-      return "오늘의 감정 조각";
-    })()}
-  </div>
-</div>
+                  <div className="space-y-4">
+                    <span className={`${myeongjo.className} text-[10px] font-bold text-white/30 uppercase tracking-[0.4em]`}>
+                      {resultData.subName || "오늘의 조각"}
+                    </span>
+                    <div className={`${resultData.selectedFont === 'myeongjo' ? myeongjo.className : resultData.selectedFont === 'gothic' ? gothic.className : resultData.selectedFont === 'design' ? design.className : handwriting.className} text-[44px] leading-[1.05] text-white break-words whitespace-pre-wrap line-clamp-6`} style={{ maxWidth: '13em' }}>
+                      {(() => {
+                        if (resultData.userInput && resultData.userInput.trim() !== "") return resultData.userInput;
+                        if (resultData.description) {
+                          const firstSentence = resultData.description.split(/[.\n]/)[0].trim();
+                          return firstSentence || "오늘의 감정 조각"; 
+                        }
+                        return "오늘의 감정 조각";
+                      })()}
+                    </div>
+                  </div>
                   <div className="text-[9px] font-mono text-white/20 tracking-[0.5em] text-center uppercase">SNAP_RECORDED</div>
                 </div>
               </div>
@@ -623,7 +584,6 @@ export default function FeelingSnapFinal() {
               </div>
             </div>
 
-            {/* 하단 액션 버튼 */}
             <div className="mt-8 space-y-6">
               <button onClick={handleSaveImage} className="w-full py-5 bg-black dark:bg-slate-100 text-white dark:text-slate-900 rounded-full font-black text-[14px] shadow-xl active:scale-95 transition-all">이미지로 저장하기</button>
               <div className="flex justify-center gap-10">
