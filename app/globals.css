@@ -6,7 +6,22 @@
     font-weight: normal;
     font-style: normal;
 }
-
+@font-face {
+    font-family: 'SchoolSafeLolly'; /* 달콤한 느낌 */
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2208@1.0/HSBombaram.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'SchoolSafeSans'; /* 깔끔한 느낌 */
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2403@1.0/HSSantokki-Regular.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'SchoolSafeBrush'; /* 강렬한 느낌 */
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2201@1.0/HSYuji-Regular.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'SchoolSafeOld'; /* 진지한 느낌 */
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/HSStay-Regular.woff2') format('woff2');
+}
 /* ...기존 코드들... */
 
 
