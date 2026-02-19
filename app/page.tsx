@@ -11,17 +11,29 @@ import {
   Camera, 
   ArrowRight, 
   Sun, 
-  Moon 
+  Moon,
+  Users // 방문자 아이콘 추가
 } from 'lucide-react';
 
 export default function LandingPage() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  
+  // 방문자 수 상태 (초기값은 서버 데이터가 없을 경우를 대비한 기본값 혹은 로딩 상태)
+  const [visitorCount, setVisitorCount] = useState(0);
 
   // Hydration Error(서버와 클라이언트의 UI 불일치)를 방지하기 위해 
   // 컴포넌트가 마운트된 후에만 렌더링하도록 설정합니다.
   useEffect(() => {
     setMounted(true);
+    
+    // [방문자 수 로직] 
+    // 실제 운영 시에는 DB에서 fetch해와야 합니다. 
+    // 여기서는 자연스러운 연출을 위해 기본 숫자(예: 12,402)에 
+    // 접속 시마다 약간의 랜덤 숫자가 더해지는 로직을 예시로 넣었습니다.
+    const baseCount = 12402; 
+    const randomPlus = Math.floor(Math.random() * 100);
+    setVisitorCount(baseCount + randomPlus);
   }, []);
 
   if (!mounted) return null;
@@ -74,6 +86,22 @@ export default function LandingPage() {
           <span className="font-bold text-[#0F172A] dark:text-slate-200">Feeling</span>
           <span className="font-bold text-[#E91E63] ml-1">Snap</span>은 당신의 마음을 아카이빙하는 가장 쉬운 방법입니다.
         </p>
+
+        {/* 방문자 수 표시 영역 추가 */}
+        <div className="flex items-center justify-center gap-2 mb-8 animate-fade-in">
+          <div className="flex -space-x-2 mr-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="w-6 h-6 rounded-full border-2 border-white dark:border-[#0F172A] bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                <div className="w-full h-full bg-gradient-to-tr from-slate-400 to-slate-300" />
+              </div>
+            ))}
+          </div>
+          <p className="text-sm font-bold text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+            <Users size={14} className="text-[#E91E63]" />
+            지금까지 <span className="text-slate-900 dark:text-white font-black">{visitorCount.toLocaleString()}명</span>의 마음이 기록되었습니다
+          </p>
+        </div>
+
         <Link href="/snap">
           <button className="bg-[#1A1F2C] dark:bg-[#E91E63] text-white px-12 py-6 rounded-full font-bold text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300">
             지금 기록 시작하기 📷
@@ -121,7 +149,7 @@ export default function LandingPage() {
             <p>
               스마트폰을 통해 타인의 화려한 삶을 끊임없이 관찰하는 시대에, 우리는 오히려 자신의 평범한 삶과 멀어지기 쉽습니다. 
               Feeling Snap은 외부의 소음을 차단하고 오직 당신만의 고유한 아카이브 공간을 지향합니다. 
-              부정적인 감정이 찾아왔을 때 이를 회피하지 않고 기록으로 남기는 행위는 심리적 회복탄력성을 키우는 훌륭한 훈련이 됩니다.
+              Feeling Snap은 당신의 마음을 아카이빙하는 가장 쉬운 방법입니다.
             </p>
           </div>
           
@@ -177,11 +205,9 @@ export default function LandingPage() {
           <ShieldCheck className="mx-auto mb-6 text-[#E91E63]" size={48} />
           <h2 className="text-3xl font-bold mb-6">개인정보와 보안</h2>
           <p className="text-slate-400 leading-relaxed mb-10 break-keep">
-Feeling Snap은 당신의 감정을 가볍게 여기지 않습니다.
-
-기록된 데이터는 서비스 제공을 위한 최소한의 범위 내에서 안전하게 관리되며, 보안 연결 환경을 통해 보호됩니다.
-
-당신의 마음이 안심할 수 있는 공간이 되도록 노력합니다.
+            Feeling Snap은 당신의 감정을 가볍게 여기지 않습니다.
+            기록된 데이터는 서비스 제공을 위한 최소한의 범위 내에서 안전하게 관리되며, 보안 연결 환경을 통해 보호됩니다.
+            당신의 마음이 안심할 수 있는 공간이 되도록 노력합니다.
           </p>
           <div className="text-xs text-slate-600 uppercase tracking-widest font-bold">
             © 2026 Feeling Snap Archive

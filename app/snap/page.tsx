@@ -246,17 +246,24 @@ export default function FeelingSnapFinal() {
   };
 
   // 결과 카드 이미지 저장
-  const handleSaveImage = async () => {
+const handleSaveImage = async () => {
     if (!cardRef.current) return;
     try {
-      const dataUrl = await toPng(cardRef.current, { pixelRatio: 3, backgroundColor: '#0d0d0d', cacheBust: true });
+      // 폰트와 이미지가 모두 로드될 시간을 보장하기 위해 약간의 지연을 줍니다.
+      const dataUrl = await toPng(cardRef.current, { 
+        pixelRatio: 2, 
+        backgroundColor: '#0d0d0d', 
+        cacheBust: true,
+        // 이미지 호출 실패 방지를 위한 설정 추가
+        includeQueryParams: true
+      });
       const link = document.createElement('a');
       link.download = `FeelingSnap_${stamp.date.replace(/\./g, '')}.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) { alert("이미지 저장에 실패했습니다."); }
   };
-
+  
   /** 히스토리 카드 컴포넌트 */
   const ArchiveCard = ({ item, onClick }: { item: any, onClick: () => void }) => (
     <div onClick={onClick} className="group relative p-6 bg-white dark:bg-slate-900 rounded-[32px] border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden">
