@@ -1,5 +1,6 @@
 'use client';
 
+// 1. 모든 외부 라이브러리 import
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { toPng } from 'html-to-image';
 import Link from 'next/link';
@@ -8,31 +9,24 @@ import {
   ArrowLeft, Lock, AlertCircle, User, LogOut, Coffee, Zap, Heart, 
   CloudRain, Share2, Trash2, UserX, Type
 } from 'lucide-react';
-// 폰트 설정 (상단 import 부분 아래에 추가)
-import { Nanum_Pen_Script, Nanum_Myeongjo, Noto_Sans_KR, Bagel_Fat_One } from 'next/font/google';
 
+// 2. 폰트 및 외부 유틸리티 import
+import { Nanum_Pen_Script, Nanum_Myeongjo, Noto_Sans_KR, Bagel_Fat_One } from 'next/font/google';
+import { createClient } from "../../utils/supabase/client";
+
+// 3. 폰트 객체 선언 (변수명 통일)
 const fontHandwriting = Nanum_Pen_Script({ weight: '400', subsets: ['latin'], display: 'swap' });
 const fontMyeongjo = Nanum_Myeongjo({ weight: ['400', '700'], subsets: ['latin'], display: 'swap' });
 const fontGothic = Noto_Sans_KR({ weight: ['400', '900'], subsets: ['latin'], display: 'swap' });
 const fontDesign = Bagel_Fat_One({ weight: '400', subsets: ['latin'], display: 'swap' });
 
-// 타입 설정
+// 4. 타입 정의 (중복 제거 및 4종 통합)
+type Stage = 'pick' | 'intensity' | 'tags' | 'deep' | 'analyzing' | 'result' | 'archive';
 type FontType = 'handwriting' | 'myeongjo' | 'gothic' | 'design';
-import { createClient } from "../../utils/supabase/client";
 
-/**
- * 폰트 설정
- * Next.js 폰트 최적화를 사용하여 로컬 폰트처럼 부드럽게 렌더링합니다.
- */
-const handwriting = Nanum_Pen_Script({ weight: '400', subsets: ['latin'], display: 'swap' });
-const myeongjo = Nanum_Myeongjo({ weight: ['400', '700'], subsets: ['latin'], display: 'swap' });
-
-// 상수 및 가격 설정
+// 5. 상수 설정
 const PRICING = { REPORT_FEE: 4900 }; 
 const MAX_TEXT_LENGTH = 70;
-
-type Stage = 'pick' | 'intensity' | 'tags' | 'deep' | 'analyzing' | 'result' | 'archive';
-type FontType = 'handwriting' | 'myeongjo';
 
 /**
  * 감정 데이터 정의
