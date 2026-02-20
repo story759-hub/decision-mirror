@@ -604,7 +604,7 @@ export default function FeelingSnapFinal() {
                 <button onClick={() => alert("링크가 복사되었습니다!")} className="text-[11px] font-bold text-[#E91E63] hover:underline flex items-center gap-1"><Share2 size={12} /> 순간 공유하기</button>
               </div>
               <div className="pt-6 border-t border-slate-100 dark:border-white/5 space-y-3">
-                <p className="text-center text-[10px] text-slate-400 font-medium opacity-70">부적절한 텍스트 입력 시 출력이 안 될 수 있습니다.</p>
+                <p className="text-center text-[10px] text-slate-400 font-medium opacity-70">부적절한 텍스트 입력 시 출력이 제한 될 수 있습니다.</p>
                 <div className="flex flex-col items-center gap-2 opacity-50">
                   <div className="flex items-center gap-1 text-[9px] text-slate-400"><Lock size={10} /> <span>기록은 보안 연결과 계정 인증을 통해 보호됩니다.</span></div>
                   <div className="flex gap-4 text-[9px] text-slate-500 font-bold">
