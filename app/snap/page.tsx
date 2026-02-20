@@ -245,49 +245,33 @@ export default function FeelingSnapFinal() {
     setStage('result');
   };
 
-  /** [수정됨] 결과 카드 이미지 저장 - 모바일 최적화 로직 추가 */
+  // 결과 카드 이미지 저장
   const handleSaveImage = async () => {
     if (!cardRef.current) return;
-    
-    // 모바일 리소스 로딩 보장
-    const images = cardRef.current.getElementsByTagName('img');
-    const imageLoadPromises = Array.from(images).map(img => {
-      if (img.complete) return Promise.resolve();
-      return new Promise((resolve) => {
-        img.onload = resolve;
-        img.onerror = resolve;
-      });
-    });
-
     try {
-      // 폰트와 이미지가 모두 준비될 때까지 대기
-      await Promise.all([...imageLoadPromises, document.fonts.ready]);
+      // 폰트가 완전히 로드될 때까지 기다림
+      await document.fonts.ready;
       
-      const options = { 
-        pixelRatio: 2, // 모바일 부하 감소를 위해 2로 설정 (충분히 고화질)
+      const dataUrl = await toPng(cardRef.current, { 
+        pixelRatio: 3, // 화질을 위해 3으로 상향
         backgroundColor: '#0d0d0d', 
         cacheBust: true,
         includeQueryParams: true,
-        style: { borderRadius: '0' }
-      };
-
-      let dataUrl = await toPng(cardRef.current, options);
+        style: {
+          borderRadius: '0' // 저장 시 테두리 문제 방지
+        }
+      });
       
-      // 모바일 빈 화면 방지를 위한 2차 시도 로직
-      if (!dataUrl || dataUrl.length < 1000) {
-        dataUrl = await toPng(cardRef.current, options);
-      }
-
       const link = document.createElement('a');
       link.download = `FeelingSnap_${stamp.date.replace(/\./g, '')}.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) { 
       console.error(err);
-      alert("이미지 저장에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      alert("이미지 저장에 실패했습니다.");
     }
   };
-
+  
   /** 히스토리 카드 컴포넌트 */
   const ArchiveCard = ({ item, onClick }: { item: any, onClick: () => void }) => (
     <div onClick={onClick} className="group relative p-6 bg-white dark:bg-slate-900 rounded-[32px] border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden">
@@ -370,6 +354,7 @@ export default function FeelingSnapFinal() {
         )}
       </nav>
       
+      {/* 로고 */}
       <header className="max-w-xl mx-auto pt-6 pb-6 text-center">
         <h1 className="text-4xl font-black tracking-tighter cursor-pointer" onClick={() => {setStage('pick'); setTextInput('');}}>
           <span className="text-[#0F172A] dark:text-white">Feeling</span><span className="text-[#E91E63] ml-1">Snap</span>
@@ -377,6 +362,7 @@ export default function FeelingSnapFinal() {
       </header>
 
       <main className="max-w-md mx-auto px-6 flex-grow w-full">
+        {/* 단계 1: 감정 선택 */}
         {stage === 'pick' && (
           <div className="space-y-8 animate-in fade-in duration-500">
             <div className="text-center space-y-2 pt-6">
@@ -392,6 +378,7 @@ export default function FeelingSnapFinal() {
                 </button>
               ))}
             </div>
+            {/* 최근 기록 영역 */}
             <div className="pt-10 space-y-6">
               <div className="flex justify-between items-end">
                 <h4 className="text-xl font-black tracking-tighter italic">Recent Snaps</h4>
@@ -412,6 +399,7 @@ export default function FeelingSnapFinal() {
           </div>
         )}
 
+        {/* 히스토리 전체 보기 */}
         {stage === 'archive' && (
           <div className="space-y-6 animate-in slide-in-from-right-4 duration-500 py-6">
             <h2 className="text-2xl font-black tracking-tighter italic">Timeline</h2>
@@ -422,6 +410,7 @@ export default function FeelingSnapFinal() {
           </div>
         )}
 
+        {/* 단계 2: 농도 선택 */}
         {stage === 'intensity' && (
           <div className="space-y-10 animate-in slide-in-from-right-4 duration-500 text-center py-10">
             <div className="space-y-2">
@@ -440,6 +429,7 @@ export default function FeelingSnapFinal() {
           </div>
         )}
 
+        {/* 단계 3: 맥락 태그 선택 */}
         {stage === 'tags' && (
           <div className="space-y-8 animate-in slide-in-from-right-4 duration-500 py-6">
             <div className="text-center space-y-2">
@@ -466,12 +456,14 @@ export default function FeelingSnapFinal() {
           </div>
         )}
 
+        {/* 단계 4: 상세 내용 작성 및 폰트 선택 */}
         {stage === 'deep' && (
           <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
             <div className="text-center py-4 space-y-1">
               <h2 className="text-2xl font-black tracking-tighter">더 하고 싶은 말이 있나요?</h2>
               <p className="text-[13px] font-medium text-slate-400/80">쓰지않아도 괜찮아요. 할 말을 남기면 함께 snap이 됩니다.</p>
             </div>
+            
             <div className="grid grid-cols-2 gap-2 mb-4">
               {[
                 { id: 'handwriting', name: '필기체', icon: <Type size={14} /> },
@@ -479,8 +471,13 @@ export default function FeelingSnapFinal() {
                 { id: 'gothic', name: '고딕체', icon: <Type size={14} /> },
                 { id: 'design', name: '디자인', icon: <Type size={14} /> }
               ].map((f) => (
-                <button key={f.id} onClick={() => setSelectedFont(f.id as FontType)}
-                  className={`flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all ${selectedFont === f.id ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'bg-slate-100 text-slate-400 dark:bg-slate-800'}`}>
+                <button
+                  key={f.id}
+                  onClick={() => setSelectedFont(f.id as FontType)}
+                  className={`flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all ${
+                    selectedFont === f.id ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'bg-slate-100 text-slate-400 dark:bg-slate-800'
+                  }`}
+                >
                   {f.icon} {f.name}
                 </button>
               ))}
@@ -503,6 +500,7 @@ export default function FeelingSnapFinal() {
           </div>
         )}
 
+        {/* 로딩 화면 */}
         {stage === 'analyzing' && (
           <div className="py-32 text-center space-y-10">
             <div className="relative w-24 h-24 mx-auto">
@@ -513,6 +511,7 @@ export default function FeelingSnapFinal() {
           </div>
         )}
         
+        {/* 단계 5: 결과 화면 (카드) */}
         {stage === 'result' && resultData && (
           <div className="animate-in fade-in duration-1000 pb-20">
             <div className="mb-8 p-6 bg-slate-50 dark:bg-slate-900/50 rounded-[32px] border border-slate-100 dark:border-slate-800">
@@ -540,12 +539,7 @@ export default function FeelingSnapFinal() {
 
             <div ref={cardRef} className="relative w-full bg-[#0d0d0d] shadow-2xl rounded-[2px] overflow-hidden" style={{ minHeight: '850px' }}>
               <div className="relative w-full aspect-[4/5] overflow-hidden">
-                <img 
-                  src={resultData.mainEmotion?.img || "/images/stable.PNG"} 
-                  alt="snap" 
-                  className="w-full h-full object-cover opacity-50 saturate-[0.8]" 
-                  crossOrigin="anonymous" 
-                />
+                <img src={resultData.mainEmotion?.img || "/images/stable.png"} alt="snap" className="w-full h-full object-cover opacity-50 saturate-[0.8]" crossOrigin="anonymous" />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80" />
                 <div className="absolute inset-0 p-10 flex flex-col justify-between">
                   <div className="flex justify-between items-start opacity-40 text-white text-[10px]">
@@ -554,7 +548,7 @@ export default function FeelingSnapFinal() {
                   </div>
                   <div className="space-y-4">
                     <span className={`${myeongjo.className} text-[10px] font-bold text-white/30 uppercase tracking-[0.4em]`}>
-                       {resultData.subName || "오늘의 조각"}
+                      {resultData.subName || "오늘의 조각"}
                     </span>
                     <div className={`${resultData.selectedFont === 'myeongjo' ? myeongjo.className : resultData.selectedFont === 'gothic' ? gothic.className : resultData.selectedFont === 'design' ? design.className : handwriting.className} text-[44px] leading-[1.05] text-white break-words whitespace-pre-wrap line-clamp-6`} style={{ maxWidth: '13em' }}>
                       {(() => {
