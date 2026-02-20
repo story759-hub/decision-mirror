@@ -28,14 +28,14 @@ const MAX_TEXT_LENGTH = 70;
 
 // 5. 감정 데이터 정의
 const EMOTION_DATA: { [key: string]: any } = {
-  stable: { label: "안정", icon: <Heart size={40} strokeWidth={1.2} className="text-emerald-500" />, bgColor: "bg-emerald-50/50 dark:bg-emerald-900/20", img: "/images/stable.png" },
-  joy: { label: "기쁨", icon: <Sparkles size={40} strokeWidth={1.2} className="text-yellow-500" />, bgColor: "bg-yellow-50/50 dark:bg-yellow-900/20", img: "/images/joy.png" },
-  expect: { label: "기대", icon: <Zap size={40} strokeWidth={1.2} className="text-orange-500" />, bgColor: "bg-orange-50/50 dark:bg-orange-900/20", img: "/images/expect.png" },
-  tired: { label: "피로", icon: <Coffee size={40} strokeWidth={1.2} className="text-slate-500" />, bgColor: "bg-slate-50/50 dark:bg-slate-800/40", img: "/images/tired.png" },
-  stress: { label: "스트레스", icon: <Tornado size={40} strokeWidth={1.2} className="text-purple-500" />, bgColor: "bg-purple-50/50 dark:bg-purple-900/20", img: "/images/stress.png" },
-  anger: { label: "분노", icon: <Flame size={40} strokeWidth={1.2} className="text-red-500" />, bgColor: "bg-red-50/50 dark:bg-red-900/20", img: "/images/anger.png" },
-  sadness: { label: "슬픔", icon: <CloudRain size={40} strokeWidth={1.2} className="text-blue-500" />, bgColor: "bg-blue-50/50 dark:bg-blue-900/20", img: "/images/sadness.png" },
-  anxiety: { label: "불안", icon: <Droplets size={40} strokeWidth={1.2} className="text-indigo-500" />, bgColor: "bg-indigo-50/50 dark:bg-indigo-900/20", img: "/images/anxiety.png" },
+  stable: { label: "안정", icon: <Heart size={40} strokeWidth={1.2} className="text-emerald-500" />, bgColor: "bg-emerald-50/50 dark:bg-emerald-900/20", img: "/images/stable.PNG" },
+  joy: { label: "기쁨", icon: <Sparkles size={40} strokeWidth={1.2} className="text-yellow-500" />, bgColor: "bg-yellow-50/50 dark:bg-yellow-900/20", img: "/images/joy.PNG" },
+  expect: { label: "기대", icon: <Zap size={40} strokeWidth={1.2} className="text-orange-500" />, bgColor: "bg-orange-50/50 dark:bg-orange-900/20", img: "/images/expect.PNG" },
+  tired: { label: "피로", icon: <Coffee size={40} strokeWidth={1.2} className="text-slate-500" />, bgColor: "bg-slate-50/50 dark:bg-slate-800/40", img: "/images/tired.PNG" },
+  stress: { label: "스트레스", icon: <Tornado size={40} strokeWidth={1.2} className="text-purple-500" />, bgColor: "bg-purple-50/50 dark:bg-purple-900/20", img: "/images/stress.PNG" },
+  anger: { label: "분노", icon: <Flame size={40} strokeWidth={1.2} className="text-red-500" />, bgColor: "bg-red-50/50 dark:bg-red-900/20", img: "/images/anger.PNG" },
+  sadness: { label: "슬픔", icon: <CloudRain size={40} strokeWidth={1.2} className="text-blue-500" />, bgColor: "bg-blue-50/50 dark:bg-blue-900/20", img: "/images/sadness.PNG" },
+  anxiety: { label: "불안", icon: <Droplets size={40} strokeWidth={1.2} className="text-indigo-500" />, bgColor: "bg-indigo-50/50 dark:bg-indigo-900/20", img: "/images/anxiety.PNG" },
 };
 
 /** 맥락 태그 정의 */
