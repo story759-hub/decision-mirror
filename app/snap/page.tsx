@@ -12,7 +12,7 @@ import {
 import { Nanum_Pen_Script, Nanum_Myeongjo, Noto_Sans_KR, Bagel_Fat_One } from 'next/font/google';
 import { createClient } from "../../utils/supabase/client";
 
-// 2. 폰트 객체 선언 (변수명을 하단 참조부와 일치시킴)
+// 2. 폰트 객체 선언
 const handwriting = Nanum_Pen_Script({ weight: '400', subsets: ['latin'], display: 'swap' });
 const myeongjo = Nanum_Myeongjo({ weight: ['400', '700'], subsets: ['latin'], display: 'swap' });
 const gothic = Noto_Sans_KR({ weight: ['400', '900'], subsets: ['latin'], display: 'swap' });
@@ -246,22 +246,30 @@ export default function FeelingSnapFinal() {
   };
 
   // 결과 카드 이미지 저장
-const handleSaveImage = async () => {
+  const handleSaveImage = async () => {
     if (!cardRef.current) return;
     try {
-      // 폰트와 이미지가 모두 로드될 시간을 보장하기 위해 약간의 지연을 줍니다.
+      // 폰트가 완전히 로드될 때까지 기다림
+      await document.fonts.ready;
+      
       const dataUrl = await toPng(cardRef.current, { 
-        pixelRatio: 2, 
+        pixelRatio: 3, // 화질을 위해 3으로 상향
         backgroundColor: '#0d0d0d', 
         cacheBust: true,
-        // 이미지 호출 실패 방지를 위한 설정 추가
-        includeQueryParams: true
+        includeQueryParams: true,
+        style: {
+          borderRadius: '0' // 저장 시 테두리 문제 방지
+        }
       });
+      
       const link = document.createElement('a');
       link.download = `FeelingSnap_${stamp.date.replace(/\./g, '')}.png`;
       link.href = dataUrl;
       link.click();
-    } catch (err) { alert("이미지 저장에 실패했습니다."); }
+    } catch (err) { 
+      console.error(err);
+      alert("이미지 저장에 실패했습니다.");
+    }
   };
   
   /** 히스토리 카드 컴포넌트 */
@@ -364,7 +372,7 @@ const handleSaveImage = async () => {
             <div className="grid grid-cols-2 gap-4">
               {Object.keys(EMOTION_DATA).map((key) => (
                 <button key={key} onClick={() => { setSelectedKey(key); setStage('intensity'); }}
-                className={`${EMOTION_DATA[key].bgColor} p-6 rounded-[32px] hover:scale-105 active:scale-95 transition-all flex flex-col items-center border border-transparent shadow-sm`}>
+                  className={`${EMOTION_DATA[key].bgColor} p-6 rounded-[32px] hover:scale-105 active:scale-95 transition-all flex flex-col items-center border border-transparent shadow-sm`}>
                   <div className="mb-3">{EMOTION_DATA[key].icon}</div>
                   <div className="font-bold text-slate-700 dark:text-slate-300">{EMOTION_DATA[key].label}</div>
                 </button>
@@ -467,9 +475,7 @@ const handleSaveImage = async () => {
                   key={f.id}
                   onClick={() => setSelectedFont(f.id as FontType)}
                   className={`flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all ${
-                    selectedFont === f.id 
-                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' 
-                    : 'bg-slate-100 text-slate-400 dark:bg-slate-800'
+                    selectedFont === f.id ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'bg-slate-100 text-slate-400 dark:bg-slate-800'
                   }`}
                 >
                   {f.icon} {f.name}
