@@ -1,13 +1,13 @@
 'use client';
 
 // 1. 모든 외부 라이브러리 및 폰트 import
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { toPng } from 'html-to-image';
 import Link from 'next/link';
 import { 
   Sparkles, Droplets, Flame, Tornado, Play, Clock, ChevronRight, 
   ArrowLeft, Lock, AlertCircle, User, LogOut, Coffee, Zap, Heart, 
-  CloudRain, Share2, Trash2, UserX, Type
+  CloudRain, Share2, Trash2, UserX, Type, Plus
 } from 'lucide-react';
 import { Nanum_Pen_Script, Nanum_Myeongjo, Noto_Sans_KR, Bagel_Fat_One } from 'next/font/google';
 import { createClient } from "../../utils/supabase/client";
@@ -38,11 +38,20 @@ const EMOTION_DATA: { [key: string]: any } = {
   anxiety: { label: "불안", icon: <Droplets size={40} strokeWidth={1.2} className="text-indigo-500" />, bgColor: "bg-indigo-50/50 dark:bg-indigo-900/20", img: "/images/anxiety.png" },
 };
 
-/** 맥락 태그 정의 */
+/** 확장된 트리거 태그 정의 */
 const CONTEXT_TAGS = {
-  trigger: { title: "원인/트리거", items: ['업무', '인간관계', '돈', '건강', '미래 고민', '외로움', '비교/열등감', '피로 누적'] },
-  energy: { title: "에너지 상태", items: ['무기력', '과각성', '집중됨', '산만함', '충동적', '예민함'] },
-  env: { title: "환경", items: ['집', '회사', '이동 중', '혼자', '누군가와 함께', '밤 시간', '주말'] }
+  trigger: {
+    title: "이 감정이 생긴 이유가 있다면",
+    items: [
+      '일이 자꾸 밀림', '해야 할 게 너무 많음', '실수한 게 계속 생각남', '괜히 내가 부족한 느낌', '성과 압박', '상사/동료 눈치', '마감 다가옴', '시험/평가 앞둠', '집중이 안 됨',
+      '답장이 안 옴', '읽씹 당한 느낌', '말을 잘못한 것 같음', '괜히 눈치 보임', '서운한 일이 있었음', '갈등이 있었음', '혼자 남겨진 느낌', '누군가의 말이 계속 생각남',
+      'SNS 보다가 비교됨', '남들이 더 잘 사는 것 같음', '나만 뒤처진 느낌', '인정받고 싶었음', '스스로 실망함', '괜히 작아진 느낌',
+      '돈 걱정이 스침', '지출이 부담됨', '앞으로가 막막함', '취업 고민', '이직 고민', '불확실한 상황',
+      '잠을 못 잠', '계속 피곤함', '예민해진 상태', '컨디션 난조', '배고픔/과식', '생리/호르몬 영향',
+      '밤이라 생각이 많아짐', '주말인데 공허함', '혼자 있는 시간', '사람 많은 곳', '날씨 영향', '이동 중',
+      '딱히 이유는 없음', '그냥 그런 날', '별 생각 없음', '잘 모르겠음'
+    ]
+  }
 };
 
 export default function FeelingSnapFinal() {
@@ -58,10 +67,31 @@ export default function FeelingSnapFinal() {
   const [history, setHistory] = useState<any[]>([]);
   const [showPayModal, setShowPayModal] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [showAllTags, setShowAllTags] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
 
-  // 감정 농도 설명 반환 함수
+  // 7회 기록 & 3일 이상 기록 일수 체크 로직
+  const reportUnlockStatus = useMemo(() => {
+    const totalCount = history.length;
+    // KST 기준으로 날짜 추출하여 중복 제거
+    const dates = history.map(item => {
+      const d = new Date(item.created_at);
+      return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+    });
+    const distinctDays = new Set(dates).size;
+    
+    return {
+      count: totalCount,
+      days: distinctDays,
+      isUnlocked: totalCount >= 7 && distinctDays >= 3
+    };
+  }, [history]);
+
+  const shuffledTags = useMemo(() => {
+    return [...CONTEXT_TAGS.trigger.items].sort(() => Math.random() - 0.5);
+  }, [stage === 'tags']);
+
   const getIntensityDesc = (val: number) => {
     if (val <= 1) return "아주 미세하게 느껴지는 정도예요.";
     if (val <= 2) return "은은한 여운이 마음을 스치고 있어요.";
@@ -70,7 +100,6 @@ export default function FeelingSnapFinal() {
     return "매우 강렬하게 온 마음을 뒤흔들고 있어요.";
   };
 
-  /** 기록 가져오기 (데이터베이스/로컬스토리지 연동) */
   const fetchHistory = useCallback(async (userId: string | null) => {
     if (typeof window === 'undefined') return;
     let fp = localStorage.getItem('snap_fp');
@@ -88,7 +117,6 @@ export default function FeelingSnapFinal() {
     } catch (err) { console.error("History fetch error:", err); }
   }, []);
 
-  // 초기 사용자 확인 및 기록 로드
   useEffect(() => {
     const init = async () => {
       try {
@@ -132,7 +160,6 @@ export default function FeelingSnapFinal() {
     } catch (err: any) { alert(err.message); }
   };
 
-  // 분석 중 로딩 텍스트 애니메이션
   useEffect(() => {
     let interval: any = null;
     if (stage === 'analyzing') {
@@ -146,7 +173,6 @@ export default function FeelingSnapFinal() {
     return () => { if (interval) clearInterval(interval); };
   }, [stage]);
 
-  // 기록 삭제 처리
   const handleDeleteRecord = async (e: React.MouseEvent, recordId: string) => {
     e.stopPropagation();
     if (!confirm("이 기록을 영구히 삭제할까요?\n삭제 후에는 분석 데이터에서도 제외됩니다.")) return;
@@ -164,7 +190,6 @@ export default function FeelingSnapFinal() {
     } catch (err: any) { alert(err.message || "삭제 중 오류가 발생했습니다."); }
   };
 
-  /** 최종 분석 요청 함수 */
   const handleFinalAnalyze = async () => {
     if (stage === 'analyzing') return;
     const currentUserInput = textInput.trim(); 
@@ -196,7 +221,7 @@ export default function FeelingSnapFinal() {
       setTimeout(async () => {
         const processedMix = (result?.mix || result?.mix_data || []).map((m: any) => ({
           ...m,
-          label: EMOTION_DATA[m.key]?.label || m.key,
+          label: EMOTION_DATA[m.key]?.label || m.key.slice(0, 4),
         }));
         const finalContent = (result.reason !== undefined && result.reason !== null) ? result.reason : currentUserInput;
         
@@ -222,7 +247,6 @@ export default function FeelingSnapFinal() {
     }
   };
 
-  // 과거 기록 클릭 시 결과 화면으로 이동
   const handleHistoryClick = (item: any) => {
     const createdAt = new Date(item.created_at);
     setStamp({
@@ -231,7 +255,7 @@ export default function FeelingSnapFinal() {
     });
     const processedMix = (item.mix_data || []).map((m: any) => ({
       ...m,
-      label: EMOTION_DATA[m.key]?.label || m.key,
+      label: EMOTION_DATA[m.key]?.label || m.key.slice(0, 4),
     }));
     setResultData({
       ...item,
@@ -245,23 +269,17 @@ export default function FeelingSnapFinal() {
     setStage('result');
   };
 
-  // 결과 카드 이미지 저장
   const handleSaveImage = async () => {
     if (!cardRef.current) return;
     try {
-      // 폰트가 완전히 로드될 때까지 기다림
       await document.fonts.ready;
-      
       const dataUrl = await toPng(cardRef.current, { 
-        pixelRatio: 3, // 화질을 위해 3으로 상향
+        pixelRatio: 3, 
         backgroundColor: '#0d0d0d', 
         cacheBust: true,
         includeQueryParams: true,
-        style: {
-          borderRadius: '0' // 저장 시 테두리 문제 방지
-        }
+        style: { borderRadius: '0' }
       });
-      
       const link = document.createElement('a');
       link.download = `FeelingSnap_${stamp.date.replace(/\./g, '')}.png`;
       link.href = dataUrl;
@@ -271,8 +289,7 @@ export default function FeelingSnapFinal() {
       alert("이미지 저장에 실패했습니다.");
     }
   };
-  
-  /** 히스토리 카드 컴포넌트 */
+
   const ArchiveCard = ({ item, onClick }: { item: any, onClick: () => void }) => (
     <div onClick={onClick} className="group relative p-6 bg-white dark:bg-slate-900 rounded-[32px] border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden">
       <div className="flex justify-between items-start mb-4">
@@ -308,7 +325,7 @@ export default function FeelingSnapFinal() {
         <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
           <div className="bg-white dark:bg-slate-900 rounded-[40px] p-8 max-w-sm w-full text-center space-y-6 animate-in zoom-in-95 duration-300">
             <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto text-red-500">
-              <AlertCircle size={32} />
+                <AlertCircle size={32} />
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-bold tracking-tighter">심리 지표 급변 경보</h3>
@@ -366,7 +383,7 @@ export default function FeelingSnapFinal() {
         {stage === 'pick' && (
           <div className="space-y-8 animate-in fade-in duration-500">
             <div className="text-center space-y-2 pt-6">
-              <h2 className="text-xl font-bold">지금 어떤가요?</h2>
+                <h2 className="text-xl font-bold">지금 어떤가요?</h2>
               <p className="text-slate-400 text-sm">8가지 핵심 감정 중 하나를 선택하세요.</p>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -378,12 +395,41 @@ export default function FeelingSnapFinal() {
                 </button>
               ))}
             </div>
-            {/* 최근 기록 영역 */}
-            <div className="pt-10 space-y-6">
+
+            {/* AI 분석 리포트 해금 영역 (수정된 로직 적용) */}
+            {!reportUnlockStatus.isUnlocked ? (
+              <div className="p-6 bg-slate-50 dark:bg-slate-900/50 rounded-[32px] border border-slate-100 dark:border-slate-800">
+                <div className="flex justify-between items-end mb-4">
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-bold flex items-center gap-2"><Sparkles size={16} className="text-[#E91E63]" /> AI 분석 리포트 해금</h4>
+                    <p className="text-[10px] text-slate-400 font-medium">최소 7회 기록 & 3일 이상 출석 필요</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] font-black text-[#E91E63] block">{reportUnlockStatus.count} / 7회</span>
+                    <span className="text-[10px] font-black text-blue-500 block">{reportUnlockStatus.days} / 3일</span>
+                  </div>
+                </div>
+                <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                  {/* 진행도는 횟수(최대 7회) 기준으로 시각화 */}
+                  <div className="h-full bg-[#E91E63] transition-all" style={{ width: `${Math.min((reportUnlockStatus.count / 7) * 100, 100)}%` }}></div>
+                </div>
+              </div>
+            ) : (
+              <button 
+                onClick={() => { if (!user) alert("로그인하시면 정밀 분석 리포트를 확인하실 수 있습니다!"); else alert("정밀 분석 리포트 서비스는 현재 준비 중입니다. 곧 오픈 예정이니 기대해주세요!"); }} 
+                className="w-full p-4 bg-slate-50 dark:bg-slate-900/50 rounded-[24px] border border-slate-100 dark:border-slate-800"
+              >
+                <p className="text-[10px] text-[#E91E63] font-bold text-center animate-pulse underline underline-offset-4 cursor-pointer">
+                  🎉 새로운 정밀 분석 리포트가 해금되었습니다!
+                </p>
+              </button>
+            )}
+
+            <div className="pt-4 space-y-6">
               <div className="flex justify-between items-end">
                 <h4 className="text-xl font-black tracking-tighter italic">Recent Snaps</h4>
                 {history.length > 3 && (
-                  <button onClick={() => setStage('archive')} className="text-[11px] font-black text-[#E91E63] hover:underline">+ MORE</button>
+                  <button onClick={() => { if (!user) alert("전체 히스토리는 로그인 시 확인 가능합니다."); else setStage('archive'); }} className="text-[11px] font-black text-[#E91E63] hover:underline">+ MORE</button>
                 )}
               </div>
               <div className="space-y-4">
@@ -392,7 +438,7 @@ export default function FeelingSnapFinal() {
                     <p className="text-[11px] text-slate-400 italic">아직 기록된 찰나가 없습니다.</p>
                   </div>
                 ) : (
-                  history.slice(0, 3).map((item) => <ArchiveCard key={item.id} item={item} onClick={() => handleHistoryClick(item)} />)
+                  (user ? history.slice(0, 3) : history.slice(0, 5)).map((item) => <ArchiveCard key={item.id} item={item} onClick={() => handleHistoryClick(item)} />)
                 )}
               </div>
             </div>
@@ -415,16 +461,16 @@ export default function FeelingSnapFinal() {
           <div className="space-y-10 animate-in slide-in-from-right-4 duration-500 text-center py-10">
             <div className="space-y-2">
               <h2 className="text-2xl font-black tracking-tighter">농도는 어떤가요?</h2>
-              <p className="text-sm text-slate-400 font-medium">{getIntensityDesc(intensity)}</p>
+               <p className="text-sm text-slate-400 font-medium">{getIntensityDesc(intensity)}</p>
             </div>
             <div className="py-10 space-y-8">
               <div className="text-8xl font-black text-[#E91E63] tabular-nums">{intensity}</div>
               <input type="range" min="1" max="5" step="1" value={intensity} onChange={(e) => setIntensity(Number(e.target.value))} className="w-full h-4 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#E91E63]" />
-              <p className="text-xs text-slate-400 mt-2">1(낮음)부터 5(높음)까지 오늘의 감정 세기를 조절하세요.</p>
+               <p className="text-xs text-slate-400 mt-2">1(낮음)부터 5(높음)까지 오늘의 감정 세기를 조절하세요.</p>
             </div>
             <div className="flex gap-3">
               <button onClick={() => setStage('pick')} className="flex-1 py-5 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-[24px] font-bold">이전</button>
-              <button onClick={() => setStage('tags')} className="flex-[2] py-5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-[24px] font-bold text-lg shadow-xl">다음으로</button>
+              <button onClick={() => { setStage('tags'); setShowAllTags(false); }} className="flex-[2] py-5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-[24px] font-bold text-lg shadow-xl">다음으로</button>
             </div>
           </div>
         )}
@@ -436,23 +482,29 @@ export default function FeelingSnapFinal() {
                <h2 className="text-2xl font-black tracking-tighter">어떤 맥락인가요?</h2>
                <p className="text-xs text-slate-400 font-medium">최대 3개까지 선택 가능합니다. 오늘의 감정을 수식하는 단어들을 골라주세요.</p>
             </div>
-            <div className="space-y-6">
-              {Object.entries(CONTEXT_TAGS).map(([key, group]) => (
-                <div key={key} className="space-y-3">
-                  <h3 className="text-xs font-bold text-slate-400 pl-1">{group.title}</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {group.items.map(tag => (
-                      <button key={tag} onClick={() => handleToggleTag(tag)}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${selectedTags.includes(tag) ? 'bg-[#E91E63] text-white border-[#E91E63]' : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-100 dark:border-slate-800'}`}>
-                        {tag}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
+            
+            <div className="space-y-4">
+              <h3 className="text-xs font-bold text-slate-400 pl-1">{CONTEXT_TAGS.trigger.title}</h3>
+               <div className="flex flex-wrap gap-2 transition-all duration-500">
+                {(showAllTags ? shuffledTags : shuffledTags.slice(0, 15)).map(tag => (
+                  <button key={tag} onClick={() => handleToggleTag(tag)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${selectedTags.includes(tag) ? 'bg-[#E91E63] text-white border-[#E91E63]' : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-100 dark:border-slate-800'}`}>
+                    {tag}
+                  </button>
+                ))}
+                {!showAllTags && (
+                  <button onClick={() => setShowAllTags(true)} className="px-4 py-2 rounded-full text-sm font-bold bg-slate-50 dark:bg-slate-800 text-[#E91E63] flex items-center gap-1 border border-dashed border-[#E91E63]/30">
+                    <Plus size={14} /> 더 보기
+                  </button>
+                )}
+              </div>
             </div>
-            <button onClick={() => setStage('deep')} disabled={selectedTags.length === 0}
-              className={`w-full py-5 rounded-[24px] font-bold text-lg shadow-xl ${selectedTags.length > 0 ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900' : 'bg-slate-200 text-slate-400'}`}>다음으로</button>
+
+            <div className="flex gap-3">
+              <button onClick={() => setStage('intensity')} className="flex-1 py-5 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-[24px] font-bold">이전</button>
+              <button onClick={() => setStage('deep')} disabled={selectedTags.length === 0}
+                className={`flex-[2] py-5 rounded-[24px] font-bold text-lg shadow-xl ${selectedTags.length > 0 ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900' : 'bg-slate-200 text-slate-400'}`}>다음으로</button>
+            </div>
           </div>
         )}
 
@@ -460,25 +512,14 @@ export default function FeelingSnapFinal() {
         {stage === 'deep' && (
           <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
             <div className="text-center py-4 space-y-1">
-              <h2 className="text-2xl font-black tracking-tighter">더 하고 싶은 말이 있나요?</h2>
+                 <h2 className="text-2xl font-black tracking-tighter">더 하고 싶은 말이 있나요?</h2>
               <p className="text-[13px] font-medium text-slate-400/80">쓰지않아도 괜찮아요. 할 말을 남기면 함께 snap이 됩니다.</p>
             </div>
             
             <div className="grid grid-cols-2 gap-2 mb-4">
-              {[
-                { id: 'handwriting', name: '필기체', icon: <Type size={14} /> },
-                { id: 'myeongjo', name: '명조체', icon: <Type size={14} /> },
-                { id: 'gothic', name: '고딕체', icon: <Type size={14} /> },
-                { id: 'design', name: '디자인', icon: <Type size={14} /> }
-              ].map((f) => (
-                <button
-                  key={f.id}
-                  onClick={() => setSelectedFont(f.id as FontType)}
-                  className={`flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all ${
-                    selectedFont === f.id ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'bg-slate-100 text-slate-400 dark:bg-slate-800'
-                  }`}
-                >
-                  {f.icon} {f.name}
+              {[{ id: 'handwriting', name: '필기체' }, { id: 'myeongjo', name: '명조체' }, { id: 'gothic', name: '고딕체' }, { id: 'design', name: '디자인' }].map((f) => (
+                <button key={f.id} onClick={() => setSelectedFont(f.id as FontType)} className={`flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all ${selectedFont === f.id ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'bg-slate-100 text-slate-400 dark:bg-slate-800'}`}>
+                  <Type size={14} /> {f.name}
                 </button>
               ))}
             </div>
@@ -490,19 +531,15 @@ export default function FeelingSnapFinal() {
                 onChange={(e) => setTextInput(e.target.value.slice(0, MAX_TEXT_LENGTH))}
                 placeholder={`자유롭게 작성해주세요.\n*깔끔하게 snap찍는 Tip!\n- 최대 6줄까지 출력(한글 기준 1줄 최대 13글자)\n- 엔터를 쳐서 입력하면 더 깔끔해요!`} 
               />
-              <div className="absolute bottom-6 right-8 text-xs font-bold text-slate-400">
-                {textInput.length} / {MAX_TEXT_LENGTH}
-              </div>
+              <div className="absolute bottom-6 right-8 text-xs font-bold text-slate-400">{textInput.length} / {MAX_TEXT_LENGTH}</div>
             </div>
-            <button onClick={() => handleFinalAnalyze()} disabled={stage !== 'deep'} className="w-full bg-[#1A1F2C] dark:bg-slate-100 text-white dark:text-slate-900 py-6 rounded-[24px] font-bold text-xl shadow-xl active:scale-95 transition-all disabled:opacity-50">
-              SNAP 📷
-            </button>
+            <button onClick={() => handleFinalAnalyze()} disabled={stage !== 'deep'} className="w-full bg-[#1A1F2C] dark:bg-slate-100 text-white dark:text-slate-900 py-6 rounded-[24px] font-bold text-xl shadow-xl active:scale-95 transition-all disabled:opacity-50">SNAP 📷</button>
           </div>
         )}
 
         {/* 로딩 화면 */}
         {stage === 'analyzing' && (
-          <div className="py-32 text-center space-y-10">
+           <div className="py-32 text-center space-y-10">
             <div className="relative w-24 h-24 mx-auto">
               <div className="absolute inset-0 border-8 border-slate-100 dark:border-slate-800 rounded-full"></div>
               <div className="absolute inset-0 border-8 border-[#E91E63] border-t-transparent rounded-full animate-spin"></div>
@@ -516,23 +553,17 @@ export default function FeelingSnapFinal() {
           <div className="animate-in fade-in duration-1000 pb-20">
             <div className="mb-8 p-6 bg-slate-50 dark:bg-slate-900/50 rounded-[32px] border border-slate-100 dark:border-slate-800">
               <div className="flex justify-between items-center mb-4">
-                <span className="text-[10px] font-black text-[#E91E63] uppercase tracking-widest">Personal Delta</span>
+                 <span className="text-[10px] font-black text-[#E91E63] uppercase tracking-widest">Personal Delta</span>
                 <div className="flex gap-4 items-center">
-                  <button onClick={(e) => handleDeleteRecord(e, resultData.id)} className="flex items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-red-500 transition-colors">
-                    <Trash2 size={12} /> 기록 삭제
-                  </button>
+                  <button onClick={(e) => handleDeleteRecord(e, resultData.id)} className="flex items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={12} /> 기록 삭제</button>
                   {!user && <Link href="/login" className="text-[9px] font-bold text-slate-400 underline">데이터 영구 보관하기</Link>}
                 </div>
               </div>
               <div className="flex items-center gap-5">
-                <div className={`text-4xl font-black ${resultData.analysis?.delta > 0 ? 'text-red-500' : 'text-emerald-500'}`}>
-                  {resultData.analysis?.delta > 0 ? `+${resultData.analysis?.delta}` : resultData.analysis?.delta || '0.0'}
-                </div>
+                <div className={`text-4xl font-black ${resultData.analysis?.delta > 0 ? 'text-red-500' : 'text-emerald-500'}`}>{resultData.analysis?.delta > 0 ? `+${resultData.analysis?.delta}` : resultData.analysis?.delta || '0.0'}</div>
                 <div className="flex-grow space-y-1">
                   <div className="text-[12px] font-bold text-slate-700 dark:text-slate-300">이전 평균 대비 변화량</div>
-                  <div onClick={() => alert("나만의 감정 데이터 분석 'PRO Insight'는 추후 업데이트 예정입니다.")} className="flex items-center gap-1 text-[#E91E63] text-[9px] font-black uppercase tracking-tighter cursor-pointer hover:opacity-70 transition-opacity">
-                    <Lock size={10} strokeWidth={3} /> PRO Insight - Coming Soon
-                  </div>
+                  <div onClick={() => alert("나만의 감정 데이터 분석 'PRO Insight'는 추후 업데이트 예정입니다.")} className="flex items-center gap-1 text-[#E91E63] text-[9px] font-black uppercase tracking-tighter cursor-pointer hover:opacity-70 transition-opacity"><Lock size={10} strokeWidth={3} /> PRO Insight - Coming Soon</div>
                 </div>
               </div>
             </div>
@@ -547,18 +578,11 @@ export default function FeelingSnapFinal() {
                     <div className="font-black italic uppercase tracking-widest">FEELING SNAP 2.0</div>
                   </div>
                   <div className="space-y-4">
-                    <span className={`${myeongjo.className} text-[10px] font-bold text-white/30 uppercase tracking-[0.4em]`}>
+                    <span className={`${myeongjo.className} text-[8px] font-bold text-white/30 uppercase tracking-[0.4em]`}>
                       {resultData.subName || "오늘의 조각"}
                     </span>
                     <div className={`${resultData.selectedFont === 'myeongjo' ? myeongjo.className : resultData.selectedFont === 'gothic' ? gothic.className : resultData.selectedFont === 'design' ? design.className : handwriting.className} text-[44px] leading-[1.05] text-white break-words whitespace-pre-wrap line-clamp-6`} style={{ maxWidth: '13em' }}>
-                      {(() => {
-                        if (resultData.userInput && resultData.userInput.trim() !== "") return resultData.userInput;
-                        if (resultData.description) {
-                          const firstSentence = resultData.description.split(/[.\n]/)[0].trim();
-                          return firstSentence || "오늘의 감정 조각"; 
-                        }
-                        return "오늘의 감정 조각";
-                      })()}
+                      {resultData.userInput || (resultData.description ? resultData.description.split(/[.\n]/)[0].trim() : "오늘의 감정 조각")}
                     </div>
                   </div>
                   <div className="text-[9px] font-mono text-white/20 tracking-[0.5em] text-center uppercase">SNAP_RECORDED</div>
@@ -566,9 +590,7 @@ export default function FeelingSnapFinal() {
               </div>
 
               <div className="p-10 space-y-10 bg-[#0d0d0d] relative">
-                <p className={`${myeongjo.className} text-[14px] font-medium leading-[1.7] italic text-white/60 pl-4 border-l border-white/10 line-clamp-4`}>
-                  {resultData.description || "그날의 감정은 한 장의 사진처럼 마음에 남습니다."}
-                </p>
+                <p className={`${myeongjo.className} text-[14px] font-medium leading-[1.7] italic text-white/60 pl-4 border-l border-white/10 line-clamp-4`}>{resultData.description || "그날의 감정은 한 장의 사진처럼 마음에 남습니다."}</p>
                 <div className="flex justify-between items-end border-t border-white/5 pt-8">
                   <div className="space-y-4">
                     <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em]">Emotion Mix</span>
@@ -581,35 +603,33 @@ export default function FeelingSnapFinal() {
                       ))}
                     </div>
                   </div>
-                  <div className="text-right space-y-3 group cursor-pointer" onClick={() => window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(resultData.song)}`, '_blank')}>
+                   <div className="text-right space-y-3 group cursor-pointer" onClick={() => window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(resultData.song)}`, '_blank')}>
                     <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em]">Now Playing</span>
                     <div className="flex items-center gap-3">
                       <div className="flex flex-col">
                         <p className="text-[10px] font-bold text-white/40 italic">{resultData.song?.split('-')[0]?.trim() || 'AI Artist'}</p>
-                        <p className={`${myeongjo.className} text-[13px] font-black text-white/70 group-hover:text-[#E91E63] italic truncate max-w-[120px]`}>
-                          {resultData.song?.split('-')[1]?.trim() || resultData.song || "Silence"}
-                        </p>
+                        <p className={`${myeongjo.className} text-[13px] font-black text-white/70 group-hover:text-[#E91E63] italic break-words whitespace-pre-wrap text-right max-w-[150px]`}>{resultData.song?.split('-')[1]?.trim() || resultData.song || "Silence"}</p>
                       </div>
                       <div className="p-2 bg-white/5 rounded-full border border-white/10"><Play size={10} className="text-[#E91E63] fill-[#E91E63]" /></div>
                     </div>
                   </div>
-                </div>
+                 </div>
               </div>
             </div>
 
             <div className="mt-8 space-y-6">
               <button onClick={handleSaveImage} className="w-full py-5 bg-black dark:bg-slate-100 text-white dark:text-slate-900 rounded-full font-black text-[14px] shadow-xl active:scale-95 transition-all">이미지로 저장하기</button>
               <div className="flex justify-center gap-10">
-                <button onClick={() => { setStage('pick'); setTextInput(''); setSelectedTags([]); }} className="text-[11px] font-bold text-slate-400 hover:text-slate-600">다시 기록하기</button>
+                 <button onClick={() => { setStage('pick'); setTextInput(''); setSelectedTags([]); }} className="text-[11px] font-bold text-slate-400 hover:text-slate-600">다시 기록하기</button>
                 <button onClick={() => alert("링크가 복사되었습니다!")} className="text-[11px] font-bold text-[#E91E63] hover:underline flex items-center gap-1"><Share2 size={12} /> 순간 공유하기</button>
               </div>
               <div className="pt-6 border-t border-slate-100 dark:border-white/5 space-y-3">
                 <p className="text-center text-[10px] text-slate-400 font-medium opacity-70">부적절한 텍스트 입력 시 출력이 제한 될 수 있습니다.</p>
-                <div className="flex flex-col items-center gap-2 opacity-50">
+                 <div className="flex flex-col items-center gap-2 opacity-50">
                   <div className="flex items-center gap-1 text-[9px] text-slate-400"><Lock size={10} /> <span>기록은 보안 연결과 계정 인증을 통해 보호됩니다.</span></div>
                   <div className="flex gap-4 text-[9px] text-slate-500 font-bold">
                     <Link href="/privacy" className="hover:underline">개인정보 처리방침</Link>
-                    <button onClick={() => alert("익명성 보장: 모든 데이터는 암호화됩니다.\n편향 방지: AI는 감정을 판단하지 않고 기록합니다.")} className="hover:underline">AI 윤리가이드</button>
+                     <button onClick={() => alert("익명성 보장: 모든 데이터는 암호화됩니다.\n편향 방지: AI는 감정을 판단하지 않고 기록합니다.")} className="hover:underline">AI 윤리가이드</button>
                   </div>
                 </div>
               </div>
