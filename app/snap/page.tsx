@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { Nanum_Pen_Script, Nanum_Myeongjo, Noto_Sans_KR, Bagel_Fat_One } from 'next/font/google';
 import { createClient } from "../../utils/supabase/client";
-import confetti from 'canvas-confetti';
+import confetti from 'canvas-confetti'; // Confetti 라이브러리 추가 필요
 
 // 2. 폰트 객체 선언
 const handwriting = Nanum_Pen_Script({ weight: '400', subsets: ['latin'], display: 'swap' });
@@ -27,18 +27,19 @@ type FontType = 'handwriting' | 'myeongjo' | 'gothic' | 'design';
 const PRICING = { REPORT_FEE: 4900 }; 
 const MAX_TEXT_LENGTH = 70;
 
-// 5. 감정 데이터 정의 [cite: 161, 162]
+// 5. 감정 데이터 정의
 const EMOTION_DATA: { [key: string]: any } = {
-  stable: { label: "안정", icon: <Heart size={40} strokeWidth={1.2} className="text-emerald-500" />, bgColor: "bg-emerald-50/50 dark:bg-emerald-900/20", color: "text-emerald-500" },
-  joy: { label: "기쁨", icon: <Sparkles size={40} strokeWidth={1.2} className="text-yellow-500" />, bgColor: "bg-yellow-50/50 dark:bg-yellow-900/20", color: "text-yellow-500" },
-  expect: { label: "기대", icon: <Zap size={40} strokeWidth={1.2} className="text-orange-500" />, bgColor: "bg-orange-50/50 dark:bg-orange-900/20", color: "text-orange-500" },
-  tired: { label: "피로", icon: <Coffee size={40} strokeWidth={1.2} className="text-slate-500" />, bgColor: "bg-slate-50/50 dark:bg-slate-800/40", color: "text-slate-500" },
-  stress: { label: "스트레스", icon: <Tornado size={40} strokeWidth={1.2} className="text-purple-500" />, bgColor: "bg-purple-50/50 dark:bg-purple-900/20", color: "text-purple-500" },
-  anger: { label: "분노", icon: <Flame size={40} strokeWidth={1.2} className="text-red-500" />, bgColor: "bg-red-50/50 dark:bg-red-900/20", color: "text-red-500" },
-  sadness: { label: "슬픔", icon: <CloudRain size={40} strokeWidth={1.2} className="text-blue-500" />, bgColor: "bg-blue-50/50 dark:bg-blue-900/20", color: "text-blue-500" },
-  anxiety: { label: "불안", icon: <Droplets size={40} strokeWidth={1.2} className="text-indigo-500" />, bgColor: "bg-indigo-50/50 dark:bg-indigo-900/20", color: "text-indigo-500" },
+  stable: { label: "안정", icon: <Heart size={40} strokeWidth={1.2} className="text-emerald-500" />, bgColor: "bg-emerald-50/50 dark:bg-emerald-900/20", img: "/images/stable.png", color: "text-emerald-500" },
+  joy: { label: "기쁨", icon: <Sparkles size={40} strokeWidth={1.2} className="text-yellow-500" />, bgColor: "bg-yellow-50/50 dark:bg-yellow-900/20", img: "/images/joy.png", color: "text-yellow-500" },
+  expect: { label: "기대", icon: <Zap size={40} strokeWidth={1.2} className="text-orange-500" />, bgColor: "bg-orange-50/50 dark:bg-orange-900/20", img: "/images/expect.png", color: "text-orange-500" },
+  tired: { label: "피로", icon: <Coffee size={40} strokeWidth={1.2} className="text-slate-500" />, bgColor: "bg-slate-50/50 dark:bg-slate-800/40", img: "/images/tired.png", color: "text-slate-500" },
+  stress: { label: "스트레스", icon: <Tornado size={40} strokeWidth={1.2} className="text-purple-500" />, bgColor: "bg-purple-50/50 dark:bg-purple-900/20", img: "/images/stress.png", color: "text-purple-500" },
+  anger: { label: "분노", icon: <Flame size={40} strokeWidth={1.2} className="text-red-500" />, bgColor: "bg-red-50/50 dark:bg-red-900/20", img: "/images/anger.png", color: "text-red-500" },
+  sadness: { label: "슬픔", icon: <CloudRain size={40} strokeWidth={1.2} className="text-blue-500" />, bgColor: "bg-blue-50/50 dark:bg-blue-900/20", img: "/images/sadness.png", color: "text-blue-500" },
+  anxiety: { label: "불안", icon: <Droplets size={40} strokeWidth={1.2} className="text-indigo-500" />, bgColor: "bg-indigo-50/50 dark:bg-indigo-900/20", img: "/images/anxiety.png", color: "text-indigo-500" },
 };
 
+/** 확장된 트리거 태그 정의 */
 const CONTEXT_TAGS = {
   trigger: {
     title: "이 감정이 생긴 이유가 있다면",
@@ -75,25 +76,18 @@ export default function FeelingSnapFinal() {
     return [...CONTEXT_TAGS.trigger.items].sort(() => Math.random() - 0.5);
   }, [stage === 'tags']);
 
-  // [신규] 감정 통찰 로직 (피드백 반영 버전) 
+  // [신규] 감정 통찰 로직 (요약, 트리거, 모드)
   const insight = useMemo(() => {
     if (history.length < 1) return null;
 
+    // A. 감정 패턴 요약 (최근 3회 vs 이전 평균)
     const recent = history.slice(0, 3);
-    
-    // 1. 요약 강화: 구체적인 감정 명사 추출
-    const emotionCounts: { [key: string]: number } = {};
-    recent.forEach(h => {
-      emotionCounts[h.emotion_key] = (emotionCounts[h.emotion_key] || 0) + 1;
-    });
-    const topEmotionKey = Object.entries(emotionCounts).sort((a, b) => b[1] - a[1])[0][0];
-    const topEmotionLabel = EMOTION_DATA[topEmotionKey]?.label || "특정 감정";
+    const recentAnxiety = recent.filter(h => h.emotion_key === 'anxiety' || h.emotion_key === 'stress').length;
+    const summary = recentAnxiety >= 2 
+      ? "최근 '불안'과 '스트레스' 비율이 눈에 띄게 높아지고 있어요." 
+      : "감정의 파동이 비교적 안정적인 흐름을 보이고 있습니다.";
 
-    const summary = history.length >= 3 
-      ? `최근엔 '${topEmotionLabel}'의 농도가 특히 높아지고 있어요.` 
-      : "첫 기록을 통해 당신의 감정 주파수를 맞추는 중입니다.";
-
-    // 2. 반복 트리거 해석 추가
+    // B. 반복 트리거 분석
     const allTags = history.flatMap(h => h.tags || []);
     const tagFreq = allTags.reduce((acc: any, cur: string) => {
       acc[cur] = (acc[cur] || 0) + 1;
@@ -104,27 +98,15 @@ export default function FeelingSnapFinal() {
       .slice(0, 2)
       .map(([tag]) => tag);
 
-    let tagInterpretation = "현재 감정을 자극하는 주요 환경적 요인입니다.";
-    if (topTags.includes('상사/동료 눈치')) {
-      tagInterpretation = "외부 평가에 감정이 흔들리는 패턴이 보입니다.";
-    } else if (topTags.includes('밤이라 생각이 많아짐')) {
-      tagInterpretation = "정적인 시간에 감정의 파동이 커지는 경향이 있어요.";
-    }
-
-    // 3. 감정 리듬 상태 및 델타 피드백
-    const currentDelta = resultData?.analysis?.delta || 0.0;
-    const deltaFeedback = currentDelta > 0.5 
-      ? "평소보다 조금 더 예민하고 긴장된 상태예요." 
-      : "안정적인 정서적 베이스라인을 유지하고 있습니다.";
-
+    // C. 감정 리듬 상태 분류
     const mainKey = history[0]?.emotion_key;
     let mode = { label: "안정 모드", icon: "🌿", color: "text-emerald-500" };
     if (['stress', 'anxiety', 'anger'].includes(mainKey)) mode = { label: "긴장 모드", icon: "⚠️", color: "text-red-500" };
     else if (['tired', 'sadness'].includes(mainKey)) mode = { label: "회복 필요", icon: "🌙", color: "text-indigo-500" };
     else if (['joy', 'expect'].includes(mainKey)) mode = { label: "상승 모드", icon: "🔥", color: "text-orange-500" };
 
-    return { summary, topTags, tagInterpretation, mode, deltaFeedback };
-  }, [history, resultData]);
+    return { summary, topTags, mode };
+  }, [history]);
 
   const getIntensityDesc = (val: number) => {
     if (val <= 1) return "아주 미세하게 느껴지는 정도예요.";
@@ -329,6 +311,7 @@ export default function FeelingSnapFinal() {
       alert("로그인하시면 정밀 분석 리포트를 확인하실 수 있습니다!");
       return;
     }
+    // Confetti 애니메이션 실행
     confetti({
       particleCount: 150,
       spread: 70,
@@ -368,12 +351,12 @@ export default function FeelingSnapFinal() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#0F172A] text-slate-900 dark:text-slate-100 pb-10 flex flex-col transition-colors">
-      {/* 유료 리포트 유도 모달 [cite: 212, 213] */}
+      {/* 유료 리포트 유도 모달 */}
       {showPayModal && (
         <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
           <div className="bg-white dark:bg-slate-900 rounded-[40px] p-8 max-w-sm w-full text-center space-y-6 animate-in zoom-in-95 duration-300">
             <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto text-red-500">
-               <AlertCircle size={32} />
+              <AlertCircle size={32} />
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-bold tracking-tighter">심리 지표 급변 경보</h3>
@@ -444,7 +427,7 @@ export default function FeelingSnapFinal() {
               ))}
             </div>
 
-            {/* AI 분석 리포트 해금 영역 [cite: 216, 217] */}
+            {/* AI 분석 리포트 해금 영역 */}
             {history.length < 7 ? (
               <div className="p-6 bg-slate-50 dark:bg-slate-900/50 rounded-[32px] border border-slate-100 dark:border-slate-800">
                 <div className="flex justify-between items-end mb-4">
@@ -483,7 +466,7 @@ export default function FeelingSnapFinal() {
           </div>
         )}
 
-        {/* 정밀 분석 리포트 화면 (피드백 반영 버전) [cite: 220, 221] */}
+        {/* 정밀 분석 리포트 화면 (해금 시 등장) */}
         {stage === 'report' && insight && (
           <div className="space-y-8 animate-in zoom-in-95 duration-500 py-6">
             <div className="text-center space-y-4">
@@ -495,7 +478,6 @@ export default function FeelingSnapFinal() {
 
             <div className="space-y-4">
               <div className="p-8 bg-white dark:bg-slate-900 rounded-[40px] border border-slate-100 dark:border-slate-800 shadow-xl space-y-6">
-                {/* 1. 감정 패턴 요약 영역 */}
                 <div className="space-y-2">
                   <h4 className="text-xs font-black text-slate-400 uppercase flex items-center gap-2"><TrendingUp size={14} /> 감정 패턴 요약</h4>
                   <p className="text-lg font-bold leading-snug">{insight.summary}</p>
@@ -503,7 +485,6 @@ export default function FeelingSnapFinal() {
                 
                 <div className="h-px bg-slate-100 dark:bg-slate-800 w-full" />
 
-                {/* 2. 반복 트리거 분석 영역 */}
                 <div className="space-y-3">
                   <h4 className="text-xs font-black text-slate-400 uppercase flex items-center gap-2"><Target size={14} /> 반복 트리거 분석</h4>
                   <div className="flex flex-wrap gap-2">
@@ -511,47 +492,22 @@ export default function FeelingSnapFinal() {
                       <span key={tag} className="px-4 py-2 bg-red-50 dark:bg-red-900/20 text-[#E91E63] rounded-full text-xs font-bold">#{tag}</span>
                     ))}
                   </div>
-                  <p className="text-xs text-slate-400 leading-relaxed font-medium">{insight.tagInterpretation}</p>
-                </div>
-
-                <div className="h-px bg-slate-100 dark:bg-slate-800 w-full" />
-
-                {/* 4. Personal Delta 영역 */}
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h4 className="text-xs font-black text-slate-400 uppercase flex items-center gap-2"><Activity size={14} /> 감정 변화 분석</h4>
-                    <span className="text-lg font-bold text-[#E91E63]">+{resultData?.analysis?.delta || '0.0'}</span>
-                  </div>
-                  <p className="text-sm font-bold text-slate-600 dark:text-slate-300">{insight.deltaFeedback}</p>
-                  
-                  {/* PRO 브릿지 영역 */}
-                  <div className="mt-4 pt-4 border-t border-dashed border-slate-100 dark:border-slate-800 opacity-60">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Lock size={12} className="text-slate-400" />
-                      <span className="text-[10px] font-bold text-slate-400">PRO INSIGHT (상승 원인 추정)</span>
-                    </div>
-                    <div className="filter blur-[4px] select-none text-xs space-y-1">
-                      <p>① 반복 트리거 증가 패턴 분석</p>
-                      <p>② 수면 부족 및 신체 컨디션 영향도</p>
-                    </div>
-                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed">최근 당신의 감정을 가장 자주 자극하는 맥락들입니다.</p>
                 </div>
               </div>
 
-              {/* 3. PRO 잠금 문구 (수정됨)  */}
               <div className="p-6 bg-slate-50 dark:bg-slate-900/50 rounded-[32px] border border-dashed border-slate-200 dark:border-slate-800 text-center space-y-2">
-                <h4 className="text-[10px] font-black text-slate-400 uppercase flex items-center justify-center gap-1">
-                  <Lock size={10} /> 30일 누적 시 자동 해금
-                </h4>
-                <p className="text-sm font-bold text-slate-500">💳 감정과 지출의 연결 패턴</p>
+                <h4 className="text-[10px] font-black text-slate-400 uppercase flex items-center justify-center gap-1"><Lock size={10} /> 30일 누적 시 열림</h4>
+                <p className="text-sm font-bold text-slate-500">감정과 소비 연결 분석</p>
                 <p className="text-[10px] text-slate-400">당신의 감정이 지갑에 미치는 영향을 곧 분석해 드립니다.</p>
               </div>
             </div>
+
             <button onClick={() => setStage('pick')} className="w-full py-5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-[24px] font-bold text-lg">기록하러 가기</button>
           </div>
         )}
 
-        {/* 히스토리 전체 보기 [cite: 222] */}
+        {/* 히스토리 전체 보기 */}
         {stage === 'archive' && (
           <div className="space-y-6 animate-in slide-in-from-right-4 duration-500 py-6">
             <h2 className="text-2xl font-black tracking-tighter italic">Timeline</h2>
@@ -562,7 +518,7 @@ export default function FeelingSnapFinal() {
           </div>
         )}
 
-        {/* 단계 2: 농도 선택 [cite: 223] */}
+        {/* 단계 2: 농도 선택 */}
         {stage === 'intensity' && (
           <div className="space-y-10 animate-in slide-in-from-right-4 duration-500 text-center py-10">
             <div className="space-y-2">
@@ -581,18 +537,20 @@ export default function FeelingSnapFinal() {
           </div>
         )}
 
-        {/* 단계 3: 맥락 태그 선택 [cite: 224] */}
+        {/* 단계 3: 맥락 태그 선택 */}
         {stage === 'tags' && (
           <div className="space-y-8 animate-in slide-in-from-right-4 duration-500 py-6">
             <div className="text-center space-y-2">
               <h2 className="text-2xl font-black tracking-tighter">어떤 맥락인가요?</h2>
-              <p className="text-xs text-slate-400 font-medium">최대 3개까지 선택 가능합니다.</p>
+               <p className="text-xs text-slate-400 font-medium">최대 3개까지 선택 가능합니다. 오늘의 감정을 수식하는 단어들을 골라주세요.</p>
             </div>
+            
             <div className="space-y-4">
               <h3 className="text-xs font-bold text-slate-400 pl-1">{CONTEXT_TAGS.trigger.title}</h3>
               <div className="flex flex-wrap gap-2 transition-all duration-500">
                 {(showAllTags ? shuffledTags : shuffledTags.slice(0, 15)).map(tag => (
-                  <button key={tag} onClick={() => handleToggleTag(tag)} className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${selectedTags.includes(tag) ? 'bg-[#E91E63] text-white border-[#E91E63]' : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-100 dark:border-slate-800'}`}>
+                  <button key={tag} onClick={() => handleToggleTag(tag)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${selectedTags.includes(tag) ? 'bg-[#E91E63] text-white border-[#E91E63]' : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-100 dark:border-slate-800'}`}>
                     {tag}
                   </button>
                 ))}
@@ -603,109 +561,137 @@ export default function FeelingSnapFinal() {
                 )}
               </div>
             </div>
+
             <div className="flex gap-3">
               <button onClick={() => setStage('intensity')} className="flex-1 py-5 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-[24px] font-bold">이전</button>
-              <button onClick={() => setStage('deep')} disabled={selectedTags.length === 0} className={`flex-[2] py-5 rounded-[24px] font-bold text-lg shadow-xl ${selectedTags.length > 0 ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}>다음으로</button>
+              <button onClick={() => setStage('deep')} disabled={selectedTags.length === 0}
+                className={`flex-[2] py-5 rounded-[24px] font-bold text-lg shadow-xl ${selectedTags.length > 0 ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900' : 'bg-slate-200 text-slate-400'}`}>다음으로</button>
             </div>
           </div>
         )}
 
-        {/* 단계 4: 깊은 기록 (생략 없이 기존 코드 유지) */}
+        {/* 단계 4: 상세 내용 작성 및 폰트 선택 */}
         {stage === 'deep' && (
-          <div className="space-y-8 animate-in slide-in-from-right-4 duration-500 py-6">
-            <div className="text-center space-y-2">
-              <h2 className="text-2xl font-black tracking-tighter italic">Deep Focus</h2>
-              <p className="text-xs text-slate-400 font-medium">현상하고 싶은 구체적인 마음을 적어주세요. (선택)</p>
+          <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="text-center py-4 space-y-1">
+              <h2 className="text-2xl font-black tracking-tighter">더 하고 싶은 말이 있나요?</h2>
+              <p className="text-[13px] font-medium text-slate-400/80">쓰지않아도 괜찮아요. 할 말을 남기면 함께 snap이 됩니다.</p>
             </div>
+            
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              {[{ id: 'handwriting', name: '필기체' }, { id: 'myeongjo', name: '명조체' }, { id: 'gothic', name: '고딕체' }, { id: 'design', name: '디자인' }].map((f) => (
+                <button key={f.id} onClick={() => setSelectedFont(f.id as FontType)} className={`flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all ${selectedFont === f.id ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900' : 'bg-slate-100 text-slate-400 dark:bg-slate-800'}`}>
+                  <Type size={14} /> {f.name}
+                </button>
+              ))}
+            </div>
+
             <div className="relative">
-              <textarea value={textInput} onChange={(e) => setTextInput(e.target.value.slice(0, MAX_TEXT_LENGTH))} placeholder="이곳에 적는 내용은 AI 분석의 중요한 힌트가 됩니다." className="w-full h-40 p-6 bg-slate-50 dark:bg-slate-900/50 rounded-[40px] border-none focus:ring-2 focus:ring-[#E91E63] text-lg resize-none placeholder:text-slate-300 dark:placeholder:text-slate-700 font-medium" />
-              <div className="absolute bottom-6 right-8 text-[10px] font-black text-slate-300">{textInput.length}/{MAX_TEXT_LENGTH}</div>
+              <textarea 
+                className={`w-full h-56 bg-[#F8FAFC] dark:bg-slate-900 rounded-[32px] p-8 text-xl outline-none shadow-inner border border-transparent dark:border-slate-800 focus:border-[#E91E63]/30 transition-all ${selectedFont === 'myeongjo' ? myeongjo.className : selectedFont === 'gothic' ? gothic.className : selectedFont === 'design' ? design.className : handwriting.className}`}
+                value={textInput} 
+                onChange={(e) => setTextInput(e.target.value.slice(0, MAX_TEXT_LENGTH))}
+                placeholder={`자유롭게 작성해주세요.\n*깔끔하게 snap찍는 Tip!\n- 최대 6줄까지 출력(한글 기준 1줄 최대 13글자)\n- 엔터를 쳐서 입력하면 더 깔끔해요!`} 
+              />
+              <div className="absolute bottom-6 right-8 text-xs font-bold text-slate-400">{textInput.length} / {MAX_TEXT_LENGTH}</div>
             </div>
-            <div className="flex flex-col gap-4">
-              <button onClick={handleFinalAnalyze} className="w-full py-6 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-[32px] font-bold text-xl shadow-2xl flex items-center justify-center gap-2">
-                <Play size={20} fill="currentColor" /> 분석 시작하기
-              </button>
-              <button onClick={() => setStage('tags')} className="text-sm font-bold text-slate-400 hover:text-slate-600">이전 단계로</button>
-            </div>
+            <button onClick={() => handleFinalAnalyze()} disabled={stage !== 'deep'} className="w-full bg-[#1A1F2C] dark:bg-slate-100 text-white dark:text-slate-900 py-6 rounded-[24px] font-bold text-xl shadow-xl active:scale-95 transition-all disabled:opacity-50">SNAP 📷</button>
           </div>
         )}
 
-        {/* 단계 5: 분석 중 */}
+        {/* 로딩 화면 */}
         {stage === 'analyzing' && (
-          <div className="flex flex-col items-center justify-center py-20 space-y-8 animate-in fade-in duration-1000">
-            <div className="relative">
-              <div className="w-32 h-32 border-4 border-slate-100 dark:border-slate-800 rounded-full animate-pulse" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-16 h-16 bg-[#E91E63] rounded-full animate-ping opacity-20" />
-                <Sparkles className="absolute text-[#E91E63] animate-bounce" size={32} />
+          <div className="py-32 text-center space-y-10">
+            <div className="relative w-24 h-24 mx-auto">
+              <div className="absolute inset-0 border-8 border-slate-100 dark:border-slate-800 rounded-full"></div>
+              <div className="absolute inset-0 border-8 border-[#E91E63] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            <p className="text-xl font-black tracking-tight animate-pulse">{loadingText}</p>
+          </div>
+        )}
+        
+        {/* 단계 5: 결과 화면 (카드) */}
+        {stage === 'result' && resultData && (
+          <div className="animate-in fade-in duration-1000 pb-20">
+            <div className="mb-8 p-6 bg-slate-50 dark:bg-slate-900/50 rounded-[32px] border border-slate-100 dark:border-slate-800">
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-[10px] font-black text-[#E91E63] uppercase tracking-widest">Personal Delta</span>
+                <div className="flex gap-4 items-center">
+                  <button onClick={(e) => handleDeleteRecord(e, resultData.id)} className="flex items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={12} /> 기록 삭제</button>
+                  {!user && <Link href="/login" className="text-[9px] font-bold text-slate-400 underline">데이터 영구 보관하기</Link>}
+              </div>
+              </div>
+              <div className="flex items-center gap-5">
+                <div className={`text-4xl font-black ${resultData.analysis?.delta > 0 ? 'text-red-500' : 'text-emerald-500'}`}>{resultData.analysis?.delta > 0 ? `+${resultData.analysis?.delta}` : resultData.analysis?.delta || '0.0'}</div>
+                <div className="flex-grow space-y-1">
+                  <div className="text-[12px] font-bold text-slate-700 dark:text-slate-300">이전 평균 대비 변화량</div>
+                  <div onClick={() => alert("나만의 감정 데이터 분석 'PRO Insight'는 추후 업데이트 예정입니다.")} className="flex items-center gap-1 text-[#E91E63] text-[9px] font-black uppercase tracking-tighter cursor-pointer hover:opacity-70 transition-opacity"><Lock size={10} strokeWidth={3} /> PRO Insight - Coming Soon</div>
+                </div>
               </div>
             </div>
-            <div className="text-center space-y-2">
-              <h2 className="text-xl font-black tracking-tighter text-[#E91E63] animate-pulse">{loadingText}...</h2>
-              <p className="text-xs text-slate-400 font-medium">당신의 감정을 선명하게 인화하고 있습니다.</p>
-            </div>
-          </div>
-        )}
 
-        {/* 단계 6: 결과 화면 (생략 없이 기존 코드 유지) */}
-        {stage === 'result' && resultData && (
-          <div className="space-y-8 animate-in zoom-in-95 duration-500 py-6">
-            <div className="relative group" ref={cardRef}>
-              <div className="aspect-[3/4] w-full bg-[#0d0d0d] rounded-[24px] p-10 flex flex-col justify-between relative overflow-hidden shadow-2xl">
-                {/* 카드 상단 정보 */}
-                <div className="z-10 flex justify-between items-start">
-                  <div className="space-y-1">
-                    <p className="text-[#E91E63] text-[10px] font-black tracking-[0.2em] uppercase">Emotion Snapshot</p>
-                    <h3 className="text-white text-2xl font-black tracking-tighter leading-none">{resultData.mainEmotion?.label || resultData.label}</h3>
+            <div ref={cardRef} className="relative w-full bg-[#0d0d0d] shadow-2xl rounded-[2px] overflow-hidden" style={{ minHeight: '850px' }}>
+              <div className="relative w-full aspect-[4/5] overflow-hidden">
+                <img src={resultData.mainEmotion?.img || "/images/stable.png"} alt="snap" className="w-full h-full object-cover opacity-50 saturate-[0.8]" crossOrigin="anonymous" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80" />
+                <div className="absolute inset-0 p-10 flex flex-col justify-between">
+                  <div className="flex justify-between items-start opacity-40 text-white text-[10px]">
+                    <div className="font-mono">{stamp.date} / {stamp.time}</div>
+                    <div className="font-black italic uppercase tracking-widest">FEELING SNAP 2.0</div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-white/40 text-[9px] font-mono leading-tight">{stamp.date}</p>
-                    <p className="text-white/40 text-[9px] font-mono leading-tight">{stamp.time}</p>
+                  <div className="space-y-4">
+                    <span className={`${myeongjo.className} text-[8px] font-bold text-white/30 uppercase tracking-[0.4em]`}>
+                      {resultData.subName || "오늘의 조각"}
+                    </span>
+                    <div className={`${resultData.selectedFont === 'myeongjo' ? myeongjo.className : resultData.selectedFont === 'gothic' ? gothic.className : resultData.selectedFont === 'design' ? design.className : handwriting.className} text-[44px] leading-[1.05] text-white break-words whitespace-pre-wrap line-clamp-6`} style={{ maxWidth: '13em' }}>
+                      {resultData.userInput || (resultData.description ? resultData.description.split(/[.\n]/)[0].trim() : "오늘의 감정 조각")}
+                    </div>
                   </div>
+                  <div className="text-[9px] font-mono text-white/20 tracking-[0.5em] text-center uppercase">SNAP_RECORDED</div>
                 </div>
+              </div>
 
-                {/* 중앙 텍스트 */}
-                <div className="z-10 flex-grow flex items-center justify-center py-10">
-                   <p className={`${resultData.selectedFont === 'myeongjo' ? myeongjo.className : resultData.selectedFont === 'gothic' ? gothic.className : resultData.selectedFont === 'design' ? design.className : handwriting.className} text-white text-4xl text-center leading-[1.6] break-keep whitespace-pre-wrap px-2`}>
-                    {resultData.userInput || resultData.reason || "기록된 조각"}
-                  </p>
-                </div>
-
-                {/* 하단 정보 */}
-                <div className="z-10 flex justify-between items-end border-t border-white/10 pt-6">
-                  <div className="space-y-1.5">
-                    <p className="text-white/30 text-[8px] font-black uppercase tracking-widest">Context & Mix</p>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="text-white/80 text-[10px] font-bold">#{resultData.subName}</span>
-                      {resultData.mix?.slice(0, 2).map((m: any) => (
-                        <span key={m.key} className="text-white/40 text-[10px]">· {m.label} {m.ratio}%</span>
+              <div className="p-10 space-y-10 bg-[#0d0d0d] relative">
+                <p className={`${myeongjo.className} text-[14px] font-medium leading-[1.7] italic text-white/60 pl-4 border-l border-white/10 line-clamp-4`}>{resultData.description || "그날의 감정은 한 장의 사진처럼 마음에 남습니다."}</p>
+                <div className="flex justify-between items-end border-t border-white/5 pt-8">
+                  <div className="space-y-4">
+                    <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em]">Emotion Mix</span>
+                    <div className="flex gap-4"> 
+                      {(resultData.mix || []).slice(0, 3).map((item: any, i: number) => (
+                        <div key={i} className="flex flex-col min-w-[32px]">
+                          <span className="text-[9px] font-bold text-white/70 mb-0.5">{item.label}</span>
+                          <span className="text-[10px] font-mono text-white/40">{item.rate}%</span>
+                        </div>
                       ))}
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 opacity-40">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#E91E63]" />
-                    <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
-                    <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
+                  <div className="text-right space-y-3 group cursor-pointer" onClick={() => window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(resultData.song)}`, '_blank')}>
+                    <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em]">Now Playing</span>
+                    <div className="flex items-center gap-3">
+                      <div className="flex flex-col">
+                        <p className="text-[10px] font-bold text-white/40 italic">{resultData.song?.split('-')[0]?.trim() || 'AI Artist'}</p>
+                        <p className={`${myeongjo.className} text-[13px] font-black text-white/70 group-hover:text-[#E91E63] italic break-words whitespace-pre-wrap text-right max-w-[150px]`}>{resultData.song?.split('-')[1]?.trim() || resultData.song || "Silence"}</p>
+                      </div>
+                      <div className="p-2 bg-white/5 rounded-full border border-white/10"><Play size={10} className="text-[#E91E63] fill-[#E91E63]" /></div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* 컨트롤 섹션 */}
-            <div className="space-y-6 pt-2">
-              <button onClick={handleSaveImage} className="w-full py-5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full font-black text-[14px] shadow-xl active:scale-95 transition-all">이미지로 저장하기</button>
+            <div className="mt-8 space-y-6">
+              <button onClick={handleSaveImage} className="w-full py-5 bg-black dark:bg-slate-100 text-white dark:text-slate-900 rounded-full font-black text-[14px] shadow-xl active:scale-95 transition-all">이미지로 저장하기</button>
               <div className="flex justify-center gap-10">
                 <button onClick={() => { setStage('pick'); setTextInput(''); setSelectedTags([]); }} className="text-[11px] font-bold text-slate-400 hover:text-slate-600">다시 기록하기</button>
                 <button onClick={() => alert("링크가 복사되었습니다!")} className="text-[11px] font-bold text-[#E91E63] hover:underline flex items-center gap-1"><Share2 size={12} /> 순간 공유하기</button>
               </div>
-              
               <div className="pt-6 border-t border-slate-100 dark:border-white/5 space-y-3">
                 <p className="text-center text-[10px] text-slate-400 font-medium opacity-70">부적절한 텍스트 입력 시 출력이 제한 될 수 있습니다.</p>
                 <div className="flex flex-col items-center gap-2 opacity-50">
                   <div className="flex items-center gap-1 text-[9px] text-slate-400"><Lock size={10} /> <span>기록은 보안 연결과 계정 인증을 통해 보호됩니다.</span></div>
                   <div className="flex gap-4 text-[9px] text-slate-500 font-bold">
                     <Link href="/privacy" className="hover:underline">개인정보 처리방침</Link>
-                    <Link href="/terms" className="hover:underline">이용약관</Link>
+                  <button onClick={() => alert("익명성 보장: 모든 데이터는 암호화됩니다.\n편향 방지: AI는 감정을 판단하지 않고 기록합니다.")} className="hover:underline">AI 윤리가이드</button>
                   </div>
                 </div>
               </div>
